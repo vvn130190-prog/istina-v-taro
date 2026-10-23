@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F8F6F0">
+<title>Таро — ответы внутри тебя</title>
+<meta name="description" content="Таро-расклады для размышления о любви, отношениях, выборе и своём пути. Найди время услышать себя.">
+<style>
+:root {
+  --bg: #F8F6F0;
+  --panel: #FFFFFF;
+  --gold: #B99A5B;
+  --gold-light: #C8AC72;
+  --text: #29252A;
+  --muted: #77717A;
+  --line: rgba(185,154,91,.32);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  line-height: 1.65;
+}
+a { color: inherit; text-decoration: none; }
+.container { width: min(1080px, 90%); margin: auto; }
+header {
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.brand { font-family: Georgia, serif; font-size: 19px; }
+.brand span { color: var(--gold); }
+.lang {
+  color: var(--gold-light);
+  border: 1px solid var(--line);
+  padding: 7px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+}
+.hero {
+  text-align: center;
+  padding: 95px 0 90px;
+  background: radial-gradient(ellipse at 50% 0%, #F0E8DC 0%, #F8F6F0 72%);
+}
+.eyebrow {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+h1 {
+  font-size: clamp(38px, 7vw, 72px);
+  line-height: 1.12;
+  margin: 25px auto;
+  max-width: 850px;
+}
+h1 em { color: var(--gold-light); font-weight: 400; }
+.hero p { max-width: 570px; margin: 0 auto 30px; color: var(--muted); }
+.button {
+  display: inline-block;
+  padding: 14px 25px;
+  border-radius: 3px;
+  background: var(--gold);
+  color: #18120b;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background .2s, transform .2s;
+}
+.button:hover { background: var(--gold-light); transform: translateY(-2px); }
+.section { padding: 76px 0; }
+.section-head { text-align: center; margin-bottom: 38px; }
+.section-head h2 { font-size: clamp(30px, 5vw, 44px); margin: 12px 0; }
+.section-head p { color: var(--muted); max-width: 560px; margin: auto; }
+.topics, .packages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.topic, .package {
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, #FFFFFF, #F7F3EB);
+  padding: 28px 23px;
+  border-radius: 5px;
+}
+.number { color: var(--gold); font-family: Georgia, serif; font-size: 30px; }
+.topic h3, .package h3 { font-size: 23px; margin: 15px 0 10px; }
+.topic p, .package p { color: var(--muted); font-size: 14px; }
+.packages { align-items: stretch; }
+.package { display: flex; flex-direction: column; }
+.package.featured {
+  border-color: var(--gold);
+  box-shadow: 0 6px 28px rgba(185,154,91,.08);
+}
+.tag { color: var(--gold); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.price { color: var(--gold-light); font-family: Georgia, serif; font-size: 42px; margin: 10px 0; }
+.package p { flex: 1; }
+.package .button { text-align: center; margin-top: 18px; }
+.note {
+  border-top: 1px solid var(--line);
+  margin-top: 45px;
+  padding-top: 22px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 12px;
+}
+.closing {
+  text-align: center;
+  padding: 65px 20px;
+  border-top: 1px solid var(--line);
+  background: #F1ECE4;
+}
+.closing h2 { font-size: 34px; color: var(--gold-light); }
+.closing p { color: var(--muted); max-width: 530px; margin: auto; }
+footer { padding: 25px 0; color: #8A8180; font-size: 12px; text-align: center; }
+@media (max-width: 700px) {
+  .hero { padding: 68px 0; }
+  .section { padding: 55px 0; }
+  .topics, .packages { grid-template-columns: 1fr; }
+  .topic, .package { padding: 25px; }
+  .brand { font-size: 16px; }
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest"></head>
+<body>
+<header>
+  <div class="container nav">
+   <a class="brand" href="#"><span>✧</span> Истина в Таро</a>
+    <a class="lang" href="#topics">ТВОЙ ПУТЬ ↓</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container">
+      <div class="eyebrow">Пространство для себя</div>
+      <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
+      <p>Остановись на мгновение. Посмотри на свою ситуацию с другой стороны и прислушайся к тому, что действительно важно для тебя.</p>
+      <a class="button" href="#packages">Выбрать свой расклад&nbsp; ↗</a>
+    </div>
+  </section>
+
+  <section class="section" id="topics">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Твой внутренний компас</div>
+        <h2>Что тебе важно узнать сейчас?</h2>
+        <p>Выбери тему, с которой хочется разобраться. Начни с того, что откликается именно тебе.</p>
+      </div>
+      <div class="topics">
+        <article class="topic">
+          <div class="number">01</div>
+          <h3>Любовь и отношения</h3>
+          <p>Разберись в чувствах, ожиданиях и собственных желаниях. Посмотри на отношения с новой стороны.</p>
+        </article>
+        <article class="topic">
+          <div class="number">02</div>
+          <h3>Мой путь</h3>
+          <p>Обрати внимание на свои возможности, внутренние ресурсы и направления, которые хочется исследовать.</p>
+        </article>
+        <article class="topic">
+          <div class="number">03</div>
+          <h3>Выбор и перемены</h3>
+          <p>Упорядочь мысли и рассмотри разные варианты, прежде чем решиться на следующий шаг.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="packages">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Выбери глубину</div>
+        <h2>Твой расклад</h2>
+        <p>От одного вопроса до более подробного разбора ситуации.</p>
+      </div>
+      <div class="packages">
+        <article class="package">
+          <div class="tag">Первое знакомство</div>
+          <h3>Один вопрос</h3>
+          <div class="price">99 ₽</div>
+          <p>Короткий расклад на одну конкретную ситуацию с понятной интерпретацией.</p>
+<a class="button" href="#contact" onclick="choosePackage('Один вопрос — 99 ₽'); return false;">Выбрать расклад</a>        </article>
+        <article class="package featured">
+          <div class="tag">Популярный выбор</div>
+          <h3>Глубже понять ситуацию</h3>
+          <div class="price">299 ₽</div>
+          <p>Более подробный расклад с несколькими картами и вопросами для размышления.</p>
+<a class="button" href="#contact" onclick="choosePackage('Глубже понять ситуацию — 299 ₽'); return false;">Выбрать расклад</a>        </article>
+        <article class="package">
+          <div class="tag">Расширенный разбор</div>
+          <h3>Путь к ясности</h3>
+          <div class="price">599 ₽</div>
+          <p>Расширенная интерпретация нескольких аспектов ситуации и возможных направлений.</p>
+<a class="button" href="#contact" onclick="choosePackage('Путь к ясности — 599 ₽'); return false;">Выбрать расклад</a>        </article>
+      </div>
+      <div class="note">Расклады предназначены для саморефлексии и не гарантируют предсказания будущего. Заказ и оплата пока не подключены.</div>
+    </div>
+  </section>
+
+ <section class="section" id="reading">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Твоя карта дня</div>
+      <h2>Остановись и прислушайся</h2>
+      <p>Подумай о том, что сейчас занимает твои мысли, и выбери карту для размышления.</p>
+    </div>
+
+    <div style="max-width:560px;margin:0 auto;text-align:center;background:#FFFFFF;border:1px solid var(--line);padding:30px 24px;border-radius:5px;">
+      <button class="button" type="button" onclick="drawDailyCard()">Открыть карту дня ✧</button>
+      <div id="daily-card-result" style="margin-top:24px;"></div>
+    </div>
+  </div>
+</section> <section class="closing" id="contact">
+    <div class="eyebrow">Твоё время — сейчас</div>
+    <h2>Прислушайся к себе</h2>
+    <p>Каждый новый взгляд на ситуацию может стать началом важных личных открытий. Выбери вопрос, который хочется исследовать первым.</p>
+
+<div class="contact-form" style="text-align:center; margin:32px auto; max-width:460px;">
+  <h3 style="font-size:25px; font-weight:400; margin-bottom:12px;">Оставайся на связи</h3>
+  <p style="margin-bottom:24px;">Новые расклады и вдохновение — когда тебе удобно.</p>
+
+  <button type="button" class="button" onclick="document.getElementById('contact-options').style.display = document.getElementById('contact-options').style.display === 'block' ? 'none' : 'block';">
+    Получать новости ✧
+  </button>
+
+  <div id="contact-options" style="display:none; margin-top:24px; text-align:left;">
+    <label for="contact-method" style="display:block; margin-bottom:8px;">Выбери удобный способ связи</label>
+    <select id="contact-method" style="width:100%; padding:14px; margin-bottom:14px; border:1px solid var(--gold); border-radius:5px; background:transparent; color:inherit;">
+      <option value="Email">Электронная почта</option>
+      <option value="Telegram">Telegram</option>
+      <option value="Телефон">Телефон</option>
+    </select>
+
+    <input id="contact-value" type="text" placeholder="Укажи свой контакт" style="width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid var(--gold); border-radius:5px; background:transparent; color:inherit;">
+<label style="display:block; margin:8px 0 16px; font-size:14px;">
+  <input id="contact-consent" type="checkbox">
+  Я согласна получать новости и предложения
+</label>
+
+<button type="button" class="button" onclick="submitContact()">
+  Продолжить
+</button>
+</div>
+</div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">✧ Таро — ответы внутри тебя · © 2026</div>
+</footer>
+<script>
+function choosePackage(packageName) {
+  const contact = document.querySelector('#contact');
+  let message = document.getElementById('selected-package');
+
+  if (!message) {
+    message = document.createElement('div');
+    message.id = 'selected-package';
+    message.style.cssText =
+      'margin:24px auto;padding:18px;border:1px solid var(--gold);' +
+      'border-radius:5px;max-width:500px;text-align:center;color:var(--text);';
+    contact.appendChild(message);
+  }
+
+  message.textContent = 'Ты выбрала: ' + packageName;
+message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+const dailyCards = [
+  {
+    name: "Звезда",
+    meaning: "Позволь себе надеяться. Даже маленький шаг в сторону своей мечты имеет значение."
+  },
+  {
+    name: "Сила",
+    meaning: "Твоя мягкость — не слабость. Доверься себе и действуй спокойно."
+  },
+  {
+    name: "Императрица",
+    meaning: "Обрати внимание на то, что помогает тебе расцветать. Позволь себе заботу и удовольствие."
+  },
+  {
+    name: "Отшельник",
+    meaning: "Иногда тишина помогает услышать главное. Дай себе время разобраться в своих чувствах."
+  },
+  {
+    name: "Солнце",
+    meaning: "Заметь то хорошее, что уже есть в твоей жизни. Радость может начинаться с малого."
+  },
+  {
+    name: "Колесо Фортуны",
+    meaning: "Перемены открывают новые возможности. Подумай, что ты готова впустить в свою жизнь."
+  },
+  {
+    name: "Верховная Жрица",
+    meaning: "Не торопись с выводами. Прислушайся к себе и внимательно посмотри на ситуацию."
+  }
+];
+
+function drawDailyCard() {
+  const card = dailyCards[Math.floor(Math.random() * dailyCards.length)];
+  document.getElementById("daily-card-result").innerHTML =
+    '<div style="color:var(--gold);font-family:Georgia,serif;font-size:28px;margin-bottom:10px;">✧ ' +
+    card.name +
+    ' ✧</div><p style="color:var(--muted);margin:0;">' +
+    card.meaning +
+    '</p><p style="font-size:11px;color:var(--muted);margin-top:18px;">Карта для саморефлексии, а не точное предсказание будущего.</p>';
+}
+
+async function submitContact() {
+  const method = document.getElementById('contact-method').value;
+  const contact = document.getElementById('contact-value').value.trim();
+  const consent = document.getElementById('contact-consent').checked;
+
+  if (!contact) {
+    alert('Пожалуйста, укажи свой контакт.');
+    return;
+  }
+
+  if (!consent) {
+    alert('Пожалуйста, подтверди согласие на получение новостей.');
+    return;
+  }
+
+  const data = new URLSearchParams();
+  data.append('method', method);
+  data.append('contact', contact);
+  data.append('consent', 'yes');
+
+  try {
+    await fetch(
+      'https://script.google.com/macros/s/AKfycbxkjYSDD5OXNOLSV8QH_EoVwpPHGiJp9Y6N694A_jzDzpWe30fUvExsmr9c34OjX34oHQ/exec',
+      {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: data.toString()
+      }
+    );
+
+   alert('Благодарю за доверие ✧ Теперь мы на связи.');
+document.getElementById('contact-options').style.display = 'none';
+document.querySelector('#contact-options').parentElement.querySelector('button').style.display = 'none';
+
+const thankYou = document.createElement('p');
+thankYou.textContent = 'Благодарю за доверие ✧ Теперь мы на связи.';
+thankYou.style.marginTop = '20px';
+thankYou.style.color = 'var(--gold)';
+thankYou.style.textAlign = 'center';
+
+document.querySelector('#contact-options').parentElement.appendChild(thankYou);
+    document.getElementById('contact-value').value = '';
+    document.getElementById('contact-consent').checked = false;
+  } catch (error) {
+    alert('Не удалось отправить заявку. Попробуй ещё раз.');
+  }
+}
+</script>
+<section id="ai-tarot" class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">ИСТИНА В ТАРО</p>
+      <h2>Твой вопрос — твой путь к ясности</h2>
+      <p>Сформулируй вопрос, который сейчас важен для тебя.</p>
+    </div>
+
+    <form id="ai-tarot-form">
+      <label for="tarot-question">О чём ты хочешь узнать?</label>
+      <textarea
+        id="tarot-question"
+        name="question"
+        rows="4"
+        maxlength="1000"
+        placeholder="Например: что мне важно понять в моих отношениях?"
+        required
+      ></textarea>
+<p style="margin: 12px 0 18px; color: var(--muted); line-height: 1.7;">
+  <strong>Не знаешь, как задать вопрос?</strong><br>
+  Просто расскажи, что происходит в твоей жизни и что тебя беспокоит.
+  Мы поможем разобраться в ситуации и найти вопрос, с которого стоит начать.
+  Пиши так, как чувствуешь.
+</p>
+
+
+      <button type="submit" class="btn">
+        Получить расклад
+      </button>
+
+      <p id="ai-tarot-message" aria-live="polite"></p>
+      <p class="tarot-note">
+        Расклад предназначен для саморефлексии и не гарантирует
+        определённого развития событий.
+      </p>
+    </form>
+  </div>
+</section>
+
+<script>
+document.getElementById('ai-tarot-form').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const question = document.getElementById('tarot-question').value.trim();
+  const message = document.getElementById('ai-tarot-message');
+
+  if (!question) {
+    message.textContent = 'Пожалуйста, напиши свой вопрос.';
+    return;
+  }
+
+  message.textContent = 'Форма готова. Подключение автоматического расклада — следующий этап.';
+});
+</script>
+
+<section id="save-app" class="section">
+  <div class="container" style="text-align:center; padding:30px 20px;">
+    <div style="font-size:32px; margin-bottom:12px;">☾ ✧</div>
+    <h2>Истина в Таро — всегда под рукой</h2>
+    <p style="line-height:1.7; margin:12px auto 20px; max-width:440px;">
+      Сохрани наш сайт на экран телефона, чтобы возвращаться к карте дня,
+      своим вопросам и новым раскладам в любое время.
+    </p>
+   <button type="button" class="btn" id="save-app-button"
+  onclick="alert('На iPhone: открой сайт в Safari, нажми «Поделиться» и выбери «На экран Домой». На Android: открой меню браузера и выбери «Добавить на главный экран» или «Установить приложение».')">
+  Сохранить на экран ✧
+</button>
+    <p style="font-size:13px; margin-top:14px;">
+      Твой личный проводник к ясности.
+    </p>
+  </div>
+</section>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(function(error) {
+        console.log("Не удалось подключить приложение:", error);
+      });
+  });
+}
+</script>
+</body>
+</html>

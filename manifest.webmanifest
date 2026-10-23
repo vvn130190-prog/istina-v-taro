@@ -1,0 +1,18 @@
+
+{
+  "name": "Истина в Таро — Ответы внутри тебя",
+  "short_name": "Истина в Таро",
+  "description": "Твой личный проводник к ясности",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F8F6F0",
+  "theme_color": "#F8F6F0",
+   "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
