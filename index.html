@@ -389,7 +389,24 @@ document.querySelector('#contact-options').parentElement.appendChild(thankYou);
 </p>
 
 
-      <button type="submit" class="btn">
+    
+      <input type="hidden" id="order-package" name="package" value="">
+
+      <label for="order-method">Как с тобой связаться?</label>
+      <select id="order-method" required style="display:block;width:100%;padding:14px;margin:10px 0;border:1px solid var(--gold);border-radius:5px;background:#fff;color:var(--text);">
+        <option value="Email">Электронная почта</option>
+        <option value="Telegram">Telegram</option>
+        <option value="Телефон">Телефон</option>
+      </select>
+
+      <label for="order-contact">Твой контакт</label>
+      <input id="order-contact" type="text" required placeholder="Email, @username или телефон" style="display:block;width:100%;padding:14px;margin:10px 0 18px;border:1px solid var(--gold);border-radius:5px;background:#fff;color:var(--text);">
+
+      <label style="display:block;margin:12px 0 18px;font-size:14px;">
+        <input id="order-consent" type="checkbox">
+        Я согласна получать новости и предложения
+      </label>
+  <button type="submit" class="btn">
         Получить расклад
       </button>
 
@@ -446,6 +463,85 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+</script>
+
+<script>
+(function () {
+  const endpoint = 'https://script.google.com/macros/s/AKfycbxkjYSDD5OXNOLSV8QH_EoVwpPHGiJp9Y6N694A_jzDzpWe30fUvExsmr9c34OjX34oHQ/exec';
+
+  let selectedPackage = '';
+
+  window.choosePackage = function (packageName) {
+    selectedPackage = packageName;
+
+    let message = document.getElementById('selected-package');
+    if (!message) {
+      message = document.createElement('p');
+      message.id = 'selected-package';
+      message.style.cssText =
+        'margin:24px auto;padding:18px;border:1px solid var(--gold);' +
+        'border-radius:5px;max-width:500px;text-align:center;color:var(--text);';
+      document.getElementById('contact').appendChild(message);
+    }
+
+    message.textContent = 'Ты выбрала: ' + packageName;
+    document.getElementById('ai-tarot').scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const form = document.getElementById('ai-tarot-form');
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const question = document.getElementById('tarot-question').value.trim();
+    const method = document.getElementById('order-method').value;
+    const contact = document.getElementById('order-contact').value.trim();
+    const consent = document.getElementById('order-consent').checked;
+    const message = document.getElementById('ai-tarot-message');
+
+    if (!selectedPackage) {
+      message.textContent = 'Сначала выбери тариф в разделе «Твой расклад».';
+      return;
+    }
+
+    if (!question || !contact) {
+      message.textContent = 'Заполни вопрос и контакт для связи.';
+      return;
+    }
+
+    const data = new URLSearchParams({
+      action: 'order',
+      package: selectedPackage,
+      question: question,
+      method: method,
+      contact: contact,
+      consent: consent ? 'yes' : 'no'
+    });
+
+    message.textContent = 'Отправляем заявку…';
+
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: data.toString()
+      });
+
+      message.textContent =
+        'Заявка отправлена. Пожалуйста, дождись подтверждения перед оплатой.';
+    } catch (error) {
+      message.textContent =
+        'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.';
+    }
+  }, true);
+})();
 </script>
 </body>
 </html>
