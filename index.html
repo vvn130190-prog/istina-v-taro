@@ -17,9 +17,9 @@ h2{font-size:clamp(28px,5vw,42px)}h3{font-size:22px}p{margin:0 0 14px}
 .eyebrow{color:var(--gold);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
 .muted{color:var(--muted)}.section{padding:76px 0}.section-head{text-align:center;margin-bottom:38px}
 .section-head p{color:var(--muted);max-width:560px;margin:0 auto}
-.btn{display:inline-block;padding:14px 26px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#18120b;font-weight:600;font-size:14px;cursor:pointer;transition:transform .2s,background .2s;font-family:inherit}
-.btn:hover{background:var(--gold-light);transform:translateY(-2px)}
-.btn-outline{background:transparent;color:var(--text)}.btn:disabled{opacity:.6;cursor:wait}
+.btn{display:inline-block;padding:14px 26px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#18120b;font-weight:600;font-size:14px;cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s;font-family:inherit}
+.btn:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn-outline{background:transparent;color:var(--text)}.btn:disabled{opacity:.6;cursor:wait;transform:none}
 header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 0}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .brand{font-family:Georgia,serif;font-size:19px}.brand span{color:var(--gold)}
@@ -145,7 +145,7 @@ footer a:hover{color:var(--gold)}
     <div class="section-head">
       <div class="eyebrow">ИИ-консультация</div>
       <h2>Расскажи, что тебя беспокоит</h2>
-      <p>Опиши ситуацию своими словами. Первый вопрос — бесплатно, каждый день.</p>
+      <p>Опиши ситуацию своими словами. Первый вопрос и 3 уточнения — бесплатно, каждый день.</p>
     </div>
     <div class="ai-card card">
       <form id="ai-form" novalidate>
@@ -288,8 +288,17 @@ else{
   rec.onresult=(e)=>{ let text=''; for(let i=0;i<e.results.length;i++) text+=e.results[i][0].transcript; const ta=document.getElementById('question'); ta.value=(ta.value?ta.value+' ':'')+text.trim(); };
 }
 const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
-function freeUsedToday(){ try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } }
-function markFreeUsed(){ try{ localStorage.setItem('aiFreeDate',JSON.stringify(todayStr())); }catch(e){} }
+
+// --- ЛОГИКА ЛИМИТОВ ---
+let isFollowup = false; // Флаг: нажал ли пользователь на уточняющий вопрос
+
+function freeUsedToday(){ 
+  try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } 
+}
+function markFreeUsed(){ 
+  try{ localStorage.setItem('aiFreeDate',JSON.stringify(todayStr())); }catch(e){} 
+}
+
 function renderAnswer(answer, followups){
   let html='<p class="answer-text">'+escapeHtml(answer)+'</p>';
   if(Array.isArray(followups) && followups.length){
@@ -297,25 +306,47 @@ function renderAnswer(answer, followups){
     followups.forEach(f=>{ html+='<button type="button" class="followup-btn" data-followup="'+escapeHtml(f)+'">✧ '+escapeHtml(f)+'</button>'; });
   }
   aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
-  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ btn.addEventListener('click',()=>{ document.getElementById('question').value=btn.dataset.followup; document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); }); });
+  
+  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
+    btn.addEventListener('click',()=>{ 
+      // Включаем флаг уточнения!
+      isFollowup = true; 
+      document.getElementById('question').value=btn.dataset.followup; 
+      document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
+    }); 
+  });
 }
+
 aiForm.addEventListener('submit',async(e)=>{
   e.preventDefault();
   const q=document.getElementById('question').value.trim();
   aiMsg.textContent=''; aiAnswer.classList.remove('visible'); aiAnswer.innerHTML='';
   if(!q){ aiMsg.textContent='Пожалуйста, напиши свой вопрос.'; return; }
   if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
-  if(freeUsedToday()){ aiMsg.textContent='Бесплатный вопрос на сегодня использован. Полный расклад — в разделе «Расклады».'; return; }
+  
+  // ЕСЛИ ЭТО НЕ УТОЧНЕНИЕ И ЛИМИТ ИСЧЕРПАН - БЛОКИРУЕМ
+  if(!isFollowup && freeUsedToday()){ 
+    aiMsg.textContent='Бесплатный вопрос на сегодня использован. Полный расклад — в разделе «Расклады».'; 
+    return; 
+  }
+  
   aiSubmit.disabled=true; aiMsg.textContent='ИИ размышляет…';
   try{
     const res=await fetch(TAROT_FUNCTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
     const data=await res.json();
     if(!res.ok || data.error){ aiMsg.textContent=data.error || 'Не удалось получить ответ.'; return; }
+    
     renderAnswer(data.answer||'', data.followups||[]);
-    markFreeUsed(); saveReading(q, data.answer||''); aiMsg.textContent='';
+    markFreeUsed(); // Запоминаем дату
+    saveReading(q, data.answer||''); 
+    aiMsg.textContent='';
+    
+    // Сбрасываем флаг после успешного ответа, чтобы следующий ручной ввод снова проверялся
+    isFollowup = false; 
   }catch(err){ aiMsg.textContent='Не удалось получить ответ. Попробуй ещё раз.'; console.error(err); }
   finally{ aiSubmit.disabled=false; }
 });
+
 function loadReadings(){ try{ return JSON.parse(localStorage.getItem('myReadings')||'[]'); }catch(e){ return []; } }
 function saveReading(q,a){ const list=loadReadings(); list.unshift({date:new Date().toLocaleString('ru-RU'),q,a}); try{ localStorage.setItem('myReadings',JSON.stringify(list.slice(0,30))); }catch(e){} renderReadings(); }
 function renderReadings(){ const list=loadReadings(); const el=document.getElementById('readings-list'); if(!list.length){ el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; return; } el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join(''); }
