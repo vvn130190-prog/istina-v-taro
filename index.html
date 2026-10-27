@@ -109,7 +109,7 @@ footer a:hover{color:var(--gold)}
     <div class="eyebrow">Пространство для себя</div>
     <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
     <p>Остановись на мгновение. Посмотри на свою ситуацию с другой стороны и прислушайся к тому, что действительно важно для тебя.</p>
-    <a class="btn" href="#daily">Открыть карту дня ✧</a>
+    <button class="btn" type="button" onclick="drawDailyCard(); document.getElementById('daily').scrollIntoView({behavior:'smooth'});">Открыть карту дня ✧</button>
   </div>
 </section>
 <section class="section" id="daily">
@@ -120,7 +120,7 @@ footer a:hover{color:var(--gold)}
       <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
     <div class="card daily-card">
-      <button class="btn" type="button" id="draw-card-btn">Открыть карту дня ✧</button>
+      <button class="btn" type="button" id="draw-card-btn" style="display:none;">Открыть карту дня ✧</button>
       <div id="daily-result" style="margin-top:24px"></div>
     </div>
   </div>
@@ -289,8 +289,7 @@ else{
 }
 const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
 
-// --- ЛОГИКА ЛИМИТОВ ---
-let isFollowup = false; // Флаг: нажал ли пользователь на уточняющий вопрос
+let isFollowup = false; 
 
 function freeUsedToday(){ 
   try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } 
@@ -309,7 +308,7 @@ function renderAnswer(answer, followups){
   
   aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
     btn.addEventListener('click',()=>{ 
-      isFollowup = true; // Включаем флаг уточнения
+      isFollowup = true; 
       document.getElementById('question').value=btn.dataset.followup; 
       document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
     }); 
@@ -323,7 +322,6 @@ aiForm.addEventListener('submit',async(e)=>{
   if(!q){ aiMsg.textContent='Пожалуйста, напиши свой вопрос.'; return; }
   if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
   
-  // ЕСЛИ ЭТО НЕ УТОЧНЕНИЕ И ЛИМИТ ИСЧЕРПАН - БЛОКИРУЕМ
   if(!isFollowup && freeUsedToday()){ 
     aiMsg.textContent='Бесплатный вопрос на сегодня использован. Полный расклад — в разделе «Расклады».'; 
     return; 
@@ -336,11 +334,10 @@ aiForm.addEventListener('submit',async(e)=>{
     if(!res.ok || data.error){ aiMsg.textContent=data.error || 'Не удалось получить ответ.'; return; }
     
     renderAnswer(data.answer||'', data.followups||[]);
-    markFreeUsed(); // Запоминаем дату
+    markFreeUsed(); 
     saveReading(q, data.answer||''); 
     aiMsg.textContent='';
-    
-    isFollowup = false; // Сбрасываем флаг
+    isFollowup = false; 
   }catch(err){ aiMsg.textContent='Не удалось получить ответ. Попробуй ещё раз.'; console.error(err); }
   finally{ aiSubmit.disabled=false; }
 });
