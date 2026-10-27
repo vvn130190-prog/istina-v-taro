@@ -18,21 +18,30 @@ exports.handler = async (event) => {
       };
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.YANDEX_API_KEY;
+    const folderId = process.env.YANDEX_FOLDER_ID;
 
-    if (!apiKey) {
-      throw new Error("Не настроен ключ OpenAI.");
+    if (!apiKey || !folderId) {
+      throw new Error("Не настроены ключи Yandex.");
     }
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Api-Key ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        instructions: `Ты — бережный помощник проекта «Истина в Таро — Ответы внутри тебя».
+        modelUri: `gpt://${folderId}/yandexgpt-lite/latest`,
+        completionOptions: {
+          stream: false,
+          temperature: 0.7,
+          maxTokens: 400
+        },
+        messages: [
+          {
+            role: "system",
+            text: `Ты — бережный помощник проекта «Истина в Таро — Ответы внутри тебя».
 Дай короткий, тёплый ответ на ситуацию человека в духе символического толкования Таро.
 Не утверждай, что знаешь мысли другого человека или предсказываешь будущее наверняка.
 Помоги человеку увидеть возможные чувства, обстоятельства и варианты действий.
@@ -40,16 +49,21 @@ exports.handler = async (event) => {
 Ответь строго в формате JSON с полями:
 answer — 2–4 предложения на русском языке;
 followups — массив ровно из трёх коротких уточняющих вопросов по ситуации.
-Не обещай, что это реальный расклад карт: это предварительный бесплатный ответ.`,
-        input: question.trim(),
-        max_output_tokens: 350
+Не обещай, что это реальный расклад карт: это предварительный бесплатный ответ.
+Твой ответ должен быть ТОЛЬКО валидным JSON без markdown-оберток.`
+          },
+          {
+            role: "user",
+            text: question.trim()
+          }
+        ]
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("OpenAI error:", data);
+      console.error("YandexGPT error:", data);
       return {
         statusCode: 502,
         headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -57,14 +71,13 @@ followups — массив ровно из трёх коротких уточн�
       };
     }
 
-    const text = data.output
-      ?.flatMap(item => item.content || [])
-      .find(item => item.type === "output_text")?.text;
+    let text = data.result?.alternatives?.[0]?.message?.text;
 
     if (!text) {
-      throw new Error("Пустой ответ OpenAI.");
+      throw new Error("Пустой ответ YandexGPT.");
     }
 
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const result = JSON.parse(text);
 
     return {
