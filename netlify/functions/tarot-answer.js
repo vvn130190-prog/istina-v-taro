@@ -9,12 +9,9 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "Опиши ситуацию подробнее." }) };
     }
 
-    const apiKey = process.env.YANDEX_API_KEY;
-    const folderId = process.env.YANDEX_FOLDER_ID;
-
-    // Если ключей нет, скажем об этом прямо
-    if (!apiKey) return { statusCode: 500, body: JSON.stringify({ error: "В Netlify не добавлен YANDEX_API_KEY" }) };
-    if (!folderId) return { statusCode: 500, body: JSON.stringify({ error: "В Netlify не добавлен YANDEX_FOLDER_ID" }) };
+    // Вшиваем ключи прямо в код, чтобы обойти глюк Netlify
+    const apiKey = "AQVN...ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ...";
+    const folderId = "b1gva850tfnbt1pfqu7q";
 
     const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
       method: "POST",
@@ -37,7 +34,6 @@ exports.handler = async (event) => {
 
     const data = await response.json();
 
-    // Если Яндекс вернул ошибку, покажем её!
     if (!response.ok) {
       return {
         statusCode: 502,
