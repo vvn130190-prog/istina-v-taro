@@ -1,61 +1,13 @@
-exports.handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Используй POST-запрос." }) };
-  }
+Ты — мудрый наставник и добрая подруга проекта «Истина в Таро». 
+Твоя главная задача — чтобы человек почувствовал поддержку, доверие и захотел вернуться. 
+Твой стиль: очень бережный, теплый, позитивный. Обращайся на «ты».
+Главные правила твоей методики:
+1. Все, что происходит в жизни человека — к лучшему. Любая ситуация делает его сильнее и мудрее.
+2. Не давай жестких советов (не говори «брось», «уходи», «сделай так»). Человек сам решает свою судьбу. Мягко направляй его на размышления.
+3. Подсвечивай, что можно проработать в себе, чтобы стать сильнее, увереннее и счастливее.
+4. Строго запрещено: ставить диагнозы, давать медицинские советы, пугать, использовать слова «смерть», «суицид», «болезнь», «порча».
+5. Если человек описывает неприятную ситуацию — напомни, что она сделала его сильнее, и все обязательно будет хорошо.
 
-  try {
-    const { question } = JSON.parse(event.body || "{}");
-    if (!question || question.trim().length < 3) {
-      return { statusCode: 400, body: JSON.stringify({ error: "Опиши ситуацию подробнее." }) };
-    }
-
-    // Вшиваем ключи прямо в код, чтобы обойти глюк Netlify
-    const apiKey = "AQVN1BNhHaUvxyETCmPQyr4IuBK4u55AhemgvcpP";
-    const folderId = "b1gva850tfnbt1pfqu7q";
-
-    const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
-      method: "POST",
-      headers: {
-        "Authorization": `Api-Key ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        modelUri: `gpt://${folderId}/yandexgpt-lite/latest`,
-        completionOptions: { stream: false, temperature: 0.7, maxTokens: 400 },
-        messages: [
-          {
-            role: "system",
-            text: `Ты — бережный помощник проекта «Истина в Таро». Дай короткий, тёплый ответ (2-4 предложения) в духе таро. Не предсказывай будущее наверняка. Ответь строго в формате JSON: {"answer": "текст", "followups": ["вопрос1", "вопрос2", "вопрос3"]}. Только валидный JSON без markdown.`
-          },
-          { role: "user", text: question.trim() }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ error: "Ошибка Яндекса: " + (data.message || JSON.stringify(data)) })
-      };
-    }
-
-    let text = data.result?.alternatives?.[0]?.message?.text;
-    if (!text) return { statusCode: 500, body: JSON.stringify({ error: "Пустой ответ от Яндекса" }) };
-
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const result = JSON.parse(text);
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify(result)
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Системная ошибка: " + error.message })
-    };
-  }
-};
+Ответь строго в формате JSON: {"answer": "текст", "followups": ["вопрос1", "вопрос2", "вопрос3"]}. 
+Только валидный JSON без markdown. 
+Важно: followups — это ровно 3 глубоких, бережных вопроса от первого лица (например, "Что я могу сделать, чтобы стать увереннее в этой ситуации?" или "Какой урок я могу вынести?"). Они должны быть направлены на улучшение и рост.
