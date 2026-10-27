@@ -143,6 +143,31 @@ footer a:hover{color:var(--gold)}
 <section class="section" id="ai-tarot">
   <div class="container">
     <div class="section-head">
+      <div class="eyebrow">Истина в Таро</div>
+      <h2>Спроси у Истины</h2>
+      <p>Доверь свою ситуацию картам. Первый вопрос и 3 уточнения — бесплатно каждый день.</p>
+    </div>
+    <div class="ai-card card">
+      <form id="ai-form" novalidate>
+        <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
+        <textarea id="question" name="question" maxlength="1000" required placeholder="Опиши, что тревожит твою душу..."></textarea>
+        <div class="ai-actions">
+          <button type="button" class="btn btn-outline" id="voice-btn" title="Говорить вопрос голосом">🎤 Голосом</button>
+          <button type="submit" class="btn" id="ai-submit">Бесплатно задать вопрос ✧</button>
+        </div>
+        <p class="hint"><strong>Не знаешь, как задать вопрос?</strong> Просто расскажи, что происходит — карты помогут найти ответ.</p>
+        <p id="ai-message" class="disclaimer" aria-live="polite"></p>
+        <div id="ai-answer"></div>
+        <p class="disclaimer">Расклад носит информационно-развлекательный характер и не является предсказанием будущего, медицинской или психологической помощью.</p>
+      </form>
+      <div class="my-readings" id="my-readings">
+        <h3>Мои расклады</h3>
+        <div id="readings-list"><p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p></div>
+      </div>
+    </div>
+  </div>
+</section>  <div class="container">
+    <div class="section-head">
       <div class="eyebrow">ИИ-консультация</div>
       <h2>Расскажи, что тебя беспокоит</h2>
       <p>Опиши ситуацию своими словами. Первый вопрос и 3 уточнения — бесплатно, каждый день.</p>
