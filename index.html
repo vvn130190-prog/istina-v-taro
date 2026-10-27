@@ -193,26 +193,43 @@ footer a:hover{color:var(--gold)}
         <h3>Один вопрос</h3>
         <div class="price">99 ₽</div>
         <p>Полный ответ на один вопрос + 1 уточнение.</p>
-        <a class="btn" href="#" data-package="one-question">Оплатить</a>
+        <button class="btn" onclick="openPaymentForm('Один вопрос — 99 ₽')">Оплатить</button>
       </article>
       <article class="package featured">
         <div class="tag">Популярный выбор</div>
         <h3>Глубже понять ситуацию</h3>
         <div class="price">299 ₽</div>
         <p>Подробный расклад + 3 уточняющих вопроса + вопросы для размышления.</p>
-        <a class="btn" href="#" data-package="deeper">Оплатить</a>
+        <button class="btn" onclick="openPaymentForm('Глубже понять — 299 ₽')">Оплатить</button>
       </article>
       <article class="package">
         <div class="tag">Расширенный разбор</div>
         <h3>Путь к ясности</h3>
         <div class="price">499 ₽</div>
         <p>Расширенный разбор + 5 уточнений + карта дня на неделю.</p>
-        <a class="btn" href="#" data-package="clarity">Оплатить</a>
+        <button class="btn" onclick="openPaymentForm('Путь к ясности — 499 ₽')">Оплатить</button>
       </article>
     </div>
-    <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> · <a href="#">Оферта</a> · <a href="#">Политика конфиденциальности</a></p>
+    <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="#">Оферта</a> · <a href="#">Политика конфиденциальности</a></p>
   </div>
 </section>
+
+<!-- Всплывающее окно для оплаты -->
+<div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:30px; border-radius:14px; max-width:400px; width:90%; position:relative;">
+    <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
+    <h3 style="margin-top:0;">Оформление расклада</h3>
+    <p style="color:#777; font-size:14px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
+    
+    <form id="payment-form" onsubmit="submitPayment(event)">
+      <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
+      <input type="text" id="pay-contact" placeholder="Telegram или Email для связи" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
+      <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+      <button type="submit" class="btn" style="width:100%;">Отправить заявку</button>
+    </form>
+    <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
+  </div>
+</div>
 <section class="section" id="reviews">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
@@ -349,6 +366,37 @@ function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'
 renderReadings();
 document.querySelectorAll('[data-package]').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.preventDefault(); alert('Оплата ЮKassa подключается. Пакет: '+btn.dataset.package); }); });
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err)); }); }
-</script>
+// --- ЛОГИКА ОПЛАТЫ ---
+let currentPackage = '';
+let selectedPrice = 0;
+
+function openPaymentForm(pkgName) {
+  currentPackage = pkgName;
+  document.getElementById('selected-package-name').textContent = pkgName;
+  document.getElementById('payment-modal').style.display = 'flex';
+  document.getElementById('pay-message').textContent = '';
+}
+
+function closePaymentForm() {
+  document.getElementById('payment-modal').style.display = 'none';
+}
+
+async function submitPayment(e) {
+  e.preventDefault();
+  const name = document.getElementById('pay-name').value;
+  const contact = document.getElementById('pay-contact').value;
+  const question = document.getElementById('pay-question').value;
+  const msg = document.getElementById('pay-message');
+
+  msg.textContent = 'Отправляем заявку...';
+
+  // ТУТ МЫ БУДЕМ ОТПРАВЛЯТЬ ДАННЫЕ В ТВОЮ GOOGLE-ТАБЛИЦУ
+  // (Пока просто имитируем отправку)
+  setTimeout(() => {
+    msg.textContent = 'Заявка принята! Мы свяжемся с вами для оплаты в течение 10 минут.';
+    document.getElementById('payment-form').reset();
+    setTimeout(closePaymentForm, 4000);
+  }, 1000);
+}</script>
 </body>
 </html>
