@@ -4,545 +4,325 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F8F6F0">
-<title>Таро — ответы внутри тебя</title>
-<meta name="description" content="Таро-расклады для размышления о любви, отношениях, выборе и своём пути. Найди время услышать себя.">
+<title>Истина в Таро — ответы внутри тебя</title>
+<meta name="description" content="Таро-расклады и ИИ-консультация по авторской методике. Карта дня бесплатно.">
 <style>
-:root {
-  --bg: #F8F6F0;
-  --panel: #FFFFFF;
-  --gold: #B99A5B;
-  --gold-light: #C8AC72;
-  --text: #29252A;
-  --muted: #77717A;
-  --line: rgba(185,154,91,.32);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  line-height: 1.65;
-}
-a { color: inherit; text-decoration: none; }
-.container { width: min(1080px, 90%); margin: auto; }
-header {
-  border-bottom: 1px solid var(--line);
-  padding: 20px 0;
-}
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-.brand { font-family: Georgia, serif; font-size: 19px; }
-.brand span { color: var(--gold); }
-.lang {
-  color: var(--gold-light);
-  border: 1px solid var(--line);
-  padding: 7px 12px;
-  border-radius: 30px;
-  font-size: 12px;
-}
-.hero {
-  text-align: center;
-  padding: 95px 0 90px;
-  background: radial-gradient(ellipse at 50% 0%, #F0E8DC 0%, #F8F6F0 72%);
-}
-.eyebrow {
-  color: var(--gold);
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-h1 {
-  font-size: clamp(38px, 7vw, 72px);
-  line-height: 1.12;
-  margin: 25px auto;
-  max-width: 850px;
-}
-h1 em { color: var(--gold-light); font-weight: 400; }
-.hero p { max-width: 570px; margin: 0 auto 30px; color: var(--muted); }
-.button {
-  display: inline-block;
-  padding: 14px 25px;
-  border-radius: 3px;
-  background: var(--gold);
-  color: #18120b;
-  font-weight: 600;
-  font-size: 13px;
-  transition: background .2s, transform .2s;
-}
-.button:hover { background: var(--gold-light); transform: translateY(-2px); }
-.section { padding: 76px 0; }
-.section-head { text-align: center; margin-bottom: 38px; }
-.section-head h2 { font-size: clamp(30px, 5vw, 44px); margin: 12px 0; }
-.section-head p { color: var(--muted); max-width: 560px; margin: auto; }
-.topics, .packages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-.topic, .package {
-  border: 1px solid var(--line);
-  background: linear-gradient(145deg, #FFFFFF, #F7F3EB);
-  padding: 28px 23px;
-  border-radius: 5px;
-}
-.number { color: var(--gold); font-family: Georgia, serif; font-size: 30px; }
-.topic h3, .package h3 { font-size: 23px; margin: 15px 0 10px; }
-.topic p, .package p { color: var(--muted); font-size: 14px; }
-.packages { align-items: stretch; }
-.package { display: flex; flex-direction: column; }
-.package.featured {
-  border-color: var(--gold);
-  box-shadow: 0 6px 28px rgba(185,154,91,.08);
-}
-.tag { color: var(--gold); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
-.price { color: var(--gold-light); font-family: Georgia, serif; font-size: 42px; margin: 10px 0; }
-.package p { flex: 1; }
-.package .button { text-align: center; margin-top: 18px; }
-.note {
-  border-top: 1px solid var(--line);
-  margin-top: 45px;
-  padding-top: 22px;
-  color: var(--muted);
-  text-align: center;
-  font-size: 12px;
-}
-.closing {
-  text-align: center;
-  padding: 65px 20px;
-  border-top: 1px solid var(--line);
-  background: #F1ECE4;
-}
-.closing h2 { font-size: 34px; color: var(--gold-light); }
-.closing p { color: var(--muted); max-width: 530px; margin: auto; }
-footer { padding: 25px 0; color: #8A8180; font-size: 12px; text-align: center; }
-@media (max-width: 700px) {
-  .hero { padding: 68px 0; }
-  .section { padding: 55px 0; }
-  .topics, .packages { grid-template-columns: 1fr; }
-  .topic, .package { padding: 25px; }
-  .brand { font-size: 16px; }
-}
+:root{--bg:#F8F6F0;--panel:#FFF;--gold:#B99A5B;--gold-light:#C8AC72;--text:#29252A;--muted:#77717A;--line:rgba(185,154,91,.32);--radius:14px;--shadow:0 6px 28px rgba(185,154,91,.10)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;line-height:1.65}
+a{color:inherit;text-decoration:none}.container{width:min(1080px,90%);margin:auto}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400;margin:0 0 12px}
+h1{font-size:clamp(38px,7vw,72px);line-height:1.12}h1 em{color:var(--gold-light);font-style:normal}
+h2{font-size:clamp(28px,5vw,42px)}h3{font-size:22px}p{margin:0 0 14px}
+.eyebrow{color:var(--gold);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+.muted{color:var(--muted)}.section{padding:76px 0}.section-head{text-align:center;margin-bottom:38px}
+.section-head p{color:var(--muted);max-width:560px;margin:0 auto}
+.btn{display:inline-block;padding:14px 26px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#18120b;font-weight:600;font-size:14px;cursor:pointer;transition:transform .2s,background .2s;font-family:inherit}
+.btn:hover{background:var(--gold-light);transform:translateY(-2px)}
+.btn-outline{background:transparent;color:var(--text)}.btn:disabled{opacity:.6;cursor:wait}
+header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 0}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{font-family:Georgia,serif;font-size:19px}.brand span{color:var(--gold)}
+.nav-links{display:flex;gap:22px;font-size:14px;color:var(--muted)}.nav-links a:hover{color:var(--text)}
+.nav .btn{padding:10px 18px;font-size:13px}@media(max-width:780px){.nav-links{display:none}}
+.hero{text-align:center;padding:95px 0 90px;background:radial-gradient(ellipse at 50% 0%,#F0E8DC 0%,#F8F6F0 72%)}
+.hero p{max-width:570px;margin:0 auto 30px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.daily-card{max-width:560px;margin:0 auto;text-align:center}
+.daily-card .card-img{display:block;width:100%;max-width:240px;height:auto;margin:0 auto 18px;border:3px solid var(--gold);border-radius:10px;padding:6px;background:#fff}
+.daily-card .card-name{color:var(--gold);font-family:Georgia,serif;font-size:26px;margin-bottom:10px}
+.daily-card .card-meaning{color:var(--muted);margin:0 0 16px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.step{border:1px solid var(--line);background:var(--panel);padding:24px 20px;border-radius:var(--radius)}
+.step .num{color:var(--gold);font-family:Georgia,serif;font-size:28px}
+.step h3{font-size:18px;margin:10px 0 6px}.step p{color:var(--muted);font-size:14px;margin:0}
+@media(max-width:780px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:480px){.steps{grid-template-columns:1fr}}
+.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.topic{border:1px solid var(--line);background:linear-gradient(145deg,#FFF,#F7F3EB);padding:28px 23px;border-radius:var(--radius)}
+.topic .number{color:var(--gold);font-family:Georgia,serif;font-size:30px}
+.topic h3{margin:15px 0 10px}.topic p{color:var(--muted);font-size:14px;margin:0}
+.packages{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+.package{border:1px solid var(--line);background:linear-gradient(145deg,#FFF,#F7F3EB);padding:28px 23px;border-radius:var(--radius);display:flex;flex-direction:column}
+.package.featured{border-color:var(--gold);box-shadow:var(--shadow)}
+.tag{color:var(--gold);font-size:10px;letter-spacing:2px;text-transform:uppercase}
+.price{color:var(--gold-light);font-family:Georgia,serif;font-size:42px;margin:10px 0}
+.package p{color:var(--muted);font-size:14px;flex:1;margin:0 0 16px}
+.package .btn{margin-top:auto;text-align:center}
+.pay-note{margin-top:24px;text-align:center;font-size:12px;color:var(--muted)}
+.pay-note a{color:var(--gold);text-decoration:underline}
+@media(max-width:780px){.topics,.packages{grid-template-columns:1fr}}
+.ai-card{max-width:640px;margin:0 auto}
+.ai-card textarea{display:block;width:100%;min-height:120px;padding:16px;border:1px solid var(--gold);border-radius:var(--radius);resize:vertical;font-family:inherit;font-size:15px;background:#FFF;color:var(--text)}
+.ai-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.ai-actions .btn{flex:1;min-width:200px}
+.hint{font-size:13px;color:var(--muted);margin:12px 0 18px}
+.disclaimer{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
+#ai-answer{white-space:pre-wrap;background:#FFF;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:20px;display:none}
+#ai-answer.visible{display:block}
+#ai-answer .answer-text{font-size:16px;margin:0 0 16px}
+#ai-answer .followups-title{font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin:0 0 10px}
+#ai-answer .followup-btn{display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:#F8F6F0;cursor:pointer;font-family:inherit;font-size:14px;color:var(--text);transition:background .2s,border .2s}
+#ai-answer .followup-btn:hover{background:#F0E8DC;border-color:var(--gold)}
+.my-readings{margin-top:24px}
+.my-readings h3{font-size:18px;margin-bottom:12px}
+.reading-item{border:1px solid var(--line);background:#FFF;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:14px}
+.reading-item .date{color:var(--gold);font-size:12px;margin-bottom:4px}
+.reading-item .q{font-weight:600;margin-bottom:6px}
+.reading-item .a{color:var(--muted)}
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.review{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.review .who{font-size:13px;color:var(--gold);margin-top:10px}
+@media(max-width:780px){.reviews{grid-template-columns:1fr}}
+.faq{max-width:720px;margin:0 auto}
+.faq details{border-bottom:1px solid var(--line);padding:16px 0}
+.faq summary{cursor:pointer;font-family:Georgia,serif;font-size:18px;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";float:right;color:var(--gold)}
+.faq details[open] summary::after{content:"–"}
+.faq p{color:var(--muted);margin:10px 0 0}
+.closing{text-align:center;padding:65px 20px;border-top:1px solid var(--line);background:#F1ECE4}
+.closing h2{color:var(--gold-light)}.closing p{color:var(--muted);max-width:530px;margin:0 auto 20px}
+footer{padding:30px 0;color:#8A8180;font-size:12px}
+footer .cols{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-start}
+footer a:hover{color:var(--gold)}
+.sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;padding:12px 16px;background:rgba(248,246,240,.96);border-top:1px solid var(--line);text-align:center}
+.sticky-cta .btn{width:100%}
+@media(max-width:780px){.sticky-cta{display:block}body{padding-bottom:70px}}
 </style>
-<link rel="manifest" href="manifest.webmanifest"></head>
+</head>
 <body>
 <header>
   <div class="container nav">
-   <a class="brand" href="#"><span>✧</span> Истина в Таро</a>
-    <a class="lang" href="#topics">ТВОЙ ПУТЬ ↓</a>
+    <a class="brand" href="#"><span>✧</span> Истина в Таро</a>
+    <nav class="nav-links">
+      <a href="#daily">Карта дня</a>
+      <a href="#ai-tarot">ИИ-консультация</a>
+      <a href="#packages">Расклады</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn" href="#packages">Оплатить</a>
   </div>
 </header>
-
 <main>
-  <section class="hero">
-    <div class="container">
-      <div class="eyebrow">Пространство для себя</div>
-      <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
-      <p>Остановись на мгновение. Посмотри на свою ситуацию с другой стороны и прислушайся к тому, что действительно важно для тебя.</p>
-      <a class="button" href="#packages">Выбрать свой расклад&nbsp; ↗</a>
-    </div>
-  </section>
-
-  <section class="section" id="topics">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Твой внутренний компас</div>
-        <h2>Что тебе важно узнать сейчас?</h2>
-        <p>Выбери тему, с которой хочется разобраться. Начни с того, что откликается именно тебе.</p>
-      </div>
-      <div class="topics">
-        <article class="topic">
-          <div class="number">01</div>
-          <h3>Любовь и отношения</h3>
-          <p>Разберись в чувствах, ожиданиях и собственных желаниях. Посмотри на отношения с новой стороны.</p>
-        </article>
-        <article class="topic">
-          <div class="number">02</div>
-          <h3>Мой путь</h3>
-          <p>Обрати внимание на свои возможности, внутренние ресурсы и направления, которые хочется исследовать.</p>
-        </article>
-        <article class="topic">
-          <div class="number">03</div>
-          <h3>Выбор и перемены</h3>
-          <p>Упорядочь мысли и рассмотри разные варианты, прежде чем решиться на следующий шаг.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="packages">
-    <div class="container">
-      <div class="section-head">
-        <div class="eyebrow">Выбери глубину</div>
-        <h2>Твой расклад</h2>
-        <p>От одного вопроса до более подробного разбора ситуации.</p>
-      </div>
-      <div class="packages">
-        <article class="package">
-          <div class="tag">Первое знакомство</div>
-          <h3>Один вопрос</h3>
-          <div class="price">99 ₽</div>
-          <p>Короткий расклад на одну конкретную ситуацию с понятной интерпретацией.</p>
-<a class="button" href="#contact" onclick="choosePackage('Один вопрос — 99 ₽'); return false;">Выбрать расклад</a>        </article>
-        <article class="package featured">
-          <div class="tag">Популярный выбор</div>
-          <h3>Глубже понять ситуацию</h3>
-          <div class="price">299 ₽</div>
-          <p>Более подробный расклад с несколькими картами и вопросами для размышления.</p>
-<a class="button" href="#contact" onclick="choosePackage('Глубже понять ситуацию — 299 ₽'); return false;">Выбрать расклад</a>        </article>
-        <article class="package">
-          <div class="tag">Расширенный разбор</div>
-          <h3>Путь к ясности</h3>
-          <div class="price">599 ₽</div>
-          <p>Расширенная интерпретация нескольких аспектов ситуации и возможных направлений.</p>
-<a class="button" href="#contact" onclick="choosePackage('Путь к ясности — 599 ₽'); return false;">Выбрать расклад</a>        </article>
-      </div>
-      <div class="note">Расклады предназначены для саморефлексии и не гарантируют предсказания будущего. Заказ и оплата пока не подключены.</div>
-    </div>
-  </section>
-
- <section class="section" id="reading">
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">Пространство для себя</div>
+    <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
+    <p>Остановись на мгновение. Посмотри на свою ситуацию с другой стороны и прислушайся к тому, что действительно важно для тебя.</p>
+    <a class="btn" href="#daily">Открыть карту дня ✧</a>
+  </div>
+</section>
+<section class="section" id="daily">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">Твоя карта дня</div>
-      <h2>Остановись и прислушайся</h2>
-      <p>Подумай о том, что сейчас занимает твои мысли, и выбери карту для размышления.</p>
+      <div class="eyebrow">Бесплатно</div>
+      <h2>Твоя карта дня</h2>
+      <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
-
-    <div style="max-width:560px;margin:0 auto;text-align:center;background:#FFFFFF;border:1px solid var(--line);padding:30px 24px;border-radius:5px;">
-      <button class="button" type="button" onclick="drawDailyCard()">Открыть карту дня ✧</button>
-      <div id="daily-card-result" style="margin-top:24px;"></div>
+    <div class="card daily-card">
+      <button class="btn" type="button" id="draw-card-btn">Открыть карту дня ✧</button>
+      <div id="daily-result" style="margin-top:24px"></div>
     </div>
   </div>
-</section> <section class="closing" id="contact">
-    <div class="eyebrow">Твоё время — сейчас</div>
-    <h2>Прислушайся к себе</h2>
-    <p>Каждый новый взгляд на ситуацию может стать началом важных личных открытий. Выбери вопрос, который хочется исследовать первым.</p>
-
-<div class="contact-form" style="text-align:center; margin:32px auto; max-width:460px;">
-  <h3 style="font-size:25px; font-weight:400; margin-bottom:12px;">Оставайся на связи</h3>
-  <p style="margin-bottom:24px;">Новые расклады и вдохновение — когда тебе удобно.</p>
-
-  <button type="button" class="button" onclick="document.getElementById('contact-options').style.display = document.getElementById('contact-options').style.display === 'block' ? 'none' : 'block';">
-    Получать новости ✧
-  </button>
-
-  <div id="contact-options" style="display:none; margin-top:24px; text-align:left;">
-    <label for="contact-method" style="display:block; margin-bottom:8px;">Выбери удобный способ связи</label>
-    <select id="contact-method" style="width:100%; padding:14px; margin-bottom:14px; border:1px solid var(--gold); border-radius:5px; background:transparent; color:inherit;">
-      <option value="Email">Электронная почта</option>
-      <option value="Telegram">Telegram</option>
-      <option value="Телефон">Телефон</option>
-    </select>
-
-    <input id="contact-value" type="text" placeholder="Укажи свой контакт" style="width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid var(--gold); border-radius:5px; background:transparent; color:inherit;">
-<label style="display:block; margin:8px 0 16px; font-size:14px;">
-  <input id="contact-consent" type="checkbox">
-  Я согласна получать новости и предложения
-</label>
-
-<button type="button" class="button" onclick="submitContact()">
-  Продолжить
-</button>
-</div>
-</div>
-  </section>
+</section>
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Авторская методика</div>
+      <h2>Как это работает</h2>
+      <p>Четыре шага от вопроса к ясности — без мистики и запугивания.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h3>Опиши ситуацию</h3><p>Своими словами, как чувствуешь.</p></div>
+      <div class="step"><div class="num">02</div><h3>Выбери глубину</h3><p>Бесплатный вопрос или подробный разбор.</p></div>
+      <div class="step"><div class="num">03</div><h3>Получи расклад</h3><p>ИИ + карты по авторской методике.</p></div>
+      <div class="step"><div class="num">04</div><h3>Прислушайся</h3><p>Вопросы для размышления, а не приговор.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="ai-tarot">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">ИИ-консультация</div>
+      <h2>Расскажи, что тебя беспокоит</h2>
+      <p>Опиши ситуацию своими словами. Первый вопрос — бесплатно, каждый день.</p>
+    </div>
+    <div class="ai-card card">
+      <form id="ai-form" novalidate>
+        <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
+        <textarea id="question" name="question" maxlength="1000" required placeholder="Что произошло? Что тебя тревожит?"></textarea>
+        <div class="ai-actions">
+          <button type="button" class="btn btn-outline" id="voice-btn" title="Говорить вопрос голосом">🎤 Голосом</button>
+          <button type="submit" class="btn" id="ai-submit">Получить расклад ✧</button>
+        </div>
+        <p class="hint"><strong>Не знаешь, как задать вопрос?</strong> Просто расскажи, что происходит — мы поможем сформулировать.</p>
+        <p id="ai-message" class="disclaimer" aria-live="polite"></p>
+        <div id="ai-answer"></div>
+        <p class="disclaimer">Расклад носит информационно-развлекательный характер и не является предсказанием будущего, медицинской или психологической помощью.</p>
+      </form>
+      <div class="my-readings" id="my-readings">
+        <h3>Мои расклады</h3>
+        <div id="readings-list"><p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="topics">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Твой внутренний компас</div>
+      <h2>Что тебе важно узнать сейчас?</h2>
+    </div>
+    <div class="topics">
+      <article class="topic"><div class="number">01</div><h3>Любовь и отношения</h3><p>Разберись в чувствах, ожиданиях и собственных желаниях.</p></article>
+      <article class="topic"><div class="number">02</div><h3>Мой путь</h3><p>Обрати внимание на свои возможности и внутренние ресурсы.</p></article>
+      <article class="topic"><div class="number">03</div><h3>Выбор и перемены</h3><p>Упорядочь мысли и рассмотри разные варианты.</p></article>
+    </div>
+  </div>
+</section>
+<section class="section" id="packages">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Выбери глубину</div>
+      <h2>Твой расклад</h2>
+      <p>От одного вопроса до подробного разбора ситуации.</p>
+    </div>
+    <div class="packages">
+      <article class="package">
+        <div class="tag">Первое знакомство</div>
+        <h3>Один вопрос</h3>
+        <div class="price">99 ₽</div>
+        <p>Полный ответ на один вопрос + 1 уточнение.</p>
+        <a class="btn" href="#" data-package="one-question">Оплатить</a>
+      </article>
+      <article class="package featured">
+        <div class="tag">Популярный выбор</div>
+        <h3>Глубже понять ситуацию</h3>
+        <div class="price">299 ₽</div>
+        <p>Подробный расклад + 3 уточняющих вопроса + вопросы для размышления.</p>
+        <a class="btn" href="#" data-package="deeper">Оплатить</a>
+      </article>
+      <article class="package">
+        <div class="tag">Расширенный разбор</div>
+        <h3>Путь к ясности</h3>
+        <div class="price">499 ₽</div>
+        <p>Расширенный разбор + 5 уточнений + карта дня на неделю.</p>
+        <a class="btn" href="#" data-package="clarity">Оплатить</a>
+      </article>
+    </div>
+    <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> · <a href="#">Оферта</a> · <a href="#">Политика конфиденциальности</a></p>
+  </div>
+</section>
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
+    <div class="reviews">
+      <div class="review"><p>«Помогло увидеть ситуацию со стороны. Вопросы после расклада оказались важнее самих карт».</p><div class="who">— Анна</div></div>
+      <div class="review"><p>«Спокойный тон и никакой мистики. Просто разговор с собой».</p><div class="who">— Мария</div></div>
+      <div class="review"><p>«Понятно и бережно. Вернулась через неделю — увидела новое».</p><div class="who">— Екатерина</div></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Частые вопросы</div><h2>Что важно знать</h2></div>
+    <div class="faq">
+      <details><summary>Это точное предсказание будущего?</summary><p>Нет. Расклад — инструмент саморефлексии. Он помогает увидеть ситуацию с другой стороны, а не предсказывает события.</p></details>
+      <details><summary>Как проходит оплата?</summary><p>Через ЮKassa. После оплаты вы получаете доступ к полному раскладу и уточняющим вопросам.</p></details>
+      <details><summary>Можно ли вернуть деньги?</summary><p>Условия возврата описаны в оферте. Если расклад не был получен по технической причине — вернём оплату.</p></details>
+      <details><summary>Это заменяет психолога?</summary><p>Нет. Сервис не является психологической, медицинской или юридической помощью.</p></details>
+      <details><summary>Где хранятся мои расклады?</summary><p>На вашем устройстве (в браузере). Если очистите кэш — они удалятся. Личный кабинет — скоро.</p></details>
+    </div>
+  </div>
+</section>
+<section class="closing" id="contact">
+  <div class="eyebrow">Твоё время — сейчас</div>
+  <h2>Прислушайся к себе</h2>
+  <p>Каждый новый взгляд на ситуацию может стать началом важных личных открытий.</p>
+  <a class="btn" href="#daily">Открыть карту дня</a>
+</section>
 </main>
-
 <footer>
-  <div class="container">✧ Таро — ответы внутри тебя · © 2026</div>
-</footer>
-<script>
-function choosePackage(packageName) {
-  const contact = document.querySelector('#contact');
-  let message = document.getElementById('selected-package');
-
-  if (!message) {
-    message = document.createElement('div');
-    message.id = 'selected-package';
-    message.style.cssText =
-      'margin:24px auto;padding:18px;border:1px solid var(--gold);' +
-      'border-radius:5px;max-width:500px;text-align:center;color:var(--text);';
-    contact.appendChild(message);
-  }
-
-  message.textContent = 'Ты выбрала: ' + packageName;
-message.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-const dailyCards = [
-  {
-    name: "Звезда",
-    meaning: "Позволь себе надеяться. Даже маленький шаг в сторону своей мечты имеет значение."
-  },
-  {
-    name: "Сила",
-    meaning: "Твоя мягкость — не слабость. Доверься себе и действуй спокойно."
-  },
-  {
-    name: "Императрица",
-    meaning: "Обрати внимание на то, что помогает тебе расцветать. Позволь себе заботу и удовольствие."
-  },
-  {
-    name: "Отшельник",
-    meaning: "Иногда тишина помогает услышать главное. Дай себе время разобраться в своих чувствах."
-  },
-  {
-    name: "Солнце",
-    meaning: "Заметь то хорошее, что уже есть в твоей жизни. Радость может начинаться с малого."
-  },
-  {
-    name: "Колесо Фортуны",
-    meaning: "Перемены открывают новые возможности. Подумай, что ты готова впустить в свою жизнь."
-  },
-  {
-    name: "Верховная Жрица",
-    meaning: "Не торопись с выводами. Прислушайся к себе и внимательно посмотри на ситуацию."
-  }
-];
-
-function drawDailyCard() {
-  const card = dailyCards[Math.floor(Math.random() * dailyCards.length)];
-  document.getElementById("daily-card-result").innerHTML =
-    '<div style="color:var(--gold);font-family:Georgia,serif;font-size:28px;margin-bottom:10px;">✧ ' +
-    card.name +
-    ' ✧</div><p style="color:var(--muted);margin:0;">' +
-    card.meaning +
-    '</p><p style="font-size:11px;color:var(--muted);margin-top:18px;">Карта для саморефлексии, а не точное предсказание будущего.</p>';
-}
-
-async function submitContact() {
-  const method = document.getElementById('contact-method').value;
-  const contact = document.getElementById('contact-value').value.trim();
-  const consent = document.getElementById('contact-consent').checked;
-
-  if (!contact) {
-    alert('Пожалуйста, укажи свой контакт.');
-    return;
-  }
-
-  if (!consent) {
-    alert('Пожалуйста, подтверди согласие на получение новостей.');
-    return;
-  }
-
-  const data = new URLSearchParams();
-  data.append('method', method);
-  data.append('contact', contact);
-  data.append('consent', 'yes');
-
-  try {
-    await fetch(
-      'https://script.google.com/macros/s/AKfycbxkjYSDD5OXNOLSV8QH_EoVwpPHGiJp9Y6N694A_jzDzpWe30fUvExsmr9c34OjX34oHQ/exec',
-      {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        body: data.toString()
-      }
-    );
-
-   alert('Благодарю за доверие ✧ Теперь мы на связи.');
-document.getElementById('contact-options').style.display = 'none';
-document.querySelector('#contact-options').parentElement.querySelector('button').style.display = 'none';
-
-const thankYou = document.createElement('p');
-thankYou.textContent = 'Благодарю за доверие ✧ Теперь мы на связи.';
-thankYou.style.marginTop = '20px';
-thankYou.style.color = 'var(--gold)';
-thankYou.style.textAlign = 'center';
-
-document.querySelector('#contact-options').parentElement.appendChild(thankYou);
-    document.getElementById('contact-value').value = '';
-    document.getElementById('contact-consent').checked = false;
-  } catch (error) {
-    alert('Не удалось отправить заявку. Попробуй ещё раз.');
-  }
-}
-</script>
-<section id="ai-tarot" class="section">
-  <div class="container">
-    <div class="section-head">
-      <p class="eyebrow">ИСТИНА В ТАРО</p>
-      <h2>Твой вопрос — твой путь к ясности</h2>
-      <p>Сформулируй вопрос, который сейчас важен для тебя.</p>
+  <div class="container cols">
+    <div>✧ Истина в Таро<br><span class="muted">© 2026 · Самозанятый · ИНН ______</span></div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      <a href="#">Оферта</a>
+      <a href="#">Политика конфиденциальности</a>
+      <a href="#">Контакты</a>
     </div>
-
-    <form id="ai-tarot-form">
-      <label for="tarot-question">О чём ты хочешь узнать?</label>
-      <textarea
-        id="tarot-question"
-        name="question"
-        rows="4"
-        maxlength="1000"
-        placeholder="Например: что мне важно понять в моих отношениях?"
-        required
-      ></textarea>
-<p style="margin: 12px 0 18px; color: var(--muted); line-height: 1.7;">
-  <strong>Не знаешь, как задать вопрос?</strong><br>
-  Просто расскажи, что происходит в твоей жизни и что тебя беспокоит.
-  Мы поможем разобраться в ситуации и найти вопрос, с которого стоит начать.
-  Пиши так, как чувствуешь.
-</p>
-
-
-    
-      <input type="hidden" id="order-package" name="package" value="">
-
-      <label for="order-method">Как с тобой связаться?</label>
-      <select id="order-method" required style="display:block;width:100%;padding:14px;margin:10px 0;border:1px solid var(--gold);border-radius:5px;background:#fff;color:var(--text);">
-        <option value="Email">Электронная почта</option>
-        <option value="Telegram">Telegram</option>
-        <option value="Телефон">Телефон</option>
-      </select>
-
-      <label for="order-contact">Твой контакт</label>
-      <input id="order-contact" type="text" required placeholder="Email, @username или телефон" style="display:block;width:100%;padding:14px;margin:10px 0 18px;border:1px solid var(--gold);border-radius:5px;background:#fff;color:var(--text);">
-
-      <label style="display:block;margin:12px 0 18px;font-size:14px;">
-        <input id="order-consent" type="checkbox">
-        Я согласна получать новости и предложения
-      </label>
-  <button type="submit" class="btn">
-        Получить расклад
-      </button>
-
-      <p id="ai-tarot-message" aria-live="polite"></p>
-      <p class="tarot-note">
-        Расклад предназначен для саморефлексии и не гарантирует
-        определённого развития событий.
-      </p>
-    </form>
   </div>
-</section>
-
+</footer>
+<div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
-document.getElementById('ai-tarot-form').addEventListener('submit', function(event) {
-  event.preventDefault();
-
-  const question = document.getElementById('tarot-question').value.trim();
-  const message = document.getElementById('ai-tarot-message');
-
-  if (!question) {
-    message.textContent = 'Пожалуйста, напиши свой вопрос.';
-    return;
-  }
-
-  message.textContent = 'Форма готова. Подключение автоматического расклада — следующий этап.';
-});
-</script>
-
-<section id="save-app" class="section">
-  <div class="container" style="text-align:center; padding:30px 20px;">
-    <div style="font-size:32px; margin-bottom:12px;">☾ ✧</div>
-    <h2>Истина в Таро — всегда под рукой</h2>
-    <p style="line-height:1.7; margin:12px auto 20px; max-width:440px;">
-      Сохрани наш сайт на экран телефона, чтобы возвращаться к карте дня,
-      своим вопросам и новым раскладам в любое время.
-    </p>
-   
-<button type="button" class="btn" id="save-app-button"
-    onclick="alert('На iPhone: открой сайт в Safari, нажми «Поделиться» и выбери «На экран Домой». На Android: открой меню браузера и выбери «Добавить на главный экран».')">
-  Сохранить на экран ✧
-</button>
-    <p style="font-size:13px; margin-top:14px;">
-      Твой личный проводник к ясности.
-    </p>
-  </div>
-</section>
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function() {
-    navigator.serviceWorker.register("./sw.js")
-      .catch(function(error) {
-        console.log("Не удалось подключить приложение:", error);
-      });
-  });
+const TAROT_FUNCTION_URL = '/.netlify/functions/tarot-answer';
+const dailyCards = [
+  { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг в сторону мечты имеет значение.", image:"17_Star.jpg" },
+  { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе и действуй спокойно.", image:"08_Strength.jpg" },
+  { name:"Императрица", meaning:"Обрати внимание на то, что помогает тебе расцветать.", image:"" },
+  { name:"Отшельник", meaning:"Иногда тишина помогает услышать главное.", image:"" },
+  { name:"Солнце", meaning:"Заметь то хорошее, что уже есть в твоей жизни.", image:"" },
+  { name:"Колесо Фортуны", meaning:"Перемены открывают новые возможности.", image:"" },
+  { name:"Верховная Жрица", meaning:"Не торопись с выводами. Прислушайся к себе.", image:"02_High_Priestess.jpg" }
+];
+function todayStr(){ return new Date().toLocaleDateString('ru-RU'); }
+function drawDailyCard(){
+  const key='dailyTarotCard'; let saved=null;
+  try{ saved=JSON.parse(localStorage.getItem(key)); }catch(e){}
+  let card=null;
+  if(saved && saved.date===todayStr()){ card=dailyCards.find(c=>c.name===saved.card); }
+  if(!card){ card=dailyCards[Math.floor(Math.random()*dailyCards.length)]; try{ localStorage.setItem(key,JSON.stringify({date:todayStr(),card:card.name})); }catch(e){} }
+  const img=card.image ? '<img class="card-img" src="'+card.image+'" alt="'+card.name+'" onerror="this.style.display=\'none\'">' : '';
+  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для саморефлексии.</p><a class="btn" href="#ai-tarot" style="margin-top:8px">Задать вопрос ИИ →</a>';
 }
-</script>
-
-<script>
-(function () {
-  const endpoint = 'https://script.google.com/macros/s/AKfycbxkjYSDD5OXNOLSV8QH_EoVwpPHGiJp9Y6N694A_jzDzpWe30fUvExsmr9c34OjX34oHQ/exec';
-
-  let selectedPackage = '';
-
-  window.choosePackage = function (packageName) {
-    selectedPackage = packageName;
-
-    let message = document.getElementById('selected-package');
-    if (!message) {
-      message = document.createElement('p');
-      message.id = 'selected-package';
-      message.style.cssText =
-        'margin:24px auto;padding:18px;border:1px solid var(--gold);' +
-        'border-radius:5px;max-width:500px;text-align:center;color:var(--text);';
-      document.getElementById('contact').appendChild(message);
-    }
-
-    message.textContent = 'Ты выбрала: ' + packageName;
-    document.getElementById('ai-tarot').scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  };
-
-  const form = document.getElementById('ai-tarot-form');
-
-  form.addEventListener('submit', async function (event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const question = document.getElementById('tarot-question').value.trim();
-    const method = document.getElementById('order-method').value;
-    const contact = document.getElementById('order-contact').value.trim();
-    const consent = document.getElementById('order-consent').checked;
-    const message = document.getElementById('ai-tarot-message');
-
-    if (!selectedPackage) {
-      message.textContent = 'Сначала выбери тариф в разделе «Твой расклад».';
-      return;
-    }
-
-    if (!question || !contact) {
-      message.textContent = 'Заполни вопрос и контакт для связи.';
-      return;
-    }
-
-    const data = new URLSearchParams({
-      action: 'order',
-      package: selectedPackage,
-      question: question,
-      method: method,
-      contact: contact,
-      consent: consent ? 'yes' : 'no'
-    });
-
-    message.textContent = 'Отправляем заявку…';
-
-    try {
-      await fetch(endpoint, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        body: data.toString()
-      });
-
-      message.textContent =
-        'Заявка отправлена. Пожалуйста, дождись подтверждения перед оплатой.';
-    } catch (error) {
-      message.textContent =
-        'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.';
-    }
-  }, true);
-})();
+document.getElementById('draw-card-btn').addEventListener('click',drawDailyCard);
+const voiceBtn=document.getElementById('voice-btn');
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SpeechRec){ voiceBtn.disabled=true; voiceBtn.textContent='🎤 Не поддерживается'; }
+else{
+  const rec=new SpeechRec(); rec.lang='ru-RU'; rec.interimResults=false;
+  let listening=false;
+  voiceBtn.addEventListener('click',()=>{ if(listening){ rec.stop(); return; } try{ rec.start(); }catch(e){} });
+  rec.onstart=()=>{ listening=true; voiceBtn.textContent='🎤 Слушаю…'; };
+  rec.onend=()=>{ listening=false; voiceBtn.textContent='🎤 Голосом'; };
+  rec.onerror=()=>{ listening=false; voiceBtn.textContent='🎤 Голосом'; };
+  rec.onresult=(e)=>{ let text=''; for(let i=0;i<e.results.length;i++) text+=e.results[i][0].transcript; const ta=document.getElementById('question'); ta.value=(ta.value?ta.value+' ':'')+text.trim(); };
+}
+const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
+function freeUsedToday(){ try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } }
+function markFreeUsed(){ try{ localStorage.setItem('aiFreeDate',JSON.stringify(todayStr())); }catch(e){} }
+function renderAnswer(answer, followups){
+  let html='<p class="answer-text">'+escapeHtml(answer)+'</p>';
+  if(Array.isArray(followups) && followups.length){
+    html+='<div class="followups-title">Уточни, если хочется глубже</div>';
+    followups.forEach(f=>{ html+='<button type="button" class="followup-btn" data-followup="'+escapeHtml(f)+'">✧ '+escapeHtml(f)+'</button>'; });
+  }
+  aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
+  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ btn.addEventListener('click',()=>{ document.getElementById('question').value=btn.dataset.followup; document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); }); });
+}
+aiForm.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const q=document.getElementById('question').value.trim();
+  aiMsg.textContent=''; aiAnswer.classList.remove('visible'); aiAnswer.innerHTML='';
+  if(!q){ aiMsg.textContent='Пожалуйста, напиши свой вопрос.'; return; }
+  if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
+  if(freeUsedToday()){ aiMsg.textContent='Бесплатный вопрос на сегодня использован. Полный расклад — в разделе «Расклады».'; return; }
+  aiSubmit.disabled=true; aiMsg.textContent='ИИ размышляет…';
+  try{
+    const res=await fetch(TAROT_FUNCTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+    const data=await res.json();
+    if(!res.ok || data.error){ aiMsg.textContent=data.error || 'Не удалось получить ответ.'; return; }
+    renderAnswer(data.answer||'', data.followups||[]);
+    markFreeUsed(); saveReading(q, data.answer||''); aiMsg.textContent='';
+  }catch(err){ aiMsg.textContent='Не удалось получить ответ. Попробуй ещё раз.'; console.error(err); }
+  finally{ aiSubmit.disabled=false; }
+});
+function loadReadings(){ try{ return JSON.parse(localStorage.getItem('myReadings')||'[]'); }catch(e){ return []; } }
+function saveReading(q,a){ const list=loadReadings(); list.unshift({date:new Date().toLocaleString('ru-RU'),q,a}); try{ localStorage.setItem('myReadings',JSON.stringify(list.slice(0,30))); }catch(e){} renderReadings(); }
+function renderReadings(){ const list=loadReadings(); const el=document.getElementById('readings-list'); if(!list.length){ el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; return; } el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join(''); }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+renderReadings();
+document.querySelectorAll('[data-package]').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.preventDefault(); alert('Оплата ЮKassa подключается. Пакет: '+btn.dataset.package); }); });
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err)); }); }
 </script>
 </body>
 </html>
-
