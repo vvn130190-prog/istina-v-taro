@@ -1,22 +1,24 @@
-netlify/functions/tarot-answer.mjs / export default async (request) => {
-  if (request.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Используй POST-запрос." }),
-      { status: 405, headers: { "Content-Type": "application/json; charset=utf-8" } }
-    );
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ error: "Используй POST-запрос." })
+    };
   }
 
   try {
-    const { question } = await request.json();
+    const { question } = JSON.parse(event.body || "{}");
 
     if (!question || typeof question !== "string" || question.trim().length < 3) {
-      return new Response(
-        JSON.stringify({ error: "Пожалуйста, опиши свою ситуацию подробнее." }),
-        { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } }
-      );
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ error: "Пожалуйста, опиши свою ситуацию подробнее." })
+      };
     }
 
-    const apiKey = Netlify.env.get("OPENAI_API_KEY");
+    const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
       throw new Error("Не настроен ключ OpenAI.");
@@ -48,10 +50,11 @@ followups — массив ровно из трёх коротких уточн�
 
     if (!response.ok) {
       console.error("OpenAI error:", data);
-      return new Response(
-        JSON.stringify({ error: "Не удалось подготовить ответ. Попробуй позже." }),
-        { status: 502, headers: { "Content-Type": "application/json; charset=utf-8" } }
-      );
+      return {
+        statusCode: 502,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ error: "Не удалось подготовить ответ. Попробуй позже." })
+      };
     }
 
     const text = data.output
@@ -64,15 +67,17 @@ followups — массив ровно из трёх коротких уточн�
 
     const result = JSON.parse(text);
 
-    return new Response(JSON.stringify(result), {
-      status: 200,
-      headers: { "Content-Type": "application/json; charset=utf-8" }
-    });
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(result)
+    };
   } catch (error) {
     console.error("Tarot function error:", error);
-    return new Response(
-      JSON.stringify({ error: "Возникла ошибка. Попробуй ещё раз немного позже." }),
-      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } }
-    );
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ error: "Возникла ошибка. Попробуй ещё раз немного позже." })
+    };
   }
 };
