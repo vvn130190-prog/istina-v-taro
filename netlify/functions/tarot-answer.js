@@ -10,7 +10,7 @@ exports.handler = async (event) => {
     }
 
     // Вшиваем ключи прямо в код, чтобы обойти глюк Netlify
-    const apiKey = "AQVN...ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ...";
+    const apiKey = "AQVN1BNhHaUvxyETCmPQyr4IuBK4u55AhemgvcpP";
     const folderId = "b1gva850tfnbt1pfqu7q";
 
     const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
