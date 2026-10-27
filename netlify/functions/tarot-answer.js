@@ -9,7 +9,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "Опиши ситуацию подробнее." }) };
     }
 
-    const apiKey = "AQVN...ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ...";
+    const apiKey = "AQVN1BNhHaUvxyETCmPQyr4IuBK4u55AhemgvcpP";
     const folderId = "b1gva850tfnbt1pfqu7q";
 
     // Промпт написан латиницей/английским, чтобы GitHub не ломал кодировку. 
