@@ -1,29 +1,20 @@
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ error: "Используй POST-запрос." })
-    };
+    return { statusCode: 405, body: JSON.stringify({ error: "Используй POST-запрос." }) };
   }
 
   try {
     const { question } = JSON.parse(event.body || "{}");
-
-    if (!question || typeof question !== "string" || question.trim().length < 3) {
-      return {
-        statusCode: 400,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ error: "Пожалуйста, опиши свою ситуацию подробнее." })
-      };
+    if (!question || question.trim().length < 3) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Опиши ситуацию подробнее." }) };
     }
 
     const apiKey = process.env.YANDEX_API_KEY;
     const folderId = process.env.YANDEX_FOLDER_ID;
 
-    if (!apiKey || !folderId) {
-      throw new Error("Не настроены ключи Yandex.");
-    }
+    // Если ключей нет, скажем об этом прямо
+    if (!apiKey) return { statusCode: 500, body: JSON.stringify({ error: "В Netlify не добавлен YANDEX_API_KEY" }) };
+    if (!folderId) return { statusCode: 500, body: JSON.stringify({ error: "В Netlify не добавлен YANDEX_FOLDER_ID" }) };
 
     const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
       method: "POST",
@@ -33,49 +24,29 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         modelUri: `gpt://${folderId}/yandexgpt-lite/latest`,
-        completionOptions: {
-          stream: false,
-          temperature: 0.7,
-          maxTokens: 400
-        },
+        completionOptions: { stream: false, temperature: 0.7, maxTokens: 400 },
         messages: [
           {
             role: "system",
-            text: `Ты — бережный помощник проекта «Истина в Таро — Ответы внутри тебя».
-Дай короткий, тёплый ответ на ситуацию человека в духе символического толкования Таро.
-Не утверждай, что знаешь мысли другого человека или предсказываешь будущее наверняка.
-Помоги человеку увидеть возможные чувства, обстоятельства и варианты действий.
-Не ставь диагнозов и не давай опасных советов.
-Ответь строго в формате JSON с полями:
-answer — 2–4 предложения на русском языке;
-followups — массив ровно из трёх коротких уточняющих вопросов по ситуации.
-Не обещай, что это реальный расклад карт: это предварительный бесплатный ответ.
-Твой ответ должен быть ТОЛЬКО валидным JSON без markdown-оберток.`
+            text: `Ты — бережный помощник проекта «Истина в Таро». Дай короткий, тёплый ответ (2-4 предложения) в духе таро. Не предсказывай будущее наверняка. Ответь строго в формате JSON: {"answer": "текст", "followups": ["вопрос1", "вопрос2", "вопрос3"]}. Только валидный JSON без markdown.`
           },
-          {
-            role: "user",
-            text: question.trim()
-          }
+          { role: "user", text: question.trim() }
         ]
       })
     });
 
     const data = await response.json();
 
+    // Если Яндекс вернул ошибку, покажем её!
     if (!response.ok) {
-      console.error("YandexGPT error:", data);
       return {
         statusCode: 502,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ error: "Не удалось подготовить ответ. Попробуй позже." })
+        body: JSON.stringify({ error: "Ошибка Яндекса: " + (data.message || JSON.stringify(data)) })
       };
     }
 
     let text = data.result?.alternatives?.[0]?.message?.text;
-
-    if (!text) {
-      throw new Error("Пустой ответ YandexGPT.");
-    }
+    if (!text) return { statusCode: 500, body: JSON.stringify({ error: "Пустой ответ от Яндекса" }) };
 
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const result = JSON.parse(text);
@@ -86,11 +57,9 @@ followups — массив ровно из трёх коротких уточн�
       body: JSON.stringify(result)
     };
   } catch (error) {
-    console.error("Tarot function error:", error);
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ error: "Возникла ошибка. Попробуй ещё раз немного позже." })
+      body: JSON.stringify({ error: "Системная ошибка: " + error.message })
     };
   }
 };
