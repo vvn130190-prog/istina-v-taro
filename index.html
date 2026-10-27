@@ -143,31 +143,6 @@ footer a:hover{color:var(--gold)}
 <section class="section" id="ai-tarot">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">Истина в Таро</div>
-      <h2>Спроси у Истины</h2>
-      <p>Доверь свою ситуацию картам. Первый вопрос и 3 уточнения — бесплатно каждый день.</p>
-    </div>
-    <div class="ai-card card">
-      <form id="ai-form" novalidate>
-        <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
-        <textarea id="question" name="question" maxlength="1000" required placeholder="Опиши, что тревожит твою душу..."></textarea>
-        <div class="ai-actions">
-          <button type="button" class="btn btn-outline" id="voice-btn" title="Говорить вопрос голосом">🎤 Голосом</button>
-          <button type="submit" class="btn" id="ai-submit">Бесплатно задать вопрос ✧</button>
-        </div>
-        <p class="hint"><strong>Не знаешь, как задать вопрос?</strong> Просто расскажи, что происходит — карты помогут найти ответ.</p>
-        <p id="ai-message" class="disclaimer" aria-live="polite"></p>
-        <div id="ai-answer"></div>
-        <p class="disclaimer">Расклад носит информационно-развлекательный характер и не является предсказанием будущего, медицинской или психологической помощью.</p>
-      </form>
-      <div class="my-readings" id="my-readings">
-        <h3>Мои расклады</h3>
-        <div id="readings-list"><p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p></div>
-      </div>
-    </div>
-  </div>
-</section>  <div class="container">
-    <div class="section-head">
       <div class="eyebrow">ИИ-консультация</div>
       <h2>Расскажи, что тебя беспокоит</h2>
       <p>Опиши ситуацию своими словами. Первый вопрос и 3 уточнения — бесплатно, каждый день.</p>
@@ -297,7 +272,7 @@ function drawDailyCard(){
   if(saved && saved.date===todayStr()){ card=dailyCards.find(c=>c.name===saved.card); }
   if(!card){ card=dailyCards[Math.floor(Math.random()*dailyCards.length)]; try{ localStorage.setItem(key,JSON.stringify({date:todayStr(),card:card.name})); }catch(e){} }
   const img=card.image ? '<img class="card-img" src="'+card.image+'" alt="'+card.name+'" onerror="this.style.display=\'none\'">' : '';
-  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для саморефлексии.</p><a class="btn" href="#ai-tarot" style="margin-top:8px">Задать вопрос ИИ →</a>';
+  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для саморефлексии.</p><a class="btn" href="#ai-tarot" style="margin-top:8px">Бесплатно задать вопрос →</a>';
 }
 document.getElementById('draw-card-btn').addEventListener('click',drawDailyCard);
 const voiceBtn=document.getElementById('voice-btn');
@@ -334,8 +309,7 @@ function renderAnswer(answer, followups){
   
   aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
     btn.addEventListener('click',()=>{ 
-      // Включаем флаг уточнения!
-      isFollowup = true; 
+      isFollowup = true; // Включаем флаг уточнения
       document.getElementById('question').value=btn.dataset.followup; 
       document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
     }); 
@@ -366,8 +340,7 @@ aiForm.addEventListener('submit',async(e)=>{
     saveReading(q, data.answer||''); 
     aiMsg.textContent='';
     
-    // Сбрасываем флаг после успешного ответа, чтобы следующий ручной ввод снова проверялся
-    isFollowup = false; 
+    isFollowup = false; // Сбрасываем флаг
   }catch(err){ aiMsg.textContent='Не удалось получить ответ. Попробуй ещё раз.'; console.error(err); }
   finally{ aiSubmit.disabled=false; }
 });
