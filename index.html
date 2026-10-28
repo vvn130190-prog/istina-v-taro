@@ -289,7 +289,8 @@ function drawDailyCard(){
   if(saved && saved.date===todayStr()){ card=dailyCards.find(c=>c.name===saved.card); }
   if(!card){ card=dailyCards[Math.floor(Math.random()*dailyCards.length)]; try{ localStorage.setItem(key,JSON.stringify({date:todayStr(),card:card.name})); }catch(e){} }
   const img=card.image ? '<img class="card-img" src="'+card.image+'" alt="'+card.name+'" onerror="this.style.display=\'none\'">' : '';
-  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для саморефлексии.</p><a class="btn" href="#ai-tarot" style="margin-top:8px">Бесплатно задать вопрос →</a>';
+  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для размышления.</p>
+  <a class="btn" href="#ai-tarot" style="margin-top:8px">Бесплатно задать вопрос →</a>';
 }
 document.getElementById('draw-card-btn').addEventListener('click',drawDailyCard);
 const voiceBtn=document.getElementById('voice-btn');
