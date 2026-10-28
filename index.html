@@ -96,7 +96,7 @@ footer a:hover{color:var(--gold)}
     <a class="brand" href="#"><span>✧</span> Истина в Таро</a>
     <nav class="nav-links">
       <a href="#daily">Карта дня</a>
-      <a href="#ai-tarot">Спросить у Истины</a>
+      <a href="#ai-tarot">ИИ-консультация</a>
       <a href="#packages">Расклады</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -135,7 +135,7 @@ footer a:hover{color:var(--gold)}
     <div class="steps">
       <div class="step"><div class="num">01</div><h3>Опиши ситуацию</h3><p>Своими словами, как чувствуешь.</p></div>
       <div class="step"><div class="num">02</div><h3>Выбери глубину</h3><p>Бесплатный вопрос или подробный разбор.</p></div>
-      <div class="step"><div class="num">03</div><h3>Получи расклад</h3><p>ИИ + карты по авторской методике.</p></div>
+      <div class="step"><div class="num">03</div><h3>Получи расклад</h3><p>Карты по авторской методике.</p></div>
       <div class="step"><div class="num">04</div><h3>Прислушайся</h3><p>Вопросы для размышления, а не приговор.</p></div>
     </div>
   </div>
@@ -271,7 +271,7 @@ footer a:hover{color:var(--gold)}
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
-const TAROT_FUNCTION_URL = '/.netlify/functions/tarot-answer';
+const TAROT_FUNCTION_URL = '/.netlify/functions/tarot-answer'; // НЕ ЗАБУДЬ ПОМЕНЯТЬ, ЕСЛИ ИСПОЛЬЗУЕШЬ NETLIFY
 const dailyCards = [
   { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг в сторону мечты имеет значение.", image:"17_Star.jpg" },
   { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе и действуй спокойно.", image:"08_Strength.jpg" },
@@ -364,11 +364,9 @@ function saveReading(q,a){ const list=loadReadings(); list.unshift({date:new Dat
 function renderReadings(){ const list=loadReadings(); const el=document.getElementById('readings-list'); if(!list.length){ el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; return; } el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join(''); }
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 renderReadings();
-document.querySelectorAll('[data-package]').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.preventDefault(); alert('Оплата ЮKassa подключается. Пакет: '+btn.dataset.package); }); });
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW:',err)); }); }
+
 // --- ЛОГИКА ОПЛАТЫ ---
 let currentPackage = '';
-let selectedPrice = 0;
 
 function openPaymentForm(pkgName) {
   currentPackage = pkgName;
@@ -390,13 +388,11 @@ async function submitPayment(e) {
 
   msg.textContent = 'Отправляем заявку...';
 
-  // ТУТ МЫ БУДЕМ ОТПРАВЛЯТЬ ДАННЫЕ В ТВОЮ GOOGLE-ТАБЛИЦУ
-  // (Пока просто имитируем отправку)
   setTimeout(() => {
     msg.textContent = 'Заявка принята! Мы свяжемся с вами для оплаты в течение 10 минут.';
     document.getElementById('payment-form').reset();
     setTimeout(closePaymentForm, 4000);
   }, 1000);
-}</script>
-</body>
-</html>
+}
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err
