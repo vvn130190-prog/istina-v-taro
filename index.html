@@ -265,7 +265,6 @@ footer a:hover{color:var(--gold)}
     <div style="display:flex;gap:18px;flex-wrap:wrap">
       <a href="/oferta.html">Оферта</a>
       <a href="/rekvizity.html">Реквизиты</a>
-      <a href="mailto:nos.viki@mail.ru">Контакты: nos.viki@mail.ru</a>
     </div>
   </div>
 </footer>
@@ -367,7 +366,15 @@ aiForm.addEventListener('submit',async(e)=>{
 
 function loadReadings(){ try{ return JSON.parse(localStorage.getItem('myReadings')||'[]'); }catch(e){ return []; } }
 function saveReading(q,a){ const list=loadReadings(); list.unshift({date:new Date().toLocaleString('ru-RU'),q,a}); try{ localStorage.setItem('myReadings',JSON.stringify(list.slice(0,30))); }catch(e){} renderReadings(); }
-function renderReadings(){ const list=loadReadings(); const el=document.getElementById('readings-list'); if(!list.length){ el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; return; } el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join(''); }
+function renderReadings(){ 
+  const list=loadReadings(); 
+  const el=document.getElementById('readings-list'); 
+  if(!list.length){ 
+    el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; 
+    return; 
+  } 
+  el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join('');
+}
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 renderReadings();
 
@@ -387,7 +394,7 @@ function closePaymentForm() {
 
 async function submitPayment(e) {
   e.preventDefault();
-   const name = document.getElementById('pay-name').value;
+  const name = document.getElementById('pay-name').value;
   const contact = document.getElementById('pay-contact').value;
   const question = document.getElementById('pay-question').value;
   const msg = document.getElementById('pay-message');
