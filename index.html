@@ -145,7 +145,8 @@ footer a:hover{color:var(--gold)}
     <div class="section-head">
       <div class="eyebrow">Авторская методика «Истина в Таро»</div>
       <h2>Расскажи, что тебя беспокоит</h2>
-<p>Опиши ситуацию своими словами. Первый вопрос и 1 уточнение — бесплатно. Полный разбор (с 3 уточнениями) — в разделе «Расклады».</p>    </div>
+      <p>Опиши ситуацию своими словами. Первый вопрос и 1 уточнение — бесплатно. Полный разбор (с 3 уточнениями) — в разделе «Расклады».</p>
+    </div>
     <div class="ai-card card">
       <form id="ai-form" novalidate>
         <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
@@ -307,6 +308,7 @@ const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('
 
 let isFollowup = false; 
 let followupCount = 0;
+
 function freeUsedToday(){ 
   try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } 
 }
@@ -320,18 +322,21 @@ function renderAnswer(answer, followups){
     html+='<div class="followups-title">Уточни, если хочется глубже</div>';
     followups.forEach(f=>{ html+='<button type="button" class="followup-btn" data-followup="'+escapeHtml(f)+'">✧ '+escapeHtml(f)+'</button>'; });
   }
- aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
-  btn.addEventListener('click',()=>{ 
-    if(followupCount >= 1) { // Разрешаем только 1 уточнение
-      aiMsg.textContent = 'Бесплатное уточнение использовано. Для глубокого разбора выберите платный расклад ниже.'; 
-      return;
-    }
-    followupCount++; 
-    isFollowup = true; 
-    document.getElementById('question').value=btn.dataset.followup; 
-    document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
-  }); 
-});
+  aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
+  
+  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
+    btn.addEventListener('click',()=>{ 
+      if(followupCount >= 1) { 
+        aiMsg.textContent = 'Бесплатное уточнение использовано. Для глубокого разбора выберите платный расклад ниже.'; 
+        return;
+      }
+      followupCount++; 
+      isFollowup = true; 
+      document.getElementById('question').value=btn.dataset.followup; 
+      document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
+    }); 
+  });
+}
 
 aiForm.addEventListener('submit',async(e)=>{
   e.preventDefault();
@@ -341,8 +346,7 @@ aiForm.addEventListener('submit',async(e)=>{
   if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
   
   if(!isFollowup && freeUsedToday()){ 
-aiMsg.textContent='Бесплатный лимит (1 вопрос + 1 уточнение) на сегодня использован. Хотите глубже? Выберите полный расклад ниже →';
-
+    aiMsg.textContent='Бесплатный лимит (1 вопрос + 1 уточнение) на сегодня использован. Хотите глубже? Выберите полный расклад ниже →'; 
     return; 
   }
   
@@ -384,11 +388,4 @@ function closePaymentForm() {
 async function submitPayment(e) {
   e.preventDefault();
   const name = document.getElementById('pay-name').value;
-  const contact = document.getElementById('pay-contact').value;
-  const question = document.getElementById('pay-question').value;
-  const msg = document.getElementById('pay-message');
-
-  msg.textContent = 'Отправляем заявку...';
-
-  setTimeout(() => {
-    msg
+  const contact = document.getElementById('
