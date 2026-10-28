@@ -306,7 +306,7 @@ else{
 const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
 
 let isFollowup = false; 
-
+let followupCount = 0;
 function freeUsedToday(){ 
   try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } 
 }
@@ -320,16 +320,18 @@ function renderAnswer(answer, followups){
     html+='<div class="followups-title">Уточни, если хочется глубже</div>';
     followups.forEach(f=>{ html+='<button type="button" class="followup-btn" data-followup="'+escapeHtml(f)+'">✧ '+escapeHtml(f)+'</button>'; });
   }
-  aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
-  
-  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
-    btn.addEventListener('click',()=>{ 
-      isFollowup = true; 
-      document.getElementById('question').value=btn.dataset.followup; 
-      document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
-    }); 
-  });
-}
+ aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
+  btn.addEventListener('click',()=>{ 
+    if(followupCount >= 1) { // Разрешаем только 1 уточнение
+      aiMsg.textContent = 'Бесплатное уточнение использовано. Для глубокого разбора выберите платный расклад ниже.'; 
+      return;
+    }
+    followupCount++; 
+    isFollowup = true; 
+    document.getElementById('question').value=btn.dataset.followup; 
+    document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
+  }); 
+});
 
 aiForm.addEventListener('submit',async(e)=>{
   e.preventDefault();
