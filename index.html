@@ -145,8 +145,7 @@ footer a:hover{color:var(--gold)}
     <div class="section-head">
       <div class="eyebrow">Авторская методика «Истина в Таро»</div>
       <h2>Расскажи, что тебя беспокоит</h2>
-      <p>Опиши ситуацию своими словами. Первый вопрос и 3 уточнения — бесплатно, каждый день.</p>
-    </div>
+<p>Опиши ситуацию своими словами. Первый вопрос и 1 уточнение — бесплатно. Полный разбор (с 3 уточнениями) — в разделе «Расклады».</p>    </div>
     <div class="ai-card card">
       <form id="ai-form" novalidate>
         <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
@@ -340,7 +339,8 @@ aiForm.addEventListener('submit',async(e)=>{
   if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
   
   if(!isFollowup && freeUsedToday()){ 
-    aiMsg.textContent='Бесплатный вопрос на сегодня использован. Полный расклад — в разделе «Расклады».'; 
+aiMsg.textContent='Бесплатный лимит (1 вопрос + 1 уточнение) на сегодня использован. Хотите глубже? Выберите полный расклад ниже →';
+
     return; 
   }
   
