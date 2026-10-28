@@ -396,4 +396,11 @@ async function submitPayment(e) {
   }, 1000);
 }
 
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err
+if('serviceWorker' in navigator){ 
+  window.addEventListener('load',()=>{ 
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:', err)); 
+  }); 
+}
+</script>
+</body>
+</html>
