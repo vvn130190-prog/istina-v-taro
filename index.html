@@ -210,12 +210,7 @@ footer a:hover{color:var(--gold)}
         <button class="btn" onclick="openPaymentForm('Путь к ясности — 499 ₽')">Оплатить</button>
       </article>
     </div>
-    <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="/oferta.html">Оферта</a>
-
-
-
-<a href="/rekvizity.html">Реквизиты</a>
-
+    <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="/oferta.html">Оферта</a> · <a href="/rekvizity.html">Реквизиты</a></p>
   </div>
 </section>
 
@@ -268,18 +263,16 @@ footer a:hover{color:var(--gold)}
   <div class="container cols">
     <div>✧ Истина в Таро<br><span class="muted">© 2026 · Самозанятый · ИНН 236506688838</span></div>
     <div style="display:flex;gap:18px;flex-wrap:wrap">
-<a href="/oferta.html">Оферта</a>
-
-<a href="/rekvizity.html">Реквизиты</a>      <a href="mailto:nos.viki@mail.ru">Контакты: nos.viki@mail.ru</a>
-
-
+      <a href="/oferta.html">Оферта</a>
+      <a href="/rekvizity.html">Реквизиты</a>
+      <a href="mailto:nos.viki@mail.ru">Контакты: nos.viki@mail.ru</a>
     </div>
   </div>
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
 const TAROT_FUNCTION_URL = 'https://istina-v-taro.netlify.app/.netlify/functions/tarot-answer';
-  const dailyCards = [
+const dailyCards = [
   { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг в сторону мечты имеет значение.", image:"17_Star.jpg" },
   { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе и действуй спокойно.", image:"08_Strength.jpg" },
   { name:"Императрица", meaning:"Обрати внимание на то, что помогает тебе расцветать.", image:"" },
@@ -296,8 +289,7 @@ function drawDailyCard(){
   if(saved && saved.date===todayStr()){ card=dailyCards.find(c=>c.name===saved.card); }
   if(!card){ card=dailyCards[Math.floor(Math.random()*dailyCards.length)]; try{ localStorage.setItem(key,JSON.stringify({date:todayStr(),card:card.name})); }catch(e){} }
   const img=card.image ? '<img class="card-img" src="'+card.image+'" alt="'+card.name+'" onerror="this.style.display=\'none\'">' : '';
-  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для размышления.</p>
-  <a class="btn" href="#ai-tarot" style="margin-top:8px">Бесплатно задать вопрос →</a>';
+  document.getElementById('daily-result').innerHTML=img+'<div class="card-name">✧ '+card.name+' ✧</div><p class="card-meaning">'+card.meaning+'</p><p style="font-size:11px;color:var(--muted)">Карта для размышления.</p><a class="btn" href="#ai-tarot" style="margin-top:8px">Бесплатно задать вопрос →</a>';
 }
 document.getElementById('draw-card-btn').addEventListener('click',drawDailyCard);
 const voiceBtn=document.getElementById('voice-btn');
@@ -397,17 +389,4 @@ async function submitPayment(e) {
   msg.textContent = 'Отправляем заявку...';
 
   setTimeout(() => {
-    msg.textContent = 'Заявка принята! Мы свяжемся с вами для оплаты в течение 10 минут.';
-    document.getElementById('payment-form').reset();
-    setTimeout(closePaymentForm, 4000);
-  }, 1000);
-}
-
-if('serviceWorker' in navigator){ 
-  window.addEventListener('load',()=>{ 
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:', err)); 
-  }); 
-}
-</script>
-</body>
-</html>
+    msg
