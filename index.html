@@ -395,4 +395,17 @@ async function submitPayment(e) {
   msg.textContent = 'Отправляем заявку...';
 
   setTimeout(() => {
-    msg.textContent = 'Заявка принята! Мы
+    msg.textContent = 'Заявка принята! Мы свяжемся с вами для оплаты в течение 10 минут.';
+    document.getElementById('payment-form').reset();
+    setTimeout(closePaymentForm, 4000);
+  }, 1000);
+}
+
+if('serviceWorker' in navigator){ 
+  window.addEventListener('load',()=>{ 
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
+  }); 
+}
+</script>
+</body>
+</html>
