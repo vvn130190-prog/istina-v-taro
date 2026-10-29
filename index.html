@@ -421,8 +421,7 @@ async function submitPayment(e) {
     const data = await res.json();
 
     if (data.confirmation_url) {
-      localStorage.setItem('last
-                                 localStorage.setItem('lastOrderId', data.order_id);
+      localStorage.setItem('lastOrderId', data.order_id);
       localStorage.setItem('lastOrderQuestion', question);
       window.location.href = data.confirmation_url;
     } else {
@@ -488,6 +487,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     checkStatus();
   }
 });
+
 // --- ОЗВУЧИВАНИЕ РАСКЛАДА ---
 let currentSpeech = null;
 
@@ -501,7 +501,7 @@ function speakAnswer(text) {
   if ('speechSynthesis' in window) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ru-RU';
-    utterance.rate = 0.9; // Немного медленнее для спокойствия
+    utterance.rate = 0.9;
     utterance.pitch = 1;
 
     utterance.onend = () => { currentSpeech = null; };
@@ -514,12 +514,10 @@ function speakAnswer(text) {
   }
 }
 
-// Добавляем кнопку "Прослушать" после отрисовки ответа
 const originalRenderAnswer = renderAnswer;
 renderAnswer = function(answer, followups) {
   originalRenderAnswer(answer, followups);
   
-  // Добавляем кнопку озвучивания под текстом ответа
   const answerDiv = document.getElementById('ai-answer');
   if (answerDiv && answer) {
     const speakBtn = document.createElement('button');
@@ -530,6 +528,13 @@ renderAnswer = function(answer, followups) {
     speakBtn.onclick = () => speakAnswer(answer);
     answerDiv.appendChild(speakBtn);
   }
-};</script>
+};
+
+if('serviceWorker' in navigator){ 
+  window.addEventListener('load',()=>{ 
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
+  }); 
+}
+</script>
 </body>
 </html>
