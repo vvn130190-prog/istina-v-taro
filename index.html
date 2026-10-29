@@ -473,6 +473,49 @@ async function submitPayment(e) {
     msg.textContent = 'Ошибка соединения. Попробуй позже.';
     console.error(err);
   }
-}</script>
+}// --- ПРОВЕРКА ОПЛАТЫ И ВЫДАЧА РАСКЛАДА ---
+window.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPaymentSuccess = urlParams.get('payment');
+  const orderId = urlParams.get('order');
+
+  if (isPaymentSuccess === 'success' && orderId) {
+    // Показываем пользователю, что проверяем оплату
+    const aiAnswerDiv = document.getElementById('ai-answer');
+    const aiMsg = document.getElementById('ai-message');
+    
+    if (aiAnswerDiv && aiMsg) {
+      aiAnswerDiv.innerHTML = '<p class="answer-text">Проверяем оплату и готовим ваш расклад... Пожалуйста, подождите.</p>';
+      aiAnswerDiv.classList.add('visible');
+      aiMsg.textContent = '';
+    }
+
+    try {
+      // Отправляем запрос на проверку оплаты
+      const res = await fetch('https://istina-v-taro2.vercel.app/api/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: orderId })
+      });
+
+      const data = await res.json();
+
+      if (data.status === 'success' && data.answer) {
+        // Если оплата прошла — показываем расклад
+        renderAnswer(data.answer, data.followups || []);
+        aiMsg.textContent = 'Оплата подтверждена! Ваш расклад готов.';
+        
+        // Очищаем URL от параметров, чтобы при обновлении страницы не было повторной проверки
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        aiAnswerDiv.innerHTML = '<p class="answer-text">Не удалось подтвердить оплату. Если вы уверены, что оплатили, напишите нам.</p>';
+        aiMsg.textContent = '';
+      }
+    } catch (err) {
+      aiAnswerDiv.innerHTML = '<p class="answer-text">Ошибка при проверке оплаты. Попробуйте обновить страницу позже.</p>';
+      console.error(err);
+    }
+  }
+});</script>
 </body>
 </html>
