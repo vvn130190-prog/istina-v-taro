@@ -17,14 +17,29 @@ export default async function handler(req, res) {
     const { orderId } = req.body;
     if (!orderId) return res.status(400).json({ error: 'Не указан номер заказа.' });
 
-    // ПРОСТО ИЩЕМ ГОТОВЫЙ РАСКЛАД В БАЗЕ
-    const resultStr = await redis.get(`result:${orderId}`);
+    // Ищем готовый расклад в базе
+    const resultData = await redis.get(`result:${orderId}`);
 
-    if (resultStr) {
-      const result = JSON.parse(resultStr);
-      return res.status(200).json({ status: 'success', answer: result.answer, followups: result.followups });
+    if (resultData) {
+      // Если данные пришли как строка, парсим. Если как объект — используем как есть.
+      let result;
+      if (typeof resultData === 'string') {
+        try {
+          result = JSON.parse(resultData);
+        } catch (e) {
+          console.error("Ошибка парсинга результата:", e);
+          return res.status(500).json({ error: "Ошибка чтения данных" });
+        }
+      } else {
+        result = resultData;
+      }
+
+      return res.status(200).json({ 
+        status: 'success', 
+        answer: result.answer, 
+        followups: result.followups 
+      });
     } else {
-      // Если расклада нет — значит, вебхук еще не успел его сгенерировать
       return res.status(200).json({ status: 'pending', error: 'Расклад еще готовится.' });
     }
   } catch (error) {
