@@ -18,15 +18,24 @@ export default async function handler(req, res) {
     
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
-      console.log('Вебхук получен для платежа:', paymentId);
 
-      // Достаем вопрос из базы данных
-      const orderDataStr = await redis.get(`order:${paymentId}`);
+      // Достаем данные из базы. Upstash сам вернет объект, если данные были записаны как JSON.
+      const orderData = await redis.get(`order:${paymentId}`);
+      
       let question = "Клиент оплатил расклад, но вопрос не найден.";
       
-      if (orderDataStr) {
-        const orderData = JSON.parse(orderDataStr);
-        question = orderData.question;
+      if (orderData) {
+        // Если orderData пришел как строка, парсим. Если как объект — используем как есть.
+        if (typeof orderData === 'string') {
+          try {
+            const parsed = JSON.parse(orderData);
+            question = parsed.question;
+          } catch (e) {
+            console.error("Ошибка парсинга данных заказа:", e);
+          }
+        } else if (orderData.question) {
+          question = orderData.question;
+        }
       }
 
       // Генерируем ответ через ИИ
@@ -43,9 +52,7 @@ export default async function handler(req, res) {
         status: 'success',
         answer: aiData.answer,
         followups: aiData.followups
-      }), { ex: 86400 }); // Храним 24 часа
-
-      console.log('Расклад сохранен в базу для:', paymentId);
+      }), { ex: 86400 });
     }
 
     return res.status(200).json({ status: 'ok' });
