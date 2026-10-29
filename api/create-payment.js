@@ -58,8 +58,7 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "Ошибка ЮKassa: " + (data.description || JSON.stringify(data)) });
     }
 
-return res.status(200).json({ confirmation_url: data.confirmation.confirmation_url, order_id: data.id });
-  } catch (error) {
+return res.status(200).json({ confirmation_url: data.confirmation.confirmation_url, order_id: data.id });} catch (error) {
     return res.status(500).json({ error: "Системная ошибка: " + error.message });
   }
 }
