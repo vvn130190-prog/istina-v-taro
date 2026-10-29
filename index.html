@@ -408,7 +408,7 @@ async function submitPayment(e) {
 
     const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
       method: 'POST',
-            },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         packageName: currentPackage,
         amount: amount,
