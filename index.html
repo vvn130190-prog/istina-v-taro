@@ -271,7 +271,7 @@ footer a:hover{color:var(--gold)}
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
 const TAROT_FUNCTION_URL = 'https://istina-v-taro2.vercel.app/api/tarot';
-  const dailyCards = [
+const dailyCards = [
   { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг в сторону мечты имеет значение.", image:"17_Star.jpg" },
   { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе и действуй спокойно.", image:"08_Strength.jpg" },
   { name:"Императрица", meaning:"Обрати внимание на то, что помогает тебе расцветать.", image:"" },
@@ -402,7 +402,6 @@ async function submitPayment(e) {
   msg.textContent = 'Создаем платеж...';
 
   try {
-    // Определяем сумму в зависимости от выбранного пакета
     let amount = "99.00";
     if (currentPackage.includes("299")) amount = "299.00";
     if (currentPackage.includes("499")) amount = "499.00";
@@ -411,7 +410,7 @@ async function submitPayment(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        packageName: currentPackage,
+                packageName: currentPackage,
         amount: amount,
         customerName: name,
         customerContact: contact,
@@ -422,53 +421,6 @@ async function submitPayment(e) {
     const data = await res.json();
 
     if (data.confirmation_url) {
-      // Перенаправляем на страницу оплаты ЮKassa
-      window.location.href = data.confirmation_url;
-    } else {
-      msg.textContent = 'Ошибка: ' + (data.error || 'Не удалось создать платеж.');
-    }
-  } catch (err) {
-    msg.textContent = 'Ошибка соединения. Попробуй позже.';
-    console.error(err);
-  }
-}
-
-if('serviceWorker' in navigator){ 
-  window.addEventListener('load',()=>{ 
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
-  }); 
-}
-// Новая функция оплаты через ЮKassa
-async function submitPayment(e) {
-  e.preventDefault();
-  const name = document.getElementById('pay-name').value;
-  const contact = document.getElementById('pay-contact').value;
-  const question = document.getElementById('pay-question').value;
-  const msg = document.getElementById('pay-message');
-
-  msg.textContent = 'Создаем платеж...';
-
-  try {
-    let amount = "99.00";
-    if (currentPackage.includes("299")) amount = "299.00";
-    if (currentPackage.includes("499")) amount = "499.00";
-
-       const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        packageName: currentPackage,
-        amount: amount,
-        customerName: name,
-        customerContact: contact,
-        customerQuestion: question
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.confirmation_url) {
-      // СОХРАНЯЕМ ID ЗАКАЗА ПЕРЕД ПЕРЕХОДОМ НА ОПЛАТУ
       localStorage.setItem('lastOrderId', data.order_id);
       window.location.href = data.confirmation_url;
     } else {
@@ -478,6 +430,50 @@ async function submitPayment(e) {
     msg.textContent = 'Ошибка соединения. Попробуй позже.';
     console.error(err);
   }
-}</script>
+}
+
+// --- ПРОВЕРКА ОПЛАТЫ ПРИ ЗАГРУЗКЕ ---
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedOrderId = localStorage.getItem('lastOrderId');
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderIdFromUrl = urlParams.get('order');
+  const orderId = orderIdFromUrl || savedOrderId;
+
+  if (orderId) {
+    const aiAnswerDiv = document.getElementById('ai-answer');
+    const aiMsg = document.getElementById('ai-message');
+    
+    if (aiAnswerDiv && aiMsg) {
+      aiAnswerDiv.innerHTML = '<p class="answer-text">Проверяем оплату и готовим ваш расклад... Пожалуйста, подождите.</p>';
+      aiAnswerDiv.classList.add('visible');
+      aiMsg.textContent = '';
+    }
+
+    try {
+      const res = await fetch('https://istina-v-taro2.vercel.app/api/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: orderId })
+      });
+
+      const data = await res.json();
+
+      if (data.status === 'success' && data.answer) {
+        renderAnswer(data.answer, data.followups || []);
+        aiMsg.textContent = 'Оплата подтверждена! Ваш расклад готов.';
+        localStorage.removeItem('lastOrderId');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (data.status === 'succeeded') {
+        aiAnswerDiv.innerHTML = '<p class="answer-text">Расклад уже был выдан ранее. Если вы его не видите, напишите нам.</p>';
+      } else {
+        aiAnswerDiv.innerHTML = '<p class="answer-text">Платеж еще не подтвержден. Если вы оплатили, подождите 10-15 секунд и обновите страницу.</p>';
+      }
+    } catch (err) {
+      aiAnswerDiv.innerHTML = '<p class="answer-text">Ошибка при проверке оплаты.</p>';
+      console.error(err);
+    }
+  }
+});
+</script>
 </body>
 </html>
