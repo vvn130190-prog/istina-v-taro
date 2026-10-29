@@ -488,6 +488,48 @@ window.addEventListener('DOMContentLoaded', async () => {
     checkStatus();
   }
 });
-</script>
+// --- ОЗВУЧИВАНИЕ РАСКЛАДА ---
+let currentSpeech = null;
+
+function speakAnswer(text) {
+  if (currentSpeech) {
+    window.speechSynthesis.cancel();
+    currentSpeech = null;
+    return;
+  }
+
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ru-RU';
+    utterance.rate = 0.9; // Немного медленнее для спокойствия
+    utterance.pitch = 1;
+
+    utterance.onend = () => { currentSpeech = null; };
+    utterance.onerror = () => { currentSpeech = null; };
+
+    currentSpeech = utterance;
+    window.speechSynthesis.speak(utterance);
+  } else {
+    alert('Ваш браузер не поддерживает озвучивание.');
+  }
+}
+
+// Добавляем кнопку "Прослушать" после отрисовки ответа
+const originalRenderAnswer = renderAnswer;
+renderAnswer = function(answer, followups) {
+  originalRenderAnswer(answer, followups);
+  
+  // Добавляем кнопку озвучивания под текстом ответа
+  const answerDiv = document.getElementById('ai-answer');
+  if (answerDiv && answer) {
+    const speakBtn = document.createElement('button');
+    speakBtn.className = 'btn btn-outline';
+    speakBtn.style.marginTop = '10px';
+    speakBtn.style.width = '100%';
+    speakBtn.innerHTML = '🔊 Прослушать расклад';
+    speakBtn.onclick = () => speakAnswer(answer);
+    answerDiv.appendChild(speakBtn);
+  }
+};</script>
 </body>
 </html>
