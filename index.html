@@ -408,7 +408,7 @@ async function submitPayment(e) {
 
     const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+            },
       body: JSON.stringify({
         packageName: currentPackage,
         amount: amount,
@@ -422,6 +422,7 @@ async function submitPayment(e) {
 
     if (data.confirmation_url) {
       localStorage.setItem('lastOrderId', data.order_id);
+      localStorage.setItem('lastOrderQuestion', question);
       window.location.href = data.confirmation_url;
     } else {
       msg.textContent = 'Ошибка: ' + (data.error || 'Не удалось создать платеж.');
@@ -432,48 +433,11 @@ async function submitPayment(e) {
   }
 }
 
-// --- ПРОВЕРКА ОПЛАТЫ ПРИ ЗАГРУЗКЕ ---
-window.addEventListener('DOMContentLoaded', async () => {
-  const savedOrderId = localStorage.getItem('lastOrderId');
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderIdFromUrl = urlParams.get('order');
-  const orderId = orderIdFromUrl || savedOrderId;
-
-  if (orderId) {
-    const aiAnswerDiv = document.getElementById('ai-answer');
-    const aiMsg = document.getElementById('ai-message');
-    
-    if (aiAnswerDiv && aiMsg) {
-      aiAnswerDiv.innerHTML = '<p class="answer-text">Проверяем оплату и готовим ваш расклад... Пожалуйста, подождите.</p>';
-      aiAnswerDiv.classList.add('visible');
-      aiMsg.textContent = '';
-    }
-
-    try {
-      const res = await fetch('https://istina-v-taro2.vercel.app/api/check-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: orderId })
-      });
-
-      const data = await res.json();
-
-      if (data.status === 'success' && data.answer) {
-        renderAnswer(data.answer, data.followups || []);
-        aiMsg.textContent = 'Оплата подтверждена! Ваш расклад готов.';
-        localStorage.removeItem('lastOrderId');
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (data.status === 'succeeded') {
-        aiAnswerDiv.innerHTML = '<p class="answer-text">Расклад уже был выдан ранее. Если вы его не видите, напишите нам.</p>';
-      } else {
-        aiAnswerDiv.innerHTML = '<p class="answer-text">Платеж еще не подтвержден. Если вы оплатили, подождите 10-15 секунд и обновите страницу.</p>';
-      }
-    } catch (err) {
-      aiAnswerDiv.innerHTML = '<p class="answer-text">Ошибка при проверке оплаты.</p>';
-      console.error(err);
-    }
-  }
-});
+if('serviceWorker' in navigator){ 
+  window.addEventListener('load',()=>{ 
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
+  }); 
+}
 </script>
 </body>
-</html>                          
+</html>
