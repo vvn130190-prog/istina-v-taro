@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { packageName, amount } = req.body;
+    const { packageName, amount, customerName, customerContact, customerQuestion } = req.body;
 
     if (!packageName || !amount) {
       return res.status(400).json({ error: 'Не указан тариф или сумма.' });
@@ -25,7 +25,6 @@ export default async function handler(req, res) {
       throw new Error("Не настроены ключи ЮKassa.");
     }
 
-    // Создаем платеж в ЮKassa
     const response = await fetch("https://api.yookassa.ru/v3/payments", {
       method: "POST",
       headers: {
@@ -41,11 +40,14 @@ export default async function handler(req, res) {
         capture: true,
         confirmation: {
           type: "redirect",
-          return_url: "https://istina-v-taro.ru/?payment=success"
+          return_url: "https://istina-v-taro.ru/?payment=success&order=" + idempotenceKey
         },
         description: packageName,
         metadata: {
-          order_id: idempotenceKey
+          order_id: idempotenceKey,
+          customer_name: customerName || "",
+          customer_contact: customerContact || "",
+          customer_question: customerQuestion || ""
         }
       })
     });
@@ -56,8 +58,7 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "Ошибка ЮKassa: " + (data.description || JSON.stringify(data)) });
     }
 
-    // Возвращаем ссылку на оплату
-    return res.status(200).json({ confirmation_url: data.confirmation.confirmation_url });
+    return res.status(200).json({ confirmation_url: data.confirmation.confirmation_url, order_id: idempotenceKey });
 
   } catch (error) {
     return res.status(500).json({ error: "Системная ошибка: " + error.message });
