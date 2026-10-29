@@ -4,26 +4,22 @@ const redis = new Redis({
   url: process.env.KV_REST_API_URL,
   token: process.env.KV_REST_API_TOKEN,
 });
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const event = req.body;
     
-    // Нас интересует только успешная оплата
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
-      
+      console.log('Вебхук получен для платежа:', paymentId);
+
       // Достаем вопрос из базы данных
       const orderDataStr = await redis.get(`order:${paymentId}`);
       let question = "Клиент оплатил расклад, но вопрос не найден.";
@@ -42,15 +38,16 @@ export default async function handler(req, res) {
 
       const aiData = await aiResponse.json();
 
-      // Сохраняем готовый расклад в базу, чтобы сайт мог его показать
+      // Сохраняем готовый расклад в базу
       await redis.set(`result:${paymentId}`, JSON.stringify({
         status: 'success',
         answer: aiData.answer,
         followups: aiData.followups
       }), { ex: 86400 }); // Храним 24 часа
+
+      console.log('Расклад сохранен в базу для:', paymentId);
     }
 
-    // ЮKassa всегда ждет ответ 200 OK
     return res.status(200).json({ status: 'ok' });
 
   } catch (error) {
