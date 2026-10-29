@@ -438,6 +438,41 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
   }); 
 }
-</script>
+// Новая функция оплаты через ЮKassa
+async function submitPayment(e) {
+  e.preventDefault();
+  const name = document.getElementById('pay-name').value;
+  const contact = document.getElementById('pay-contact').value;
+  const question = document.getElementById('pay-question').value;
+  const msg = document.getElementById('pay-message');
+
+  msg.textContent = 'Создаем платеж...';
+
+  try {
+    let amount = "99.00";
+    if (currentPackage.includes("299")) amount = "299.00";
+    if (currentPackage.includes("499")) amount = "499.00";
+
+    const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageName: currentPackage,
+        amount: amount
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.confirmation_url) {
+      window.location.href = data.confirmation_url;
+    } else {
+      msg.textContent = 'Ошибка: ' + (data.error || 'Не удалось создать платеж.');
+    }
+  } catch (err) {
+    msg.textContent = 'Ошибка соединения. Попробуй позже.';
+    console.error(err);
+  }
+}</script>
 </body>
 </html>
