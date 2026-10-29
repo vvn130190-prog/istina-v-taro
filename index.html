@@ -399,13 +399,38 @@ async function submitPayment(e) {
   const question = document.getElementById('pay-question').value;
   const msg = document.getElementById('pay-message');
 
-  msg.textContent = 'Отправляем заявку...';
+  msg.textContent = 'Создаем платеж...';
 
-  setTimeout(() => {
-    msg.textContent = 'Заявка принята! Мы свяжемся с вами для оплаты в течение 10 минут.';
-    document.getElementById('payment-form').reset();
-    setTimeout(closePaymentForm, 4000);
-  }, 1000);
+  try {
+    // Определяем сумму в зависимости от выбранного пакета
+    let amount = "99.00";
+    if (currentPackage.includes("299")) amount = "299.00";
+    if (currentPackage.includes("499")) amount = "499.00";
+
+    const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageName: currentPackage,
+        amount: amount,
+        customerName: name,
+        customerContact: contact,
+        customerQuestion: question
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.confirmation_url) {
+      // Перенаправляем на страницу оплаты ЮKassa
+      window.location.href = data.confirmation_url;
+    } else {
+      msg.textContent = 'Ошибка: ' + (data.error || 'Не удалось создать платеж.');
+    }
+  } catch (err) {
+    msg.textContent = 'Ошибка соединения. Попробуй позже.';
+    console.error(err);
+  }
 }
 
 if('serviceWorker' in navigator){ 
