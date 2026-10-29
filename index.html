@@ -421,7 +421,8 @@ async function submitPayment(e) {
     const data = await res.json();
 
     if (data.confirmation_url) {
-      localStorage.setItem('lastOrderId', data.order_id);
+      localStorage.setItem('last
+                                 localStorage.setItem('lastOrderId', data.order_id);
       localStorage.setItem('lastOrderQuestion', question);
       window.location.href = data.confirmation_url;
     } else {
@@ -433,11 +434,60 @@ async function submitPayment(e) {
   }
 }
 
-if('serviceWorker' in navigator){ 
-  window.addEventListener('load',()=>{ 
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
-  }); 
-}
+// --- ПРОВЕРКА ОПЛАТЫ ПРИ ЗАГРУЗКЕ ---
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedOrderId = localStorage.getItem('lastOrderId');
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderIdFromUrl = urlParams.get('order');
+  const orderId = orderIdFromUrl || savedOrderId;
+
+  if (orderId) {
+    const aiAnswerDiv = document.getElementById('ai-answer');
+    const aiMsg = document.getElementById('ai-message');
+    
+    if (aiAnswerDiv && aiMsg) {
+      aiAnswerDiv.innerHTML = '<p class="answer-text">Проверяем оплату и готовим ваш расклад... Пожалуйста, подождите.</p>';
+      aiAnswerDiv.classList.add('visible');
+      aiMsg.textContent = '';
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const checkStatus = async () => {
+      attempts++;
+      try {
+        const res = await fetch('https://istina-v-taro2.vercel.app/api/check-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: orderId })
+        });
+
+        const data = await res.json();
+
+        if (data.status === 'success' && data.answer) {
+          renderAnswer(data.answer, data.followups || []);
+          aiMsg.textContent = 'Оплата подтверждена! Ваш расклад готов.';
+          
+          const question = localStorage.getItem('lastOrderQuestion') || "Оплаченный вопрос";
+          saveReading(question, data.answer);
+          
+          localStorage.removeItem('lastOrderId');
+          localStorage.removeItem('lastOrderQuestion');
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (attempts < maxAttempts) {
+          setTimeout(checkStatus, 3000);
+        } else {
+          aiAnswerDiv.innerHTML = '<p class="answer-text">Расклад все еще готовится. Пожалуйста, обновите страницу через минуту.</p>';
+        }
+      } catch (err) {
+        if (attempts < maxAttempts) setTimeout(checkStatus, 3000);
+      }
+    };
+
+    checkStatus();
+  }
+});
 </script>
 </body>
 </html>
