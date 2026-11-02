@@ -330,6 +330,22 @@ function renderAnswer(answer, followups){
         return;
       }
       followupCount++; 
+      console.log('Счетчик уточнений:', followupCount);
+      isFollowup = true; 
+      document.getElementById('question').value=btn.dataset.followup; 
+      document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
+    }); 
+  });
+}
+  aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
+  
+  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
+    btn.addEventListener('click',()=>{ 
+      if(followupCount >= 2) { 
+        openPaymentForm('Следующий вопрос — 99 ₽');
+        return;
+      }
+      followupCount++; 
       isFollowup = true; 
       document.getElementById('question').value=btn.dataset.followup; 
       document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
