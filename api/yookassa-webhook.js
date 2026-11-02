@@ -19,24 +19,29 @@ export default async function handler(req, res) {
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
 
-      // Достаем вопрос из базы
+      // Достаем данные из базы
       const orderData = await redis.get(`order:${paymentId}`);
+      
       let question = "Клиент оплатил расклад, но вопрос не найден.";
       let customerName = "Не указано";
       let customerContact = "Не указано";
       
       if (orderData) {
+        // Если orderData пришел как строка, парсим
+        let parsedData = orderData;
         if (typeof orderData === 'string') {
           try {
-            const parsed = JSON.parse(orderData);
-            question = parsed.question || question;
-            customerName = parsed.name || customerName;
-            customerContact = parsed.contact || customerContact;
-          } catch (e) {}
-        } else if (orderData.question) {
-          question = orderData.question;
-          customerName = orderData.name || customerName;
-          customerContact = orderData.contact || customerContact;
+            parsedData = JSON.parse(orderData);
+          } catch (e) {
+            console.error("Ошибка парсинга orderData:", e);
+          }
+        }
+        
+        // Если это объект, берем поля
+        if (parsedData && typeof parsedData === 'object') {
+          question = parsedData.question || question;
+          customerName = parsedData.name || customerName;
+          customerContact = parsedData.contact || customerContact;
         }
       }
 
@@ -50,7 +55,8 @@ export default async function handler(req, res) {
       formData.append('package', 'Оплата через ЮKassa');
       formData.append('amount', event.object.amount.value);
 
-      await fetch(GOOGLE_SCRIPT_URL, {
+      // Отправляем в таблицу (без await, чтобы не тормозить)
+      fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         body: formData
       }).catch(e => console.error("Ошибка отправки в таблицу:", e));
