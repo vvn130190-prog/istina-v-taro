@@ -325,10 +325,11 @@ function renderAnswer(answer, followups){
   
   aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
     btn.addEventListener('click',()=>{ 
-      if(followupCount >= 1) { 
-        aiMsg.textContent = 'Бесплатное уточнение использовано. Для глубокого разбора выберите платный расклад ниже.'; 
-        return;
-      }
+     if(followupCount >= 2) { 
+  // Показываем окно оплаты за следующий вопрос
+  openPaymentForm('Следующий вопрос — 99 ₽');
+  return;
+}
       followupCount++; 
       isFollowup = true; 
       document.getElementById('question').value=btn.dataset.followup; 
