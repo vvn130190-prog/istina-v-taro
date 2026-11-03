@@ -116,8 +116,9 @@ footer a:hover{color:var(--gold)}
       <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
     <div class="card daily-card" style="perspective: 1000px;">
-      <div id="card-flip-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:240px; aspect-ratio: 2/3; margin:0 auto; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">
+      <div id="card-flip-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:240px; height:360px; margin:0 auto; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">
         
+        <!-- Рубашка карты -->
         <div id="card-back" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25); position:relative; overflow:hidden;">
           <div style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.1; background-image: radial-gradient(#B99A5B 1px, transparent 1px); background-size: 20px 20px;"></div>
           
@@ -130,12 +131,13 @@ footer a:hover{color:var(--gold)}
           <div style="position:absolute; top:10px; left:10px; right:10px; bottom:10px; border:1px solid rgba(185,154,91,0.4); border-radius:8px;"></div>
         </div>
 
-        <div id="card-front" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); background:#FFF; border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-shadow: 0 8px 24px rgba(185,154,91,0.25);">
-          <div id="card-image" style="width:100%; height:auto; margin-bottom:10px;"></div>
+        <!-- Лицо карты (только картинка) -->
+        <div id="card-front" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); background:#FFF; border:3px solid #B99A5B; border-radius:12px; display:flex; align-items:center; justify-content:center; padding:5px; box-shadow: 0 8px 24px rgba(185,154,91,0.25);">
+          <div id="card-image" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
         </div>
 
       </div>
-      <p id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px;"></p>
+      <p id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px; min-height:60px;"></p>
     </div>
   </div>
 </section>
