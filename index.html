@@ -330,12 +330,27 @@ function flipCard() {
     try { localStorage.setItem('dailyTarotCard', JSON.stringify({date: today, card: card.name})); } catch(e) {}
   }
   
-  document.getElementById('card-image').innerHTML = '<img src="' + card.image + '" style="width:100%; height:auto; object-fit:contain; border-radius:8px;" onerror="this.style.display=\'none\'">';
-  
-  document.getElementById('daily-meaning').textContent = card.name + ': ' + card.meaning;
-  
+  // Сначала переворачиваем карту (быстро)
   container.style.transform = 'rotateY(180deg)';
   isFlipped = true;
+  
+  // Показываем название и трактовку под картой
+  document.getElementById('daily-meaning').textContent = card.name + ': ' + card.meaning;
+  
+  // Загружаем картинку «лениво» (только когда карта уже перевернулась)
+  const img = new Image();
+  img.src = card.image;
+  img.style.width = '100%';
+  img.style.height = 'auto';
+  img.style.borderRadius = '8px';
+  img.onload = function() {
+    const cardImage = document.getElementById('card-image');
+    cardImage.innerHTML = '';
+    cardImage.appendChild(img);
+  };
+  img.onerror = function() {
+    document.getElementById('card-image').innerHTML = '<p style="color:#777; font-size:12px;">Картинка загружается...</p>';
+  };
 }
 
 const voiceBtn=document.getElementById('voice-btn');
