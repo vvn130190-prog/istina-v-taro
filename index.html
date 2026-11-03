@@ -330,14 +330,16 @@ function flipCard() {
     try { localStorage.setItem('dailyTarotCard', JSON.stringify({date: today, card: card.name})); } catch(e) {}
   }
   
-  // Сначала переворачиваем карту (быстро)
+  // Переворачиваем карту
   container.style.transform = 'rotateY(180deg)';
   isFlipped = true;
   
-  // Показываем название и трактовку под картой
-  document.getElementById('daily-meaning').textContent = card.name + ': ' + card.meaning;
+  // Выводим название и трактовку под картой (с правильным форматированием)
+  document.getElementById('daily-meaning').innerHTML = 
+    '<strong style="display:block; font-size:20px; color:#B99A5B; margin-bottom:8px;">' + card.name + '</strong>' + 
+    card.meaning;
   
-  // Загружаем картинку «лениво» (только когда карта уже перевернулась)
+  // Загружаем картинку
   const img = new Image();
   img.src = card.image;
   img.style.width = '100%';
