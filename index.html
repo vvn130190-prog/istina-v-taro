@@ -115,27 +115,28 @@ footer a:hover{color:var(--gold)}
       <h2>Твоя карта дня</h2>
       <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
-    <div class="card daily-card" style="perspective: 1000px;">
-      <div id="card-flip-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:260px; height:400px; margin:0 auto; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">
+    <div class="card daily-card" style="text-align:center;">
+      
+      <!-- Контейнер для карты -->
+      <div id="card-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:260px; margin:0 auto; min-height:400px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         
-        <div id="card-back" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25); position:relative; overflow:hidden;">
-          <div style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.1; background-image: radial-gradient(#B99A5B 1px, transparent 1px); background-size: 20px 20px;"></div>
-          
-          <div style="z-index:1; text-align:center;">
-            <div style="font-size:60px; color:#B99A5B; margin-bottom:10px;">✧</div>
-            <div style="font-family:Georgia, serif; font-size:18px; color:#B99A5B; letter-spacing:2px;">КАРТА ДНЯ</div>
-            <div style="font-family:Georgia, serif; font-size:14px; color:#C8AC72; letter-spacing:2px; margin-top:10px;">Нажми на меня ✧</div>
-          </div>
-          
-          <div style="position:absolute; top:10px; left:10px; right:10px; bottom:10px; border:1px solid rgba(185,154,91,0.4); border-radius:8px;"></div>
+        <!-- Рубашка (показывается до клика) -->
+        <div id="card-back" style="width:100%; height:400px; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25); position:relative;">
+          <div style="font-size:60px; color:#B99A5B; margin-bottom:10px;">✧</div>
+          <div style="font-family:Georgia, serif; font-size:18px; color:#B99A5B; letter-spacing:2px;">КАРТА ДНЯ</div>
+          <div style="font-family:Georgia, serif; font-size:14px; color:#C8AC72; letter-spacing:2px; margin-top:10px;">Нажми на меня ✧</div>
         </div>
 
-        <div id="card-front" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); background:#FFF; border:3px solid #B99A5B; border-radius:12px; display:flex; align-items:center; justify-content:center; padding:5px; box-shadow: 0 8px 24px rgba(185,154,91,0.25);">
+        <!-- Лицо карты (появляется после клика, изначально скрыто) -->
+        <div id="card-front" style="width:100%; height:400px; display:none; flex-direction:column; align-items:center; justify-content:center; background:#FFF; border:3px solid #B99A5B; border-radius:12px; box-shadow: 0 8px 24px rgba(185,154,91,0.25); padding:10px;">
           <div id="card-image" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
         </div>
 
       </div>
-      <div id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px; line-height:1.6; padding:0 10px; min-height:100px;"></div>
+
+      <!-- Текст под картой -->
+      <div id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px; line-height:1.6; padding:0 10px; min-height:80px;"></div>
+
     </div>
   </div>
 </section>
@@ -314,8 +315,12 @@ function todayStr(){ return new Date().toLocaleDateString('ru-RU'); }
 let isFlipped = false;
 
 function flipCard() {
-  const container = document.getElementById('card-flip-container');
-  if (isFlipped) return;
+  const cardBack = document.getElementById('card-back');
+  const cardFront = document.getElementById('card-front');
+  
+  // Скрываем рубашку, показываем лицо
+  cardBack.style.display = 'none';
+  cardFront.style.display = 'flex';
   
   const today = todayStr();
   let saved = null;
@@ -330,18 +335,14 @@ function flipCard() {
     try { localStorage.setItem('dailyTarotCard', JSON.stringify({date: today, card: card.name})); } catch(e) {}
   }
   
-  container.style.transform = 'rotateY(180deg)';
-  isFlipped = true;
-  
   document.getElementById('daily-meaning').innerHTML = 
     '<strong style="display:block; font-size:20px; color:#B99A5B; margin-bottom:8px;">' + card.name + '</strong>' + 
     card.meaning;
   
   const img = new Image();
   img.src = card.image;
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.objectFit = 'contain';
+  img.style.maxWidth = '100%';
+  img.style.maxHeight = '100%';
   img.style.borderRadius = '8px';
   img.onload = function() {
     const cardImage = document.getElementById('card-image');
@@ -352,7 +353,6 @@ function flipCard() {
     document.getElementById('card-image').innerHTML = '<p style="color:#777; font-size:12px;">Картинка загружается...</p>';
   };
 }
-
 const voiceBtn=document.getElementById('voice-btn');
 const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SpeechRec){ voiceBtn.disabled=true; voiceBtn.textContent='🎤 Не поддерживается'; }
