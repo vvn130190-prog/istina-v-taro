@@ -116,7 +116,8 @@ footer a:hover{color:var(--gold)}
       <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
     <div class="card daily-card" style="perspective: 1000px;">
-<div id="card-flip-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:240px; aspect-ratio: 2/3; margin:0 auto; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">        
+      <div id="card-flip-container" onclick="flipCard()" style="cursor:pointer; width:100%; max-width:240px; aspect-ratio: 2/3; margin:0 auto; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">
+        
         <div id="card-back" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25); position:relative; overflow:hidden;">
           <div style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.1; background-image: radial-gradient(#B99A5B 1px, transparent 1px); background-size: 20px 20px;"></div>
           
@@ -131,11 +132,11 @@ footer a:hover{color:var(--gold)}
 
         <div id="card-front" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); background:#FFF; border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-shadow: 0 8px 24px rgba(185,154,91,0.25);">
           <div id="card-image" style="width:100%; height:auto; margin-bottom:10px;"></div>
-          <div id="card-name" style="font-family:Georgia, serif; color:#B99A5B; font-size:20px; text-align:center;"></div>
         </div>
 
       </div>
-<p id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px;"></p>    </div>
+      <p id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px;"></p>
+    </div>
   </div>
 </section>
 <section class="section" id="how">
@@ -285,28 +286,28 @@ footer a:hover{color:var(--gold)}
 <script>
 const TAROT_FUNCTION_URL = 'https://istina-v-taro2.vercel.app/api/tarot';
 const dailyCards = [
-  { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"00_Fool.jpg" },
-  { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"01_Magician.jpg" },
-  { name:"Верховная Жрица", meaning:"Прислушайся к интуиции. Ответ уже внутри тебя.", image:"02_High_Priestess.jpg" },
-  { name:"Императрица", meaning:"Время заботы и плодородия. Позволь себе расцвести.", image:"03_Empress.jpg" },
-  { name:"Император", meaning:"Пора взять ситуацию под контроль. Будь уверен в себе.", image:"04_Emperor.jpg" },
-  { name:"Иерофант", meaning:"Традиции и мудрость. Обратись за советом к наставнику.", image:"05_Hierophant.jpg" },
-  { name:"Влюбленные", meaning:"Важный выбор из сердца. Слушай свою душу.", image:"06_Lovers.jpg" },
-  { name:"Колесница", meaning:"Победа через движение. Не останавливайся.", image:"07_Chariot.jpg" },
-  { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе.", image:"08_Strength.jpg" },
-  { name:"Отшельник", meaning:"Время тишины и самоанализа. Побудь наедине с собой.", image:"09_Hermit.jpg" },
-  { name:"Колесо Фортуны", meaning:"Перемены открывают новые возможности. Лови момент.", image:"10_Wheel_of_Fortune.jpg" },
-  { name:"Справедливость", meaning:"Пришло время честности и баланса. Всё по заслугам.", image:"11_Justice.jpg" },
-  { name:"Повешенный", meaning:"Остановись и посмотри на ситуацию с другой стороны.", image:"12_Hanged_Man.jpg" },
-  { name:"Смерть", meaning:"Завершение старого и начало нового. Отпусти прошлое.", image:"13_Death.jpg" },
-  { name:"Умеренность", meaning:"Найди баланс и гармонию. Не торопись.", image:"14_Temperance.jpg" },
-  { name:"Дьявол", meaning:"Осторожно с зависимостями и искушениями. Будь честен с собой.", image:"15_Devil.jpg" },
-  { name:"Башня", meaning:"Неожиданные перемены. Уйдет всё ненужное, но будет точка роста.", image:"16_Tower.jpg" },
-  { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг к мечте важен.", image:"17_Star.jpg" },
-  { name:"Луна", meaning:"Не торопись с выводами. Прислушайся к подсознанию.", image:"18_Moon.jpg" },
-  { name:"Солнце", meaning:"Радость и успех. Заметь хорошее, что уже есть в жизни.", image:"19_Sun.jpg" },
-  { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"20_Judgement.jpg" },
-  { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"21_World.jpg" }
+  { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"RWS_Tarot_00_Fool.jpg" },
+  { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"RWS_Tarot_01_Magician.jpg" },
+  { name:"Верховная Жрица", meaning:"Прислушайся к интуиции. Ответ уже внутри тебя.", image:"RWS_Tarot_02_High_Priestess.jpg" },
+  { name:"Императрица", meaning:"Время заботы и плодородия. Позволь себе расцвести.", image:"RWS_Tarot_03_Empress.jpg" },
+  { name:"Император", meaning:"Пора взять ситуацию под контроль. Будь уверен в себе.", image:"RWS_Tarot_04_Emperor.jpg" },
+  { name:"Иерофант", meaning:"Традиции и мудрость. Обратись за советом к наставнику.", image:"RWS_Tarot_05_Hierophant.jpg" },
+  { name:"Влюбленные", meaning:"Важный выбор из сердца. Слушай свою душу.", image:"RWS_Tarot_06_Lovers.jpg" },
+  { name:"Колесница", meaning:"Победа через движение. Не останавливайся.", image:"RWS_Tarot_07_Chariot.jpg" },
+  { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе.", image:"RWS_Tarot_08_Strength.jpg" },
+  { name:"Отшельник", meaning:"Время тишины и самоанализа. Побудь наедине с собой.", image:"RWS_Tarot_09_Hermit.jpg" },
+  { name:"Колесо Фортуны", meaning:"Перемены открывают новые возможности. Лови момент.", image:"RWS_Tarot_10_Wheel_of_Fortune.jpg" },
+  { name:"Справедливость", meaning:"Пришло время честности и баланса. Всё по заслугам.", image:"RWS_Tarot_11_Justice.jpg" },
+  { name:"Повешенный", meaning:"Остановись и посмотри на ситуацию с другой стороны.", image:"RWS_Tarot_12_Hanged_Man.jpg" },
+  { name:"Смерть", meaning:"Завершение старого и начало нового. Отпусти прошлое.", image:"RWS_Tarot_13_Death.jpg" },
+  { name:"Умеренность", meaning:"Найди баланс и гармонию. Не торопись.", image:"RWS_Tarot_14_Temperance.jpg" },
+  { name:"Дьявол", meaning:"Осторожно с зависимостями и искушениями. Будь честен с собой.", image:"RWS_Tarot_15_Devil.jpg" },
+  { name:"Башня", meaning:"Неожиданные перемены. Уйдет всё ненужное, но будет точка роста.", image:"RWS_Tarot_16_Tower.jpg" },
+  { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг к мечте важен.", image:"RWS_Tarot_17_Star.jpg" },
+  { name:"Луна", meaning:"Не торопись с выводами. Прислушайся к подсознанию.", image:"RWS_Tarot_18_Moon.jpg" },
+  { name:"Солнце", meaning:"Радость и успех. Заметь хорошее, что уже есть в жизни.", image:"RWS_Tarot_19_Sun.jpg" },
+  { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"RWS_Tarot_20_Judgement.jpg" },
+  { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"RWS_Tarot_21_World.jpg" }
 ];
 function todayStr(){ return new Date().toLocaleDateString('ru-RU'); }
 
@@ -329,8 +330,9 @@ function flipCard() {
     try { localStorage.setItem('dailyTarotCard', JSON.stringify({date: today, card: card.name})); } catch(e) {}
   }
   
-document.getElementById('card-image').innerHTML = '<img src="' + card.image + '" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" loading="eager" onerror="this.style.display=\'none\'">';  document.getElementById('card-name').textContent = card.name;
-  document.getElementById('daily-meaning').textContent = card.meaning;
+  document.getElementById('card-image').innerHTML = '<img src="' + card.image + '" style="width:100%; height:auto; border-radius:8px;" loading="eager" onerror="this.style.display=\'none\'">';
+  
+  document.getElementById('daily-meaning').textContent = card.name + ': ' + card.meaning;
   
   container.style.transform = 'rotateY(180deg)';
   isFlipped = true;
