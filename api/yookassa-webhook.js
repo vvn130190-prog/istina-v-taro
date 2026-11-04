@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       }).catch(e => console.error("Ошибка отправки в таблицу:", e));
 
       // 2. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ ИИ
-      const aiResponse = await fetch("https://istina-v-taro2.vercel.app/api/tarot", {
+      const aiResponse = await fetch("https://istina-v-taro.ru/api/tarot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: question })
