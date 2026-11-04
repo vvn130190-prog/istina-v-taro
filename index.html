@@ -281,7 +281,7 @@ footer a:hover{color:var(--gold)}
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
-const TAROT_FUNCTION_URL = 'https://istina-v-taro2.vercel.app/api/tarot';
+const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
 const dailyCards = [
   { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/RWS_Tarot_00_Fool.jpg/500px-RWS_Tarot_00_Fool.jpg" },
   { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/RWS_Tarot_01_Magician.jpg/500px-RWS_Tarot_01_Magician.jpg" },
@@ -464,8 +464,7 @@ async function submitPayment(e) {
     if (currentPackage.includes("299")) amount = "299.00";
     if (currentPackage.includes("499")) amount = "499.00";
 
-    const res = await fetch('https://istina-v-taro2.vercel.app/api/create-payment', {
-      method: 'POST',
+const res = await fetch('https://istina-v-taro.ru/api/create-payment', { method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         packageName: currentPackage,
@@ -514,7 +513,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const checkStatus = async () => {
       attempts++;
       try {
-        const res = await fetch('https://istina-v-taro2.vercel.app/api/check-payment', {
+        const res = await fetch('https://istina-v-taro.ru/api/check-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: orderId })
