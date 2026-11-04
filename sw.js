@@ -1,36 +1,34 @@
+const CACHE_NAME = 'istina-v-taro-v2';
 
-const CACHE_NAME = "istina-v-taro-v1";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./icons/icon.svg"
-];
-
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
+self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
 });
 
-self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+self.addEventListener('fetch', (event) => {
+  // Для запросов к API (оплата, ИИ) — не кэшируем, всегда идем в сеть
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    (async () => {
+      try {
+        // Пытаемся загрузить из сети
+        const response = await fetch(event.request);
+        return response;
+      } catch (error) {
+        // Если сети нет — пытаемся взять из кэша
+        const cached = await caches.match(event.request);
+        if (cached) {
+          return cached;
+        }
+        // Если ничего нет — возвращаем ошибку (но это лучше, чем падение)
+        return new Response('Offline', { status: 503 });
+      }
+    })()
   );
 });
