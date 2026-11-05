@@ -372,7 +372,6 @@ function renderDailyCard() {
   }
 }
 
-// Глобальная функция для onclick в HTML
 window.flipCard = function () {
   renderDailyCard();
 };
@@ -551,12 +550,12 @@ window.submitPayment = function (e) {
 
 /* ============================================================
    7. ИНИЦИАЛИЗАЦИЯ
-   ==document.addEventListener('DOMContentLoaded', () => {
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
   currentDailyCard = getDailyCard();
   loadReadings();
 });
 
-// На случай, если DOM уже загружен (скрипт в конце body)
 if (document.readyState !== 'loading') {
   currentDailyCard = getDailyCard();
   loadReadings();
