@@ -116,23 +116,17 @@ footer a:hover{color:var(--gold)}
       <p>Подумай о том, что сейчас занимает твои мысли, и открой карту для размышления.</p>
     </div>
     <div class="card daily-card" style="text-align:center; padding:24px;">
-      
       <div id="card-container" onclick="flipCard()" style="cursor:pointer; display:inline-block; width:100%; max-width:260px; min-height:400px; position:relative;">
-        
         <div id="card-back" style="width:100%; min-height:400px; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25);">
           <div style="font-size:60px; color:#B99A5B; margin-bottom:10px;">✧</div>
           <div style="font-family:Georgia, serif; font-size:18px; color:#B99A5B; letter-spacing:2px;">КАРТА ДНЯ</div>
           <div style="font-family:Georgia, serif; font-size:14px; color:#C8AC72; letter-spacing:2px; margin-top:10px;">Нажми на меня ✧</div>
         </div>
-
         <div id="card-front" style="display:none; width:100%; min-height:400px; background:#FFF; border:3px solid #B99A5B; border-radius:12px; box-shadow: 0 8px 24px rgba(185,154,91,0.25); padding:10px; box-sizing:border-box;">
           <div id="card-image" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
         </div>
-
       </div>
-
       <div id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px; line-height:1.6; padding:0 10px; min-height:80px;"></div>
-
     </div>
   </div>
 </section>
@@ -224,14 +218,11 @@ footer a:hover{color:var(--gold)}
     <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="/oferta.html">Оферта</a> · <a href="/rekvizity.html">Реквизиты</a></p>
   </div>
 </section>
-
-<!-- Всплывающее окно для оплаты -->
 <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
   <div style="background:#fff; padding:30px; border-radius:14px; max-width:400px; width:90%; position:relative;">
     <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
     <h3 style="margin-top:0;">Оформление расклада</h3>
     <p style="color:#777; font-size:14px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
-    
     <form id="payment-form" onsubmit="submitPayment(event)">
       <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
       <input type="text" id="pay-contact" placeholder="Telegram или Email для связи" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
@@ -313,7 +304,6 @@ let isFlipped = false;
 function flipCard() {
   const cardBack = document.getElementById('card-back');
   const cardFront = document.getElementById('card-front');
-  
   cardBack.style.display = 'none';
   cardFront.style.display = 'flex';
   
@@ -331,8 +321,7 @@ function flipCard() {
   }
   
   document.getElementById('daily-meaning').innerHTML = 
-    '<strong style="display:block; font-size:20px; color:#B99A5B; margin-bottom:8px;">' + card.name + '</strong>' + 
-    card.meaning;
+    '<strong style="display:block; font-size:20px; color:#B99A5B; margin-bottom:8px;">' + card.name + '</strong>' + card.meaning;
   
   const img = new Image();
   img.src = card.image;
@@ -349,6 +338,7 @@ function flipCard() {
     document.getElementById('card-image').innerHTML = '<p style="color:#777; font-size:12px;">Картинка загружается...</p>';
   };
 }
+
 const voiceBtn=document.getElementById('voice-btn');
 const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SpeechRec){ voiceBtn.disabled=true; voiceBtn.textContent='🎤 Не поддерживается'; }
@@ -361,6 +351,7 @@ else{
   rec.onerror=()=>{ listening=false; voiceBtn.textContent='🎤 Голосом'; };
   rec.onresult=(e)=>{ let text=''; for(let i=0;i<e.results.length;i++) text+=e.results[i][0].transcript; const ta=document.getElementById('question'); ta.value=(ta.value?ta.value+' ':'')+text.trim(); };
 }
+
 const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
 
 let isFollowup = false; 
@@ -436,7 +427,6 @@ function renderReadings(){
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 renderReadings();
 
-// --- ЛОГИКА ОПЛАТЫ ---
 let currentPackage = '';
 
 function openPaymentForm(pkgName) {
@@ -464,7 +454,7 @@ async function submitPayment(e) {
     if (currentPackage.includes("299")) amount = "299.00";
     if (currentPackage.includes("499")) amount = "499.00";
 
-const res = await fetch('https://istina-v-taro.ru/api/create-payment', { method: 'POST',
+    const res = await fetch('https://istina-v-taro.ru/api/create-payment', { method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         packageName: currentPackage,
@@ -490,7 +480,6 @@ const res = await fetch('https://istina-v-taro.ru/api/create-payment', { method:
   }
 }
 
-// --- ПРОВЕРКА ОПЛАТЫ ПРИ ЗАГРУЗКЕ ---
 window.addEventListener('DOMContentLoaded', async () => {
   const savedOrderId = localStorage.getItem('lastOrderId');
   const urlParams = new URLSearchParams(window.location.search);
@@ -545,7 +534,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// --- ОЗВУЧИВАНИЕ РАСКЛАДА ---
 let currentSpeech = null;
 
 function speakAnswer(text) {
