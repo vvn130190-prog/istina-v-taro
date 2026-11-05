@@ -226,8 +226,12 @@ footer a:hover{color:var(--gold)}
     <form id="payment-form" onsubmit="submitPayment(event)">
       <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
       <input type="text" id="pay-contact" placeholder="Telegram или Email для связи" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
-      <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
-      <button type="submit" class="btn" style="width:100%;">Отправить заявку</button>
+     <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+
+<!-- ВСТАВИТЬ ВОТ ЭТУ КНОПКУ: -->
+<button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
+
+<button type="submit" class="btn" style="width:100%;">Отправить заявку</button>
     </form>
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
@@ -539,35 +543,72 @@ if (aiForm) {
 }
 
 /* ============================================================
-   5. ГОЛОСОВОЙ ВВОД
+   5. ГОЛОСОВОЙ ВВОД (для ИИ-чата и для окна оплаты)
    ============================================================ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+// Универсальная функция запуска микрофона
+function startVoiceInput(targetInputId, buttonElement, statusElement) {
+  if (!SR) {
+    alert('Ваш браузер не поддерживает голосовой ввод. Используйте Chrome или Safari.');
+    return;
+  }
+
+  const recognition = new SR();
+  recognition.lang = 'ru-RU';
+  recognition.interimResults = false;
+  
+  const originalText = buttonElement.textContent;
+  buttonElement.disabled = true;
+  buttonElement.textContent = '🎤 Слушаю...';
+  if (statusElement) showMessage(statusElement, 'Говорите...');
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    const input = document.getElementById(targetInputId);
+    if (input) {
+      input.value = input.value ? (input.value + ' ' + text).trim() : text.trim();
+    }
+    if (statusElement) showMessage(statusElement, '');
+  };
+
+  recognition.onerror = () => {
+    if (statusElement) showMessage(statusElement, 'Не удалось распознать речь.', true);
+  };
+
+  recognition.onend = () => {
+    buttonElement.disabled = false;
+    buttonElement.textContent = originalText;
+  };
+
+  recognition.start();
+}
+
+// 1. Привязка кнопки в ИИ-чате
 const voiceBtn = document.getElementById('voice-btn');
 if (voiceBtn) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    voiceBtn.style.display = 'none';
+    voiceBtn.style.display = 'none'; // Скрываем, если браузер не поддерживает
   } else {
     voiceBtn.addEventListener('click', () => {
-      if (getFreeQuestionsCount() >= 2) return;
-      
-      const recognition = new SR();
-      recognition.lang = 'ru-RU';
-      recognition.interimResults = false;
-      voiceBtn.disabled = true;
-      showMessage(aiMessage, 'Слушаю…');
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        const q = document.getElementById('question');
-        q.value = (q.value + ' ' + text).trim();
-        showMessage(aiMessage, '');
-      };
-      recognition.onerror = () => showMessage(aiMessage, 'Не удалось распознать речь.', true);
-      recognition.onend = () => { voiceBtn.disabled = false; };
-      recognition.start();
+      if (getFreeQuestionsCount() >= 2) return; // Блокируем, если лимит исчерпан
+      startVoiceInput('question', voiceBtn, aiMessage);
     });
   }
 }
 
+// 2. Привязка кнопки в окне оплаты
+const payVoiceBtn = document.getElementById('pay-voice-btn');
+if (payVoiceBtn) {
+  if (!SR) {
+    payVoiceBtn.style.display = 'none';
+  } else {
+    payVoiceBtn.addEventListener('click', () => {
+      // Записываем голос прямо в поле pay-question
+      startVoiceInput('pay-question', payVoiceBtn, document.getElementById('pay-message'));
+    });
+  }
+}
 /* ============================================================
    6. ОПЛАТА / ЗАЯВКА
    ============================================================ */
