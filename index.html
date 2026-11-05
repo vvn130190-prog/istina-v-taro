@@ -319,6 +319,15 @@ function showMessage(el, text, isError = false) {
   el.style.color = isError ? '#c0392b' : '';
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 /* ============================================================
    3. КАРТА ДНЯ
    ============================================================ */
@@ -377,7 +386,7 @@ window.flipCard = function () {
 };
 
 /* ============================================================
-   4. ИИ-РАСКЛАД
+   4. ИИ-РАСКЛАД И ЛИМИТЫ
    ============================================================ */
 const aiForm = document.getElementById('ai-form');
 const aiSubmit = document.getElementById('ai-submit');
@@ -398,14 +407,11 @@ function incrementFreeQuestionsCount() {
 
 function updateFormState() {
   const count = getFreeQuestionsCount();
-  const limit = 2; // 1 вопрос + 1 уточнение
+  const limit = 2; // 1 основной + 1 уточнение
 
   if (count >= limit) {
-    // Лимит исчерпан
-    if (aiSubmit) {
-      aiSubmit.style.display = 'none'; // Скрываем обычную кнопку
-    }
-    // Показываем кнопку оплаты, если ее еще нет
+    if (aiSubmit) aiSubmit.style.display = 'none'; 
+    
     if (!document.getElementById('ai-pay-btn')) {
       const payBtn = document.createElement('button');
       payBtn.type = 'button';
@@ -413,17 +419,13 @@ function updateFormState() {
       payBtn.className = 'btn';
       payBtn.textContent = 'Оплатить 3-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
-      payBtn.onclick = () => {
-        // Открываем вашу существующую модалку оплаты
-        window.openPaymentForm('Дополнительный вопрос — 99 ₽');
-      };
+      payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽');
       aiSubmit.parentNode.appendChild(payBtn);
     }
     if (aiMessage) {
       showMessage(aiMessage, 'Бесплатные вопросы (1 + 1 уточнение) исчерпаны. Для продолжения оформите расклад.', true);
     }
   } else {
-    // Лимит не исчерпан — возвращаем форму в обычное состояние
     if (aiSubmit) {
       aiSubmit.style.display = 'inline-block';
       aiSubmit.disabled = false;
@@ -434,7 +436,6 @@ function updateFormState() {
   }
 }
 
-// Загрузка истории
 function loadReadings() {
   if (!readingsList) return;
   let list = [];
@@ -464,21 +465,10 @@ function saveReading(question, answer) {
   loadReadings();
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// Обработка отправки формы
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Проверка на лимит перед отправкой
     if (getFreeQuestionsCount() >= 2) {
       updateFormState();
       return;
@@ -532,13 +522,9 @@ if (aiForm) {
       }
 
       saveReading(question, answer);
-      
-      // Увеличиваем счетчик успешных вопросов
       incrementFreeQuestionsCount();
-
-      if (getFreeQuestionsCount() < 2) {
-        showMessage(aiMessage, '');
-      }
+      
+      if (getFreeQuestionsCount() < 2) showMessage(aiMessage, '');
       
     } catch (err) {
       console.error(err);
@@ -558,7 +544,7 @@ if (voiceBtn) {
     voiceBtn.style.display = 'none';
   } else {
     voiceBtn.addEventListener('click', () => {
-      if (getFreeQuestionsCount() >= 2) return; // Блокируем голос, если лимит
+      if (getFreeQuestionsCount() >= 2) return;
       
       const recognition = new SR();
       recognition.lang = 'ru-RU';
@@ -607,9 +593,6 @@ window.submitPayment = function (e) {
     return;
   }
 
-  // Здесь можно отправить заявку на сервер:
-  // await fetch('/api/orders', {method:'POST', body: JSON.stringify({...})});
-
   if (msg) {
     msg.textContent = 'Заявка принята! Свяжемся с тобой в ближайшее время. ✧';
     msg.style.color = '';
@@ -624,11 +607,14 @@ window.submitPayment = function (e) {
 document.addEventListener('DOMContentLoaded', () => {
   currentDailyCard = getDailyCard();
   loadReadings();
-  updateFormState(); // <--- Добавить эту строку
+  updateFormState();
 });
 
 if (document.readyState !== 'loading') {
   currentDailyCard = getDailyCard();
   loadReadings();
-  updateFormState(); // <--- И эту строку
+  updateFormState();
 }
+</script>
+</body>
+</html>
