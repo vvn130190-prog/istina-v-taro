@@ -234,8 +234,7 @@ footer a:hover{color:var(--gold)}
       <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
       
       <button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
-      <button type="button" id="pay-submit-btn" class="btn" style="width:100%;">Перейти к оплате</button>
-    </div>
+<button type="button" id="pay-submit-btn" class="btn" style="width:100%;" onclick="submitPayment()">Перейти к оплате</button>    </div>
     
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
@@ -626,6 +625,19 @@ window.openPaymentForm = function (packageName) {
   
   if (amountInput) amountInput.value = amount;
 
+  // Сбрасываем окно в исходное состояние (если открывали до этого)
+  document.getElementById('pay-name').style.display = 'block';
+  document.getElementById('pay-contact').style.display = 'block';
+  document.getElementById('pay-question').style.display = 'block';
+  document.getElementById('pay-voice-btn').style.display = 'block';
+  const btn = document.getElementById('pay-submit-btn');
+  if (btn) {
+    btn.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Перейти к оплате';
+  }
+  document.getElementById('payment-widget-container').innerHTML = '';
+
   if (modal) modal.style.display = 'flex';
 };
 
@@ -636,14 +648,13 @@ window.closePaymentForm = function () {
   if (msg) msg.textContent = '';
 };
 
-window.submitPayment = async function (e) {
-  e.preventDefault();
+window.submitPayment = async function () {
   const name = document.getElementById('pay-name').value.trim();
   const contact = document.getElementById('pay-contact').value.trim();
   const question = document.getElementById('pay-question').value.trim();
   const amount = document.getElementById('pay-amount').value;
   const msg = document.getElementById('pay-message');
-  const submitBtn = document.querySelector('#payment-form button[type="submit"]');
+  const submitBtn = document.getElementById('pay-submit-btn');
 
   if (!name || !contact || !question) {
     if (msg) { msg.textContent = 'Заполни все поля.'; msg.style.color = '#c0392b'; }
@@ -652,36 +663,48 @@ window.submitPayment = async function (e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Переход к оплате...';
+    submitBtn.textContent = 'Загрузка формы...';
   }
-  if (msg) { msg.textContent = ''; msg.style.color = ''; }
+  if (msg) { msg.textContent = ''; }
 
   try {
-    const response = await fetch(PAYMENT_API_URL, {
+    const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name,
-        contact: contact,
-        question: question,
-        amount: Number(amount)
-      })
+      body: JSON.stringify({ name, contact, question, amount: Number(amount) })
     });
 
-    if (!response.ok) throw new Error('Ошибка сети');
-
     const data = await response.json();
-    
-    if (data.confirmation_url) {
-      window.location.href = data.confirmation_url;
-    } else {
-      throw new Error('Сервер не вернул ссылку на оплату');
+
+    if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
+
+    if (typeof window.YooMoneyCheckoutWidget === 'undefined') {
+        throw new Error('Библиотека ЮKassa не загрузилась. Проверьте интернет.');
     }
+
+    const checkout = new window.YooMoneyCheckoutWidget({
+      confirmation_token: data.confirmation_token,
+      return_url: 'https://istina-v-taro.ru',
+      error_callback: function(error) {
+        console.error('Ошибка виджета:', error);
+        if (msg) { msg.textContent = 'Ошибка оплаты. Попробуйте позже.'; msg.style.color = '#c0392b'; }
+      }
+    });
+
+    // Скрываем поля ввода
+    document.getElementById('pay-name').style.display = 'none';
+    document.getElementById('pay-contact').style.display = 'none';
+    document.getElementById('pay-question').style.display = 'none';
+    document.getElementById('pay-voice-btn').style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+
+    // Показываем виджет оплаты
+    checkout.render('payment-widget-container');
 
   } catch (err) {
     console.error(err);
     if (msg) {
-      msg.textContent = 'Ошибка при создании платежа. Попробуйте позже.';
+      msg.textContent = err.message || 'Ошибка при создании платежа.';
       msg.style.color = '#c0392b';
     }
     if (submitBtn) {
