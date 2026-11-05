@@ -385,6 +385,56 @@ const aiMessage = document.getElementById('ai-message');
 const aiAnswer = document.getElementById('ai-answer');
 const readingsList = document.getElementById('readings-list');
 
+// --- Учет бесплатных вопросов ---
+function getFreeQuestionsCount() {
+  return parseInt(localStorage.getItem('freeQuestionsCount') || '0', 10);
+}
+
+function incrementFreeQuestionsCount() {
+  const count = getFreeQuestionsCount() + 1;
+  localStorage.setItem('freeQuestionsCount', count);
+  updateFormState();
+}
+
+function updateFormState() {
+  const count = getFreeQuestionsCount();
+  const limit = 2; // 1 вопрос + 1 уточнение
+
+  if (count >= limit) {
+    // Лимит исчерпан
+    if (aiSubmit) {
+      aiSubmit.style.display = 'none'; // Скрываем обычную кнопку
+    }
+    // Показываем кнопку оплаты, если ее еще нет
+    if (!document.getElementById('ai-pay-btn')) {
+      const payBtn = document.createElement('button');
+      payBtn.type = 'button';
+      payBtn.id = 'ai-pay-btn';
+      payBtn.className = 'btn';
+      payBtn.textContent = 'Оплатить 3-й вопрос — 99 ₽';
+      payBtn.style.width = '100%';
+      payBtn.onclick = () => {
+        // Открываем вашу существующую модалку оплаты
+        window.openPaymentForm('Дополнительный вопрос — 99 ₽');
+      };
+      aiSubmit.parentNode.appendChild(payBtn);
+    }
+    if (aiMessage) {
+      showMessage(aiMessage, 'Бесплатные вопросы (1 + 1 уточнение) исчерпаны. Для продолжения оформите расклад.', true);
+    }
+  } else {
+    // Лимит не исчерпан — возвращаем форму в обычное состояние
+    if (aiSubmit) {
+      aiSubmit.style.display = 'inline-block';
+      aiSubmit.disabled = false;
+    }
+    const payBtn = document.getElementById('ai-pay-btn');
+    if (payBtn) payBtn.remove();
+    if (aiMessage) showMessage(aiMessage, '');
+  }
+}
+
+// Загрузка истории
 function loadReadings() {
   if (!readingsList) return;
   let list = [];
@@ -423,9 +473,17 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// Обработка отправки формы
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // Проверка на лимит перед отправкой
+    if (getFreeQuestionsCount() >= 2) {
+      updateFormState();
+      return;
+    }
+
     const question = document.getElementById('question').value.trim();
     if (!question) {
       showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true);
@@ -463,6 +521,10 @@ if (aiForm) {
 
         aiAnswer.querySelectorAll('.followup-btn').forEach(btn => {
           btn.addEventListener('click', () => {
+            if (getFreeQuestionsCount() >= 2) {
+              updateFormState();
+              return;
+            }
             document.getElementById('question').value = btn.textContent;
             aiForm.requestSubmit();
           });
@@ -470,11 +532,17 @@ if (aiForm) {
       }
 
       saveReading(question, answer);
-      showMessage(aiMessage, '');
+      
+      // Увеличиваем счетчик успешных вопросов
+      incrementFreeQuestionsCount();
+
+      if (getFreeQuestionsCount() < 2) {
+        showMessage(aiMessage, '');
+      }
+      
     } catch (err) {
       console.error(err);
       showMessage(aiMessage, 'Не удалось получить расклад. Попробуй ещё раз чуть позже.', true);
-    } finally {
       aiSubmit.disabled = false;
     }
   });
@@ -490,6 +558,8 @@ if (voiceBtn) {
     voiceBtn.style.display = 'none';
   } else {
     voiceBtn.addEventListener('click', () => {
+      if (getFreeQuestionsCount() >= 2) return; // Блокируем голос, если лимит
+      
       const recognition = new SR();
       recognition.lang = 'ru-RU';
       recognition.interimResults = false;
@@ -554,12 +624,11 @@ window.submitPayment = function (e) {
 document.addEventListener('DOMContentLoaded', () => {
   currentDailyCard = getDailyCard();
   loadReadings();
+  updateFormState(); // <--- Добавить эту строку
 });
 
 if (document.readyState !== 'loading') {
   currentDailyCard = getDailyCard();
   loadReadings();
+  updateFormState(); // <--- И эту строку
 }
-</script>
-</body>
-</html>
