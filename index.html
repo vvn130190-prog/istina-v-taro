@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F8F6F0">
 <title>Истина в Таро — ответы внутри тебя</title>
-<meta name="description" content="Таро-расклады и ИИ-консультация по авторской методике. Карта дня бесплатно.">
+  <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script><meta name="description" content="Таро-расклады и ИИ-консультация по авторской методике. Карта дня бесплатно.">
 <style>
 :root{--bg:#F8F6F0;--panel:#FFF;--gold:#B99A5B;--gold-light:#C8AC72;--text:#29252A;--muted:#77717A;--line:rgba(185,154,91,.32);--radius:14px;--shadow:0 6px 28px rgba(185,154,91,.10)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -224,18 +224,22 @@ footer a:hover{color:var(--gold)}
     <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
     <h3 style="margin-top:0;">Оформление расклада</h3>
     <p style="color:#777; font-size:14px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
-    <form id="payment-form" onsubmit="submitPayment(event)">
-      <input type="hidden" id="pay-amount" value="">
+    
+    <div id="payment-form-wrap">
+      <!-- Сюда встанет виджет ЮKassa -->
+      <div id="payment-widget-container" style="margin-bottom: 15px;"></div> 
+      
       <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
       <input type="text" id="pay-contact" placeholder="Telegram или Email для связи" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
       <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+      
       <button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
-      <button type="submit" class="btn" style="width:100%;">Перейти к оплате</button>
-    </form>
+      <button type="button" id="pay-submit-btn" class="btn" style="width:100%;">Перейти к оплате</button>
+    </div>
+    
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
 </div>
-
 <section class="section" id="reviews">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
