@@ -655,6 +655,9 @@ window.submitPayment = async function () {
     return;
   }
 
+  // СОХРАНЯЕМ ВОПРОС В ПАМЯТЬ БРАУЗЕРА ПЕРЕД ОПЛАТОЙ
+  localStorage.setItem('pendingPaidQuestion', question);
+
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Загрузка формы...';
@@ -671,10 +674,6 @@ window.submitPayment = async function () {
     const data = await response.json();
 
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
-
-    if (typeof window.YooMoneyCheckoutWidget === 'undefined') {
-        throw new Error('Библиотека ЮKassa не загрузилась. Проверьте интернет.');
-    }
 
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
@@ -706,19 +705,47 @@ window.submitPayment = async function () {
   }
 };
 /* ============================================================
-   7. ИНИЦИАЛИЗАЦИЯ
+   8. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
    ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  currentDailyCard = getDailyCard();
-  loadReadings();
-  updateFormState();
-});
+function checkPaidReading() {
+  const paidQuestion = localStorage.getItem('pendingPaidQuestion');
+  
+  if (paidQuestion) {
+    // Очищаем память, чтобы не показывать расклад при каждом обновлении
+    localStorage.removeItem('pendingPaidQuestion');
+    
+    // Плавно скроллим к блоку ИИ
+    document.getElementById('ai-tarot').scrollIntoView({ behavior: 'smooth' });
+    
+    // Вставляем вопрос в поле ввода
+    document.getElementById('question').value = paidQuestion;
+    
+    // Выводим сообщение
+    showMessage(aiMessage, 'Оплата прошла успешно! Карты уже раскладываются...');
+    
+    // Имитируем отправку формы, чтобы ИИ выдал ответ
+    const oldCount = localStorage.getItem('freeQuestionsCount');
+    localStorage.setItem('freeQuestionsCount', '0'); 
+    
+    // Отправляем форму
+    setTimeout(() => {
+      if (aiForm) {
+        aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+      // Возвращаем лимит обратно
+      setTimeout(() => {
+        localStorage.setItem('freeQuestionsCount', oldCount);
+        updateFormState();
+      }, 5000);
+    }, 500);
+  }
+}
 
+// Запускаем проверку при загрузке страницы
+document.addEventListener('DOMContentLoaded', checkPaidReading);
 if (document.readyState !== 'loading') {
-  currentDailyCard = getDailyCard();
-  loadReadings();
-  updateFormState();
+  checkPaidReading();
 }
 </script>
-</body>
+  </body>
 </html>
