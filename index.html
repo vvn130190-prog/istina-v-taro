@@ -272,7 +272,11 @@ footer a:hover{color:var(--gold)}
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 <script>
+/* ============================================================
+   1. КОНСТАНТЫ И ДАННЫЕ
+   ============================================================ */
 const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
+
 const dailyCards = [
   { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/RWS_Tarot_00_Fool.jpg/500px-RWS_Tarot_00_Fool.jpg" },
   { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/RWS_Tarot_01_Magician.jpg/500px-RWS_Tarot_01_Magician.jpg" },
@@ -297,289 +301,270 @@ const dailyCards = [
   { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/RWS_Tarot_20_Judgement.jpg/500px-RWS_Tarot_20_Judgement.jpg" },
   { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/RWS_Tarot_21_World.jpg/500px-RWS_Tarot_21_World.jpg" }
 ];
-function todayStr(){ return new Date().toLocaleDateString('ru-RU'); }
 
+/* ============================================================
+   2. УТИЛИТЫ
+   ============================================================ */
+function todayStr() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function showMessage(el, text, isError = false) {
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = isError ? '#c0392b' : '';
+}
+
+/* ============================================================
+   3. КАРТА ДНЯ
+   ============================================================ */
+let currentDailyCard = null;
 let isFlipped = false;
 
-function flipCard() {
-  const cardBack = document.getElementById('card-back');
-  const cardFront = document.getElementById('card-front');
-  cardBack.style.display = 'none';
-  cardFront.style.display = 'flex';
-  
+function getDailyCard() {
   const today = todayStr();
   let saved = null;
-  try { saved = JSON.parse(localStorage.getItem('dailyTarotCard')); } catch(e) {}
-  
+  try { saved = JSON.parse(localStorage.getItem('dailyTarotCard')); } catch (e) {}
+
   let card = null;
   if (saved && saved.date === today) {
     card = dailyCards.find(c => c.name === saved.card);
   }
   if (!card) {
     card = dailyCards[Math.floor(Math.random() * dailyCards.length)];
-    try { localStorage.setItem('dailyTarotCard', JSON.stringify({date: today, card: card.name})); } catch(e) {}
+    try {
+      localStorage.setItem('dailyTarotCard', JSON.stringify({ date: today, card: card.name }));
+    } catch (e) {
+      console.warn('Не удалось сохранить карту дня:', e);
+    }
   }
-  
-  document.getElementById('daily-meaning').innerHTML = 
-    '<strong style="display:block; font-size:20px; color:#B99A5B; margin-bottom:8px;">' + card.name + '</strong>' + card.meaning;
-  
-  const img = new Image();
-  img.src = card.image;
-  img.style.maxWidth = '100%';
-  img.style.maxHeight = '100%';
-  img.style.objectFit = 'contain';
-  img.style.borderRadius = '8px';
-  img.onload = function() {
-    const cardImage = document.getElementById('card-image');
-    cardImage.innerHTML = '';
-    cardImage.appendChild(img);
-  };
-  img.onerror = function() {
-    document.getElementById('card-image').innerHTML = '<p style="color:#777; font-size:12px;">Картинка загружается...</p>';
-  };
+  return card;
 }
 
-const voiceBtn=document.getElementById('voice-btn');
-const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SpeechRec){ voiceBtn.disabled=true; voiceBtn.textContent='🎤 Не поддерживается'; }
-else{
-  const rec=new SpeechRec(); rec.lang='ru-RU'; rec.interimResults=false;
-  let listening=false;
-  voiceBtn.addEventListener('click',()=>{ if(listening){ rec.stop(); return; } try{ rec.start(); }catch(e){} });
-  rec.onstart=()=>{ listening=true; voiceBtn.textContent='🎤 Слушаю…'; };
-  rec.onend=()=>{ listening=false; voiceBtn.textContent='🎤 Голосом'; };
-  rec.onerror=()=>{ listening=false; voiceBtn.textContent='🎤 Голосом'; };
-  rec.onresult=(e)=>{ let text=''; for(let i=0;i<e.results.length;i++) text+=e.results[i][0].transcript; const ta=document.getElementById('question'); ta.value=(ta.value?ta.value+' ':'')+text.trim(); };
-}
+function renderDailyCard() {
+  if (isFlipped || !currentDailyCard) return;
+  isFlipped = true;
 
-const aiForm=document.getElementById('ai-form'), aiMsg=document.getElementById('ai-message'), aiAnswer=document.getElementById('ai-answer'), aiSubmit=document.getElementById('ai-submit');
+  const cardBack = document.getElementById('card-back');
+  const cardFront = document.getElementById('card-front');
+  const cardImage = document.getElementById('card-image');
+  const meaningEl = document.getElementById('daily-meaning');
+  if (!cardBack || !cardFront || !cardImage) return;
 
-let isFollowup = false; 
-let followupCount = 0;
+  cardImage.innerHTML = `
+    <img src="${currentDailyCard.image}" alt="${currentDailyCard.name}"
+         style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+  `;
+  cardBack.style.display = 'none';
+  cardFront.style.display = 'flex';
 
-function freeUsedToday(){ 
-  try{ return JSON.parse(localStorage.getItem('aiFreeDate')||'null')===todayStr(); }catch(e){ return false; } 
-}
-function markFreeUsed(){ 
-  try{ localStorage.setItem('aiFreeDate',JSON.stringify(todayStr())); }catch(e){} 
-}
-
-function renderAnswer(answer, followups){
-  let html='<p class="answer-text">'+escapeHtml(answer)+'</p>';
-  if(Array.isArray(followups) && followups.length){
-    html+='<div class="followups-title">Уточни, если хочется глубже</div>';
-    followups.forEach(f=>{ html+='<button type="button" class="followup-btn" data-followup="'+escapeHtml(f)+'">✧ '+escapeHtml(f)+'</button>'; });
+  if (meaningEl) {
+    meaningEl.innerHTML = `
+      <div style="font-family:Georgia,serif; font-size:22px; color:#29252A; margin-bottom:10px;">
+        ${currentDailyCard.name}
+      </div>
+      <div>${currentDailyCard.meaning}</div>
+    `;
   }
-  aiAnswer.innerHTML=html; aiAnswer.classList.add('visible');
-  
-  aiAnswer.querySelectorAll('[data-followup]').forEach(btn=>{ 
-    btn.addEventListener('click',()=>{ 
-      if(followupCount >= 1) { 
-        openPaymentForm('Следующий вопрос — 99 ₽');
-        return;
+}
+
+// Глобальная функция для onclick в HTML
+window.flipCard = function () {
+  renderDailyCard();
+};
+
+/* ============================================================
+   4. ИИ-РАСКЛАД
+   ============================================================ */
+const aiForm = document.getElementById('ai-form');
+const aiSubmit = document.getElementById('ai-submit');
+const aiMessage = document.getElementById('ai-message');
+const aiAnswer = document.getElementById('ai-answer');
+const readingsList = document.getElementById('readings-list');
+
+function loadReadings() {
+  if (!readingsList) return;
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
+  if (!list.length) {
+    readingsList.innerHTML = '<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>';
+    return;
+  }
+  readingsList.innerHTML = list
+    .slice()
+    .reverse()
+    .map(item => `
+      <div class="reading-item">
+        <div class="date">${item.date}</div>
+        <div class="q">${escapeHtml(item.question)}</div>
+        <div class="a">${escapeHtml(item.answer).slice(0, 300)}${item.answer.length > 300 ? '…' : ''}</div>
+      </div>
+    `)
+    .join('');
+}
+
+function saveReading(question, answer) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
+  list.push({ date: new Date().toLocaleString('ru-RU'), question, answer });
+  try { localStorage.setItem('myReadings', JSON.stringify(list)); } catch (e) {}
+  loadReadings();
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+if (aiForm) {
+  aiForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const question = document.getElementById('question').value.trim();
+    if (!question) {
+      showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true);
+      return;
+    }
+
+    aiSubmit.disabled = true;
+    showMessage(aiMessage, 'Карты раскладываются…');
+    if (aiAnswer) {
+      aiAnswer.classList.remove('visible');
+      aiAnswer.innerHTML = '';
+    }
+
+    try {
+      const resp = await fetch(TAROT_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      const answer = data.answer || data.text || 'Не удалось получить ответ.';
+      const followups = Array.isArray(data.followups) ? data.followups : [];
+
+      if (aiAnswer) {
+        aiAnswer.innerHTML = `
+          <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
+          ${followups.length ? `
+            <p class="followups-title">Можно уточнить</p>
+            ${followups.map(q => `<button type="button" class="followup-btn">${escapeHtml(q)}</button>`).join('')}
+          ` : ''}
+        `;
+        aiAnswer.classList.add('visible');
+
+        aiAnswer.querySelectorAll('.followup-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('question').value = btn.textContent;
+            aiForm.requestSubmit();
+          });
+        });
       }
-      followupCount++; 
-      isFollowup = true; 
-      document.getElementById('question').value=btn.dataset.followup; 
-      document.getElementById('ai-tarot').scrollIntoView({behavior:'smooth'}); 
-    }); 
+
+      saveReading(question, answer);
+      showMessage(aiMessage, '');
+    } catch (err) {
+      console.error(err);
+      showMessage(aiMessage, 'Не удалось получить расклад. Попробуй ещё раз чуть позже.', true);
+    } finally {
+      aiSubmit.disabled = false;
+    }
   });
 }
 
-aiForm.addEventListener('submit',async(e)=>{
-  e.preventDefault();
-  const q=document.getElementById('question').value.trim();
-  aiMsg.textContent=''; aiAnswer.classList.remove('visible'); aiAnswer.innerHTML='';
-  if(!q){ aiMsg.textContent='Пожалуйста, напиши свой вопрос.'; return; }
-  if(q.length<3){ aiMsg.textContent='Опиши ситуацию чуть подробнее.'; return; }
-  
-  if(!isFollowup && freeUsedToday()){ 
-    aiMsg.textContent='Бесплатный лимит (1 вопрос + 1 уточнение) на сегодня использован. Хотите глубже? Выберите полный расклад ниже →'; 
-    return; 
+/* ============================================================
+   5. ГОЛОСОВОЙ ВВОД
+   ============================================================ */
+const voiceBtn = document.getElementById('voice-btn');
+if (voiceBtn) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    voiceBtn.style.display = 'none';
+  } else {
+    voiceBtn.addEventListener('click', () => {
+      const recognition = new SR();
+      recognition.lang = 'ru-RU';
+      recognition.interimResults = false;
+      voiceBtn.disabled = true;
+      showMessage(aiMessage, 'Слушаю…');
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        const q = document.getElementById('question');
+        q.value = (q.value + ' ' + text).trim();
+        showMessage(aiMessage, '');
+      };
+      recognition.onerror = () => showMessage(aiMessage, 'Не удалось распознать речь.', true);
+      recognition.onend = () => { voiceBtn.disabled = false; };
+      recognition.start();
+    });
   }
-  
-  aiSubmit.disabled=true; aiMsg.textContent='ИИ размышляет…';
-  try{
-    const res=await fetch(TAROT_FUNCTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
-    const data=await res.json();
-    if(!res.ok || data.error){ aiMsg.textContent=data.error || 'Не удалось получить ответ.'; return; }
-    
-    renderAnswer(data.answer||'', data.followups||[]);
-    markFreeUsed(); 
-    saveReading(q, data.answer||''); 
-    aiMsg.textContent='';
-    isFollowup = false; 
-  }catch(err){ aiMsg.textContent='Не удалось получить ответ. Попробуй ещё раз.'; console.error(err); }
-  finally{ aiSubmit.disabled=false; }
-});
-
-function loadReadings(){ try{ return JSON.parse(localStorage.getItem('myReadings')||'[]'); }catch(e){ return []; } }
-function saveReading(q,a){ const list=loadReadings(); list.unshift({date:new Date().toLocaleString('ru-RU'),q,a}); try{ localStorage.setItem('myReadings',JSON.stringify(list.slice(0,30))); }catch(e){} renderReadings(); }
-function renderReadings(){ 
-  const list=loadReadings(); 
-  const el=document.getElementById('readings-list'); 
-  if(!list.length){ 
-    el.innerHTML='<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>'; 
-    return; 
-  } 
-  el.innerHTML=list.map(r=>'<div class="reading-item"><div class="date">'+r.date+'</div><div class="q">'+escapeHtml(r.q)+'</div><div class="a">'+escapeHtml(r.a)+'</div></div>').join('');
-}
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-renderReadings();
-
-let currentPackage = '';
-
-function openPaymentForm(pkgName) {
-  currentPackage = pkgName;
-  document.getElementById('selected-package-name').textContent = pkgName;
-  document.getElementById('payment-modal').style.display = 'flex';
-  document.getElementById('pay-message').textContent = '';
 }
 
-function closePaymentForm() {
-  document.getElementById('payment-modal').style.display = 'none';
-}
+/* ============================================================
+   6. ОПЛАТА / ЗАЯВКА
+   ============================================================ */
+window.openPaymentForm = function (packageName) {
+  const modal = document.getElementById('payment-modal');
+  const nameEl = document.getElementById('selected-package-name');
+  if (nameEl) nameEl.textContent = packageName;
+  if (modal) modal.style.display = 'flex';
+};
 
-async function submitPayment(e) {
+window.closePaymentForm = function () {
+  const modal = document.getElementById('payment-modal');
+  if (modal) modal.style.display = 'none';
+  const msg = document.getElementById('pay-message');
+  if (msg) msg.textContent = '';
+};
+
+window.submitPayment = function (e) {
   e.preventDefault();
-  const name = document.getElementById('pay-name').value;
-  const contact = document.getElementById('pay-contact').value;
-  const question = document.getElementById('pay-question').value;
+  const name = document.getElementById('pay-name').value.trim();
+  const contact = document.getElementById('pay-contact').value.trim();
+  const question = document.getElementById('pay-question').value.trim();
   const msg = document.getElementById('pay-message');
 
-  msg.textContent = 'Создаем платеж...';
-
-  try {
-    let amount = "99.00";
-    if (currentPackage.includes("299")) amount = "299.00";
-    if (currentPackage.includes("499")) amount = "499.00";
-
-    const res = await fetch('https://istina-v-taro.ru/api/create-payment', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        packageName: currentPackage,
-        amount: amount,
-        customerName: name,
-        customerContact: contact,
-        customerQuestion: question
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.confirmation_url) {
-      localStorage.setItem('lastOrderId', data.order_id);
-      localStorage.setItem('lastOrderQuestion', question);
-      window.location.href = data.confirmation_url;
-    } else {
-      msg.textContent = 'Ошибка: ' + (data.error || 'Не удалось создать платеж.');
-    }
-  } catch (err) {
-    msg.textContent = 'Ошибка соединения. Попробуй позже.';
-    console.error(err);
-  }
-}
-
-window.addEventListener('DOMContentLoaded', async () => {
-  const savedOrderId = localStorage.getItem('lastOrderId');
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderIdFromUrl = urlParams.get('order');
-  const orderId = orderIdFromUrl || savedOrderId;
-
-  if (orderId) {
-    const aiAnswerDiv = document.getElementById('ai-answer');
-    const aiMsg = document.getElementById('ai-message');
-    
-    if (aiAnswerDiv && aiMsg) {
-      aiAnswerDiv.innerHTML = '<p class="answer-text">Проверяем оплату и готовим ваш расклад... Пожалуйста, подождите.</p>';
-      aiAnswerDiv.classList.add('visible');
-      aiMsg.textContent = '';
-    }
-
-    let attempts = 0;
-    const maxAttempts = 20;
-
-    const checkStatus = async () => {
-      attempts++;
-      try {
-        const res = await fetch('https://istina-v-taro.ru/api/check-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: orderId })
-        });
-
-        const data = await res.json();
-
-        if (data.status === 'success' && data.answer) {
-          renderAnswer(data.answer, data.followups || []);
-          aiMsg.textContent = 'Оплата подтверждена! Ваш расклад готов.';
-          
-          const question = localStorage.getItem('lastOrderQuestion') || "Оплаченный вопрос";
-          saveReading(question, data.answer);
-          
-          localStorage.removeItem('lastOrderId');
-          localStorage.removeItem('lastOrderQuestion');
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else if (attempts < maxAttempts) {
-          setTimeout(checkStatus, 3000);
-        } else {
-          aiAnswerDiv.innerHTML = '<p class="answer-text">Расклад все еще готовится. Пожалуйста, обновите страницу через минуту.</p>';
-        }
-      } catch (err) {
-        if (attempts < maxAttempts) setTimeout(checkStatus, 3000);
-      }
-    };
-
-    checkStatus();
-  }
-});
-
-let currentSpeech = null;
-
-function speakAnswer(text) {
-  if (currentSpeech) {
-    window.speechSynthesis.cancel();
-    currentSpeech = null;
+  if (!name || !contact || !question) {
+    if (msg) { msg.textContent = 'Заполни все поля.'; msg.style.color = '#c0392b'; }
     return;
   }
 
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ru-RU';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+  // Здесь можно отправить заявку на сервер:
+  // await fetch('/api/orders', {method:'POST', body: JSON.stringify({...})});
 
-    utterance.onend = () => { currentSpeech = null; };
-    utterance.onerror = () => { currentSpeech = null; };
-
-    currentSpeech = utterance;
-    window.speechSynthesis.speak(utterance);
-  } else {
-    alert('Ваш браузер не поддерживает озвучивание.');
+  if (msg) {
+    msg.textContent = 'Заявка принята! Свяжемся с тобой в ближайшее время. ✧';
+    msg.style.color = '';
   }
-}
-
-const originalRenderAnswer = renderAnswer;
-renderAnswer = function(answer, followups) {
-  originalRenderAnswer(answer, followups);
-  
-  const answerDiv = document.getElementById('ai-answer');
-  if (answerDiv && answer) {
-    const speakBtn = document.createElement('button');
-    speakBtn.className = 'btn btn-outline';
-    speakBtn.style.marginTop = '10px';
-    speakBtn.style.width = '100%';
-    speakBtn.innerHTML = '🔊 Прослушать расклад';
-    speakBtn.onclick = () => speakAnswer(answer);
-    answerDiv.appendChild(speakBtn);
-  }
+  document.getElementById('payment-form').reset();
+  setTimeout(() => window.closePaymentForm(), 2500);
 };
 
-if('serviceWorker' in navigator){ 
-  window.addEventListener('load',()=>{ 
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:',err)); 
-  }); 
+/* ============================================================
+   7. ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  currentDailyCard = getDailyCard();
+  loadReadings();
+});
+
+// На случай, если DOM уже загружен (скрипт в конце body)
+if (document.readyState !== 'loading') {
+  currentDailyCard = getDailyCard();
+  loadReadings();
 }
+</}   // ← закрыть todayStr()
+}   // ← закрыть renderDailyCard()
+}   // ← закрыть flipCard()
 </script>
 </body>
-</html>
+</html>>
