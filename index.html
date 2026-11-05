@@ -218,24 +218,24 @@ footer a:hover{color:var(--gold)}
     <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="/oferta.html">Оферта</a> · <a href="/rekvizity.html">Реквизиты</a></p>
   </div>
 </section>
+
 <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
   <div style="background:#fff; padding:30px; border-radius:14px; max-width:400px; width:90%; position:relative;">
     <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
     <h3 style="margin-top:0;">Оформление расклада</h3>
     <p style="color:#777; font-size:14px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
     <form id="payment-form" onsubmit="submitPayment(event)">
+      <input type="hidden" id="pay-amount" value="">
       <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
       <input type="text" id="pay-contact" placeholder="Telegram или Email для связи" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
-     <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
-
-<!-- ВСТАВИТЬ ВОТ ЭТУ КНОПКУ: -->
-<button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
-
-<button type="submit" class="btn" style="width:100%;">Отправить заявку</button>
+      <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+      <button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
+      <button type="submit" class="btn" style="width:100%;">Перейти к оплате</button>
     </form>
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
 </div>
+
 <section class="section" id="reviews">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
@@ -280,6 +280,7 @@ footer a:hover{color:var(--gold)}
    1. КОНСТАНТЫ И ДАННЫЕ
    ============================================================ */
 const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
+const PAYMENT_API_URL = 'https://istina-v-taro.ru/api/create-payment'; // <--- АДРЕС ДЛЯ ОПЛАТЫ
 
 const dailyCards = [
   { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/RWS_Tarot_00_Fool.jpg/500px-RWS_Tarot_00_Fool.jpg" },
@@ -398,7 +399,6 @@ const aiMessage = document.getElementById('ai-message');
 const aiAnswer = document.getElementById('ai-answer');
 const readingsList = document.getElementById('readings-list');
 
-// --- Учет бесплатных вопросов ---
 function getFreeQuestionsCount() {
   return parseInt(localStorage.getItem('freeQuestionsCount') || '0', 10);
 }
@@ -445,7 +445,6 @@ function loadReadings() {
   let list = [];
   try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
   
-  // Фильтруем битые записи (если вдруг answer пустой)
   list = list.filter(item => item && typeof item.answer === 'string' && typeof item.question === 'string');
 
   if (!list.length) {
@@ -543,11 +542,10 @@ if (aiForm) {
 }
 
 /* ============================================================
-   5. ГОЛОСОВОЙ ВВОД (для ИИ-чата и для окна оплаты)
+   5. ГОЛОСОВОЙ ВВОД
    ============================================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// Универсальная функция запуска микрофона
 function startVoiceInput(targetInputId, buttonElement, statusElement) {
   if (!SR) {
     alert('Ваш браузер не поддерживает голосовой ввод. Используйте Chrome или Safari.');
@@ -584,38 +582,46 @@ function startVoiceInput(targetInputId, buttonElement, statusElement) {
   recognition.start();
 }
 
-// 1. Привязка кнопки в ИИ-чате
 const voiceBtn = document.getElementById('voice-btn');
 if (voiceBtn) {
   if (!SR) {
-    voiceBtn.style.display = 'none'; // Скрываем, если браузер не поддерживает
+    voiceBtn.style.display = 'none';
   } else {
     voiceBtn.addEventListener('click', () => {
-      if (getFreeQuestionsCount() >= 2) return; // Блокируем, если лимит исчерпан
+      if (getFreeQuestionsCount() >= 2) return;
       startVoiceInput('question', voiceBtn, aiMessage);
     });
   }
 }
 
-// 2. Привязка кнопки в окне оплаты
 const payVoiceBtn = document.getElementById('pay-voice-btn');
 if (payVoiceBtn) {
   if (!SR) {
     payVoiceBtn.style.display = 'none';
   } else {
     payVoiceBtn.addEventListener('click', () => {
-      // Записываем голос прямо в поле pay-question
       startVoiceInput('pay-question', payVoiceBtn, document.getElementById('pay-message'));
     });
   }
 }
+
 /* ============================================================
-   6. ОПЛАТА / ЗАЯВКА
+   6. ОПЛАТА / ЗАЯВКА (Интеграция с ЮKassa)
    ============================================================ */
 window.openPaymentForm = function (packageName) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
+  const amountInput = document.getElementById('pay-amount');
+  
   if (nameEl) nameEl.textContent = packageName;
+  
+  let amount = 0;
+  if (packageName.includes('99')) amount = 99;
+  else if (packageName.includes('299')) amount = 299;
+  else if (packageName.includes('499')) amount = 499;
+  
+  if (amountInput) amountInput.value = amount;
+
   if (modal) modal.style.display = 'flex';
 };
 
@@ -626,24 +632,59 @@ window.closePaymentForm = function () {
   if (msg) msg.textContent = '';
 };
 
-window.submitPayment = function (e) {
+window.submitPayment = async function (e) {
   e.preventDefault();
   const name = document.getElementById('pay-name').value.trim();
   const contact = document.getElementById('pay-contact').value.trim();
   const question = document.getElementById('pay-question').value.trim();
+  const amount = document.getElementById('pay-amount').value;
   const msg = document.getElementById('pay-message');
+  const submitBtn = document.querySelector('#payment-form button[type="submit"]');
 
   if (!name || !contact || !question) {
     if (msg) { msg.textContent = 'Заполни все поля.'; msg.style.color = '#c0392b'; }
     return;
   }
 
-  if (msg) {
-    msg.textContent = 'Заявка принята! Свяжемся с тобой в ближайшее время. ✧';
-    msg.style.color = '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Переход к оплате...';
   }
-  document.getElementById('payment-form').reset();
-  setTimeout(() => window.closePaymentForm(), 2500);
+  if (msg) { msg.textContent = ''; msg.style.color = ''; }
+
+  try {
+    const response = await fetch(PAYMENT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        contact: contact,
+        question: question,
+        amount: Number(amount)
+      })
+    });
+
+    if (!response.ok) throw new Error('Ошибка сети');
+
+    const data = await response.json();
+    
+    if (data.confirmation_url) {
+      window.location.href = data.confirmation_url;
+    } else {
+      throw new Error('Сервер не вернул ссылку на оплату');
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (msg) {
+      msg.textContent = 'Ошибка при создании платежа. Попробуйте позже.';
+      msg.style.color = '#c0392b';
+    }
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Перейти к оплате';
+    }
+  }
 };
 
 /* ============================================================
