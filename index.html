@@ -440,6 +440,10 @@ function loadReadings() {
   if (!readingsList) return;
   let list = [];
   try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
+  
+  // Фильтруем битые записи (если вдруг answer пустой)
+  list = list.filter(item => item && typeof item.answer === 'string' && typeof item.question === 'string');
+
   if (!list.length) {
     readingsList.innerHTML = '<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>';
     return;
@@ -449,9 +453,9 @@ function loadReadings() {
     .reverse()
     .map(item => `
       <div class="reading-item">
-        <div class="date">${item.date}</div>
-        <div class="q">${escapeHtml(item.question)}</div>
-        <div class="a">${escapeHtml(item.answer).slice(0, 300)}${item.answer.length > 300 ? '…' : ''}</div>
+        <div class="date">${item.date || 'Без даты'}</div>
+        <div class="q">${escapeHtml(item.question || '')}</div>
+        <div class="a">${escapeHtml(item.answer || '').slice(0, 300)}${item.answer && item.answer.length > 300 ? '…' : ''}</div>
       </div>
     `)
     .join('');
