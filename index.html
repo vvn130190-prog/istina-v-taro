@@ -527,8 +527,7 @@ if (aiForm) {
               return;
             }
             document.getElementById('question').value = btn.textContent;
-            aiForm.requestSubmit();
-          });
+aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));          });
         });
       }
 
@@ -692,14 +691,12 @@ window.submitPayment = async function () {
       }
     });
 
-    // Скрываем поля ввода
     document.getElementById('pay-name').style.display = 'none';
     document.getElementById('pay-contact').style.display = 'none';
     document.getElementById('pay-question').style.display = 'none';
     document.getElementById('pay-voice-btn').style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
 
-    // Показываем виджет оплаты
     checkout.render('payment-widget-container');
 
   } catch (err) {
@@ -714,7 +711,6 @@ window.submitPayment = async function () {
     }
   }
 };
-
 /* ============================================================
    7. ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
