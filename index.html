@@ -574,16 +574,12 @@ if (voiceBtn) {
 window.openPaymentForm = function (packageName) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
-  const amountInput = document.getElementById('pay-amount');
   
   if (nameEl) nameEl.textContent = packageName;
-  
-  let amount = 0;
-  if (packageName.includes('99')) amount = 99;
-  else if (packageName.includes('299')) amount = 299;
-  else if (packageName.includes('499')) amount = 499;
-  
-  if (amountInput) amountInput.value = amount;
+
+  // Сохраняем название пакета, чтобы потом взять из него сумму
+  window.currentPackageName = packageName;
+
   document.getElementById('payment-widget-container').innerHTML = '';
   const btn = document.getElementById('pay-submit-btn');
   if (btn) { btn.style.display = 'block'; btn.disabled = false; btn.textContent = 'Перейти к оплате'; }
@@ -599,9 +595,15 @@ window.closePaymentForm = function () {
 };
 
 window.submitPayment = async function () {
-  const amount = document.getElementById('pay-amount').value;
   const msg = document.getElementById('pay-message');
   const submitBtn = document.getElementById('pay-submit-btn');
+
+  // Берем сумму прямо из названия пакета, а не из скрытого поля
+  const packageName = window.currentPackageName || '';
+  let amount = 99; // По умолчанию
+  if (packageName.includes('299')) amount = 299;
+  else if (packageName.includes('499')) amount = 499;
+  else if (packageName.includes('99')) amount = 99;
 
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
   if (msg) msg.textContent = '';
@@ -610,7 +612,7 @@ window.submitPayment = async function () {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: Number(amount) })
+      body: JSON.stringify({ amount: Number(amount) }) // Отправляем точную сумму
     });
 
     const data = await response.json();
@@ -634,7 +636,6 @@ window.submitPayment = async function () {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Перейти к оплате'; }
   }
 };
-
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
   window.openPaymentForm('Продолжение анализа — 99 ₽');
