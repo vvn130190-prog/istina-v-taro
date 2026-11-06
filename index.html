@@ -298,24 +298,18 @@ footer a:hover{color:var(--gold)}
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
 
-<!-- Кнопка установки PWA -->
-<div id="install-container" style="display:none; text-align:center; padding: 20px;">
-  <button id="install-btn" class="btn" style="background: #29252A; color: #FFF; border-color: #29252A;">
-    📱 Сохранить сайт на телефон
-  </button>
-</div>
 <script>
-// КОД ДЛЯ УСТАНОВКИ НА ТЕЛЕФОН (вставьте сюда)
+/* ============================================================
+   1. КОНСТАНТЫ И ДАННЫЕ
+   ============================================================ */
+const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
+
+// PWA: Установка на телефон
 window.deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     window.deferredPrompt = e;
 });
-
-/* ============================================================
-   1. КОНСТАНТЫ И ДАННЫЕ
-   ============================================================ */
-const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
 
 const dailyCards = [
   { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"/icons/00_Fool.webp" },
@@ -520,7 +514,6 @@ if (aiForm) {
           buttonsHtml = '';
         }
 
-        // Убрали escapeHtml(answer), чтобы рамки <div class="tarot-block"> сработали
         aiAnswer.innerHTML = `
           <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
           ${buttonsHtml}
@@ -685,25 +678,7 @@ if (document.readyState !== 'loading') {
   checkPaidReading();
 }
 
-// PWA: Установка на телефон
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('install-container').style.display = 'block';
-});
-
-document.getElementById('install-btn')?.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      document.getElementById('install-container').style.display = 'none';
-    }
-    deferredPrompt = null;
-  }
-});
-  // Простая и надежная кнопка установки
+// Кнопка установки
 document.addEventListener('DOMContentLoaded', () => {
     const installBtn = document.createElement('button');
     installBtn.textContent = '📱 Сохранить на телефон';
@@ -715,13 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
         display: none;
     `;
     
-    // Показываем кнопку, только если это мобильное устройство
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         installBtn.style.display = 'block';
     }
 
     installBtn.onclick = () => {
-        // Логика для Android
         if (window.deferredPrompt) {
             window.deferredPrompt.prompt();
             window.deferredPrompt.userChoice.then((choiceResult) => {
@@ -731,7 +704,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.deferredPrompt = null;
             });
         } else {
-            // Логика для iPhone (Safari)
             alert('Чтобы сохранить сайт на iPhone:\n\n1. Нажмите кнопку "Поделиться" (квадрат со стрелкой) внизу экрана.\n2. Выберите "На экран Домой".');
         }
     };
