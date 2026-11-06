@@ -59,7 +59,7 @@ export default async function handler(req, res) {
         'Authorization': `Api-Key ${apiKey}`
       },
       body: JSON.stringify({
-        modelUri: 'gpt://b1gva850tfnbt1pqu7q/yandexgpt-lite', 
+        modelUri: 'gpt://b1gva850tfnbt1pfqu7q/yandexgpt-lite', 
         completionOptions: {
           stream: false,
           temperature: 0.7,
