@@ -57,8 +57,26 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 #ai-answer{white-space:normal;background:#FFF;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:20px;display:none}
 #ai-answer.visible{display:block}
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
-/* Стиль для выделения карт */
 #ai-answer .answer-text strong, #ai-answer .answer-text b { color: var(--gold); }
+
+/* СТИЛИ ДЛЯ ЗОЛОТЫХ РАМОК */
+#ai-answer .tarot-block {
+    background: linear-gradient(145deg, #FFFDF8, #F7F3EB);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+    box-shadow: 0 4px 12px rgba(185,154,91,0.15);
+}
+#ai-answer .tarot-block strong {
+    color: var(--gold);
+    font-family: Georgia, serif;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 8px;
+}
+#ai-answer .tarot-block p { margin: 0; }
+
 .my-readings{margin-top:24px}
 .my-readings h3{font-size:18px;margin-bottom:12px}
 .reading-item{border:1px solid var(--line);background:#FFF;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:14px}
@@ -372,7 +390,7 @@ function renderDailyCard() {
 window.flipCard = renderDailyCard;
 
 /* ============================================================
-   4. ИИ-РАСКЛАД И ЛИМИТЫ
+   4. ИИ-РАСКЛАД И ЛИМИТЫ (ЛИМИТ ИСПРАВЛЕН НА 1)
    ============================================================ */
 const aiForm = document.getElementById('ai-form');
 const aiSubmit = document.getElementById('ai-submit');
@@ -392,19 +410,19 @@ function incrementFreeQuestionsCount() {
 
 function updateFormState() {
   const count = getFreeQuestionsCount();
-  if (count >= 2) {
+  if (count >= 1) { // ТЕПЕРЬ ТОЛЬКО 1 БЕСПЛАТНЫЙ ВОПРОС
     if (aiSubmit) aiSubmit.style.display = 'none'; 
     if (!document.getElementById('ai-pay-btn')) {
       const payBtn = document.createElement('button');
       payBtn.type = 'button';
       payBtn.id = 'ai-pay-btn';
       payBtn.className = 'btn';
-      payBtn.textContent = 'Оплатить 3-й вопрос — 99 ₽';
+      payBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
       payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽');
       aiSubmit.parentNode.appendChild(payBtn);
     }
-    if (aiMessage) showMessage(aiMessage, 'Хотите узнать больше? Выберите глубину разбора ниже.', false);
+    if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Хотите узнать больше? Выберите глубину разбора ниже.', false);
   } else {
     if (aiSubmit) { aiSubmit.style.display = 'inline-block'; aiSubmit.disabled = false; }
     const payBtn = document.getElementById('ai-pay-btn');
@@ -442,7 +460,7 @@ function saveReading(question, answer) {
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (getFreeQuestionsCount() >= 2) { updateFormState(); return; }
+    if (getFreeQuestionsCount() >= 1) { updateFormState(); return; }
 
     const question = document.getElementById('question').value.trim();
     if (!question) { showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true); return; }
@@ -465,7 +483,7 @@ if (aiForm) {
 
       if (aiAnswer) {
         let buttonsHtml = '';
-        const hasPaid = getFreeQuestionsCount() >= 2;
+        const hasPaid = getFreeQuestionsCount() >= 1;
 
         if (!hasPaid) {
           buttonsHtml = `
@@ -479,23 +497,14 @@ if (aiForm) {
             </div>
           `;
         } else {
-          buttonsHtml = `
-            <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line); text-align: center;">
-              <p style="font-size: 13px; margin-bottom: 10px; font-weight: bold; line-height: 1.4;">
-                Хотите полностью разобрать ситуацию?
-              </p>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 6px; font-size: 13px; padding: 8px; border-radius: 6px;">
-                Узнать причины и скрытые факторы — 299 ₽
-              </button>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 8px; background: #29252A; color: #FFF; border-color: #29252A; border-radius: 6px;">
-                Полный разбор с советами и прогнозом — 499 ₽
-              </button>
-            </div>
-          `;
+          // Если это уже оплаченный вопрос, просто выводим ответ
+          // (кнопки на 299/499 можно добавить здесь, если нужно)
+          buttonsHtml = '';
         }
 
+        // ВАЖНО: Убрали escapeHtml(answer), чтобы HTML-рамки <div class="tarot-block"> сработали!
         aiAnswer.innerHTML = `
-          <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
+          <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
           ${buttonsHtml}
         `;
         aiAnswer.classList.add('visible');
@@ -504,7 +513,7 @@ if (aiForm) {
       saveReading(question, answer);
       incrementFreeQuestionsCount();
       
-      if (getFreeQuestionsCount() < 2) showMessage(aiMessage, '');
+      if (getFreeQuestionsCount() < 1) showMessage(aiMessage, '');
       
     } catch (err) {
       console.error(err);
@@ -545,7 +554,7 @@ function startVoiceInput(targetInputId, buttonElement, statusElement) {
 const voiceBtn = document.getElementById('voice-btn');
 if (voiceBtn) {
   if (!SR) voiceBtn.style.display = 'none';
-  else voiceBtn.addEventListener('click', () => { if (getFreeQuestionsCount() < 2) startVoiceInput('question', voiceBtn, aiMessage); });
+  else voiceBtn.addEventListener('click', () => { if (getFreeQuestionsCount() < 1) startVoiceInput('question', voiceBtn, aiMessage); });
 }
 
 /* ============================================================
@@ -634,7 +643,7 @@ function checkPaidReading() {
     setTimeout(() => {
       if (aiForm) aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       setTimeout(() => {
-        localStorage.setItem('freeQuestionsCount', '2');
+        localStorage.setItem('freeQuestionsCount', '1'); // После оплаты ставим лимит 1
         updateFormState();
       }, 5000);
     }, 500);
