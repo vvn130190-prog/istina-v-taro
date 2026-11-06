@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F8F6F0">
 <title>Истина в Таро — ответы внутри тебя</title>
+<link rel="manifest" href="/manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
 <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
 <style>
 :root{--bg:#F8F6F0;--panel:#FFF;--gold:#B99A5B;--gold-light:#C8AC72;--text:#29252A;--muted:#77717A;--line:rgba(185,154,91,.32);--radius:14px;--shadow:0 6px 28px rgba(185,154,91,.10)}
@@ -291,6 +297,14 @@ footer a:hover{color:var(--gold)}
   </div>
 </footer>
 <div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
+
+<!-- Кнопка установки PWA -->
+<div id="install-container" style="display:none; text-align:center; padding: 20px;">
+  <button id="install-btn" class="btn" style="background: #29252A; color: #FFF; border-color: #29252A;">
+    📱 Сохранить сайт на телефон
+  </button>
+</div>
+
 <script>
 /* ============================================================
    1. КОНСТАНТЫ И ДАННЫЕ
@@ -390,7 +404,7 @@ function renderDailyCard() {
 window.flipCard = renderDailyCard;
 
 /* ============================================================
-   4. ИИ-РАСКЛАД И ЛИМИТЫ (ЛИМИТ ИСПРАВЛЕН НА 1)
+   4. ИИ-РАСКЛАД И ЛИМИТЫ (ТОЛЬКО 1 БЕСПЛАТНЫЙ ВОПРОС)
    ============================================================ */
 const aiForm = document.getElementById('ai-form');
 const aiSubmit = document.getElementById('ai-submit');
@@ -410,7 +424,7 @@ function incrementFreeQuestionsCount() {
 
 function updateFormState() {
   const count = getFreeQuestionsCount();
-  if (count >= 1) { // ТЕПЕРЬ ТОЛЬКО 1 БЕСПЛАТНЫЙ ВОПРОС
+  if (count >= 1) { 
     if (aiSubmit) aiSubmit.style.display = 'none'; 
     if (!document.getElementById('ai-pay-btn')) {
       const payBtn = document.createElement('button');
@@ -497,12 +511,10 @@ if (aiForm) {
             </div>
           `;
         } else {
-          // Если это уже оплаченный вопрос, просто выводим ответ
-          // (кнопки на 299/499 можно добавить здесь, если нужно)
           buttonsHtml = '';
         }
 
-        // ВАЖНО: Убрали escapeHtml(answer), чтобы HTML-рамки <div class="tarot-block"> сработали!
+        // Убрали escapeHtml(answer), чтобы рамки <div class="tarot-block"> сработали
         aiAnswer.innerHTML = `
           <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
           ${buttonsHtml}
@@ -643,7 +655,7 @@ function checkPaidReading() {
     setTimeout(() => {
       if (aiForm) aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       setTimeout(() => {
-        localStorage.setItem('freeQuestionsCount', '1'); // После оплаты ставим лимит 1
+        localStorage.setItem('freeQuestionsCount', '1');
         updateFormState();
       }, 5000);
     }, 500);
@@ -651,7 +663,7 @@ function checkPaidReading() {
 }
 
 /* ============================================================
-   7. ИНИЦИАЛИЗАЦИЯ
+   7. ИНИЦИАЛИЗАЦИЯ И PWA
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   currentDailyCard = getDailyCard();
@@ -666,6 +678,25 @@ if (document.readyState !== 'loading') {
   updateFormState();
   checkPaidReading();
 }
+
+// PWA: Установка на телефон
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-container').style.display = 'block';
+});
+
+document.getElementById('install-btn')?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('install-container').style.display = 'none';
+    }
+    deferredPrompt = null;
+  }
+});
 </script>
 </body>
 </html>
