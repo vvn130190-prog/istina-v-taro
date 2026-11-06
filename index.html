@@ -496,22 +496,43 @@ if (aiForm) {
       const resp = await fetch(TAROT_FUNCTION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question })
-      });
-
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      const answer = data.answer || data.text || 'Не удалось получить ответ.';
-      const followups = Array.isArray(data.followups) ? data.followups : [];
+body: JSON.stringify({ 
+  question: question, 
+  isFree: getFreeQuestionsCount() < 1 // Передаем серверу, что это бесплатный вопрос
+})});
 
       if (aiAnswer) {
-        aiAnswer.innerHTML = `
-          <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
-          ${followups.length ? `
-            <p class="followups-title">Можно уточнить</p>
-            ${followups.map(q => `<button type="button" class="followup-btn">${escapeHtml(q)}</button>`).join('')}
-          ` : ''}
-        `;
+  // Если это был бесплатный вопрос, показываем короткий ответ и 3 варианта оплаты
+  const isFree = getFreeQuestionsCount() <= 1; 
+  
+  if (isFree) {
+    aiAnswer.innerHTML = `
+      <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
+      <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold);">
+        <p style="font-size: 14px; margin-bottom: 15px; color: var(--text);">
+          <strong>Карты видят больше.</strong> Хотите узнать, что именно стоит за этой ситуацией и как лучше поступить?
+        </p>
+        
+        <button type="button" class="btn" onclick="window.openPaymentForm('Уточнить момент — 99 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px;">
+          Уточнить один момент — 99 ₽
+        </button>
+        
+        <button type="button" class="btn" onclick="window.openPaymentForm('Разобрать ситуацию — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A;">
+          Разобрать ситуацию глубже — 299 ₽
+        </button>
+        
+        <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px;">
+          Полный разбор с советами — 499 ₽
+        </button>
+      </div>
+    `;
+  } else {
+    // Если вопрос уже платный, показываем полный ответ
+    aiAnswer.innerHTML = `
+      <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
+    `;
+  }
+}
         aiAnswer.classList.add('visible');
 
         aiAnswer.querySelectorAll('.followup-btn').forEach(btn => {
