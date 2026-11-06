@@ -271,30 +271,29 @@ const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
 const PAYMENT_API_URL = 'https://istina-v-taro.ru/api/create-payment'; // <--- АДРЕС ДЛЯ ОПЛАТЫ
 
 const dailyCards = [
-  { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/RWS_Tarot_00_Fool.jpg/500px-RWS_Tarot_00_Fool.jpg" },
-  { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/RWS_Tarot_01_Magician.jpg/500px-RWS_Tarot_01_Magician.jpg" },
-  { name:"Верховная Жрица", meaning:"Прислушайся к интуиции. Ответ уже внутри тебя.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/RWS_Tarot_02_High_Priestess.jpg/500px-RWS_Tarot_02_High_Priestess.jpg" },
-  { name:"Императрица", meaning:"Время заботы и плодородия. Позволь себе расцвести.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/RWS_Tarot_03_Empress.jpg/500px-RWS_Tarot_03_Empress.jpg" },
-  { name:"Император", meaning:"Пора взять ситуацию под контроль. Будь уверен в себе.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/RWS_Tarot_04_Emperor.jpg/500px-RWS_Tarot_04_Emperor.jpg" },
-  { name:"Иерофант", meaning:"Традиции и мудрость. Обратись за советом к наставнику.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/RWS_Tarot_05_Hierophant.jpg/500px-RWS_Tarot_05_Hierophant.jpg" },
-  { name:"Влюбленные", meaning:"Важный выбор из сердца. Слушай свою душу.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/RWS_Tarot_06_Lovers.jpg/500px-RWS_Tarot_06_Lovers.jpg" },
-  { name:"Колесница", meaning:"Победа через движение. Не останавливайся.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/RWS_Tarot_07_Chariot.jpg/500px-RWS_Tarot_07_Chariot.jpg" },
-  { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/RWS_Tarot_08_Strength.jpg/500px-RWS_Tarot_08_Strength.jpg" },
-  { name:"Отшельник", meaning:"Время тишины и самоанализа. Побудь наедине с собой.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/RWS_Tarot_09_Hermit.jpg/500px-RWS_Tarot_09_Hermit.jpg" },
-  { name:"Колесо Фортуны", meaning:"Перемены открывают новые возможности. Лови момент.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg/500px-RWS_Tarot_10_Wheel_of_Fortune.jpg" },
-  { name:"Справедливость", meaning:"Пришло время честности и баланса. Всё по заслугам.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/RWS_Tarot_11_Justice.jpg/500px-RWS_Tarot_11_Justice.jpg" },
-  { name:"Повешенный", meaning:"Остановись и посмотри на ситуацию с другой стороны.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/RWS_Tarot_12_Hanged_Man.jpg/500px-RWS_Tarot_12_Hanged_Man.jpg" },
-  { name:"Смерть", meaning:"Завершение старого и начало нового. Отпусти прошлое.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/RWS_Tarot_13_Death.jpg/500px-RWS_Tarot_13_Death.jpg" },
-  { name:"Умеренность", meaning:"Найди баланс и гармонию. Не торопись.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/RWS_Tarot_14_Temperance.jpg/500px-RWS_Tarot_14_Temperance.jpg" },
-  { name:"Дьявол", meaning:"Осторожно с зависимостями и искушениями. Будь честен с собой.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/RWS_Tarot_15_Devil.jpg/500px-RWS_Tarot_15_Devil.jpg" },
-  { name:"Башня", meaning:"Неожиданные перемены. Уйдет всё ненужное, но будет точка роста.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/RWS_Tarot_16_Tower.jpg/500px-RWS_Tarot_16_Tower.jpg" },
-  { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг к мечте важен.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/RWS_Tarot_17_Star.jpg/500px-RWS_Tarot_17_Star.jpg" },
-  { name:"Луна", meaning:"Не торопись с выводами. Прислушайся к подсознанию.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/RWS_Tarot_18_Moon.jpg/500px-RWS_Tarot_18_Moon.jpg" },
-  { name:"Солнце", meaning:"Радость и успех. Заметь хорошее, что уже есть в жизни.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/RWS_Tarot_19_Sun.jpg/500px-RWS_Tarot_19_Sun.jpg" },
-  { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/RWS_Tarot_20_Judgement.jpg/500px-RWS_Tarot_20_Judgement.jpg" },
-  { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/RWS_Tarot_21_World.jpg/500px-RWS_Tarot_21_World.jpg" }
+  { name:"Шут", meaning:"Новый этап, спонтанность, свобода. Доверься потоку.", image:"/icons/00_Fool.webp" },
+  { name:"Маг", meaning:"У тебя есть все инструменты для успеха. Действуй!", image:"/icons/01_Magician.webp" },
+  { name:"Верховная Жрица", meaning:"Прислушайся к интуиции. Ответ уже внутри тебя.", image:"/icons/02_High_Priestess.webp" },
+  { name:"Императрица", meaning:"Время заботы и плодородия. Позволь себе расцвести.", image:"/icons/03_Empress.webp" },
+  { name:"Император", meaning:"Пора взять ситуацию под контроль. Будь уверен в себе.", image:"/icons/04_Emperor.webp" },
+  { name:"Иерофант", meaning:"Традиции и мудрость. Обратись за советом к наставнику.", image:"/icons/05_Hierophant.webp" },
+  { name:"Влюбленные", meaning:"Важный выбор из сердца. Слушай свою душу.", image:"/icons/06_Lovers.webp" },
+  { name:"Колесница", meaning:"Победа через движение. Не останавливайся.", image:"/icons/07_Chariot.webp" },
+  { name:"Сила", meaning:"Твоя мягкость — не слабость. Доверься себе.", image:"/icons/08_Strength.webp" },
+  { name:"Отшельник", meaning:"Время тишины и самоанализа. Побудь наедине с собой.", image:"/icons/09_Hermit.webp" },
+  { name:"Колесо Фортуны", meaning:"Перемены открывают новые возможности. Лови момент.", image:"/icons/10_Wheel_of_Fortune.webp" },
+  { name:"Справедливость", meaning:"Пришло время честности и баланса. Всё по заслугам.", image:"/icons/11_Justice.webp" },
+  { name:"Повешенный", meaning:"Остановись и посмотри на ситуацию с другой стороны.", image:"/icons/12_Hanged_Man.webp" },
+  { name:"Смерть", meaning:"Завершение старого и начало нового. Отпусти прошлое.", image:"/icons/13_Death.webp" },
+  { name:"Умеренность", meaning:"Найди баланс и гармонию. Не торопись.", image:"/icons/14_Temperance.webp" },
+  { name:"Дьявол", meaning:"Осторожно с зависимостями и искушениями. Будь честен с собой.", image:"/icons/15_Devil.webp" },
+  { name:"Башня", meaning:"Неожиданные перемены. Уйдет всё ненужное, но будет точка роста.", image:"/icons/16_Tower.webp" },
+  { name:"Звезда", meaning:"Позволь себе надеяться. Даже маленький шаг к мечте важен.", image:"/icons/17_Star.webp" },
+  { name:"Луна", meaning:"Не торопись с выводами. Прислушайся к подсознанию.", image:"/icons/18_Moon.webp" },
+  { name:"Солнце", meaning:"Радость и успех. Заметь хорошее, что уже есть в жизни.", image:"/icons/19_Sun.webp" },
+  { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"/icons/20_Judgement.webp" },
+  { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"/icons/21_World.webp" }
 ];
-
 /* ============================================================
    2. УТИЛИТЫ
    ============================================================ */
@@ -357,9 +356,8 @@ function renderDailyCard() {
   const meaningEl = document.getElementById('daily-meaning');
   if (!cardBack || !cardFront || !cardImage) return;
 
-  cardImage.innerHTML = `
-    <img src="${currentDailyCard.image}" alt="${currentDailyCard.name}"
-         style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    cardImage.innerHTML = `
+    <img src="${currentDailyCard.image}" alt="${currentDailyCard.name}" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
   `;
   cardBack.style.display = 'none';
   cardFront.style.display = 'flex';
