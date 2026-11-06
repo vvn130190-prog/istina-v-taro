@@ -476,6 +476,7 @@ if (aiForm) {
     if (getFreeQuestionsCount() >= 1) { updateFormState(); return; }
 
     const question = document.getElementById('question').value.trim();
+    document.getElementById('question').value = '';
     if (!question) { showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true); return; }
 
     aiSubmit.disabled = true;
