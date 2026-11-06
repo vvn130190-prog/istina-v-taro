@@ -488,7 +488,11 @@ body: JSON.stringify({
   question: question, 
   isFree: getFreeQuestionsCount() < 1 // Передаем серверу, что это бесплатный вопрос
 })});
-
+      if (!resp.ok) throw new Error('Ошибка сети');
+      
+      // ПОЛУЧАЕМ ОТВЕТ ОТ СЕРВЕРА
+      const data = await resp.json();
+      const answer = data.answer || data.text || 'Не удалось получить ответ.';
           if (aiAnswer) {
         const isFree = getFreeQuestionsCount() <= 1; 
         let buttonsHtml = '';
