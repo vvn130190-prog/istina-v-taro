@@ -1,6 +1,6 @@
 // api/tarot.js
 export default async function handler(req, res) {
-  // 1. СНАЧАЛА РАЗРЕШАЕМ CORS (чтобы браузер не блокировал запрос)
+  // 1. СНАЧАЛА РАЗРЕШАЕМ CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 4. Получаем вопрос и флаг (бесплатный или платный)
+  // 4. Получаем вопрос и флаг
   const { question, isFree } = req.body || {};
 
   if (!question) {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Ключ ИИ не настроен' });
   }
 
-  // 5. ПРОМПТ ДЛЯ БЕСПЛАТНОГО ВОПРОСА (Коротко и с интригой)
+  // 5. ПРОМПТ ДЛЯ БЕСПЛАТНОГО ВОПРОСА
   const FREE_PROMPT = `
   Ты — опытный и бережный таролог. Твоя задача — дать глубокий, но КОРОТКИЙ ответ на вопрос пользователя.
   ПРАВИЛА:
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
   Вопрос клиента: "${question}"
   `;
 
-  // 6. ПРОМПТ ДЛЯ ПЛАТНОГО ВОПРОСА (Глубокий разбор)
+  // 6. ПРОМПТ ДЛЯ ПЛАТНОГО ВОПРОСА
   const PAID_PROMPT = `
   Ты — опытный таролог. Твоя задача — дать развернутый, глубокий анализ ситуации клиента (до 8-10 предложений).
   ПРАВИЛА:
@@ -49,7 +49,6 @@ export default async function handler(req, res) {
   Вопрос клиента: "${question}"
   `;
 
-  // Выбираем промпт в зависимости от того, платный вопрос или нет
   const SYSTEM_PROMPT = isFree ? FREE_PROMPT : PAID_PROMPT;
 
   try {
@@ -60,11 +59,11 @@ export default async function handler(req, res) {
         'Authorization': `Api-Key ${apiKey}`
       },
       body: JSON.stringify({
-       modelUri: 'gpt://b1gva850tfnbt1pqu7q/yandexgpt-lite', // ЗАМЕНИТЕ b1g... НА ВАШ ID КАТАЛОГА ИЗ YANDEX CLOUD!
+        modelUri: 'gpt://b1gva850tfnbt1pqu7q/yandexgpt-lite', 
         completionOptions: {
           stream: false,
           temperature: 0.7,
-          maxTokens: isFree ? 100 : 300 // Ограничиваем длину: бесплатный короче, платный длиннее
+          maxTokens: isFree ? 100 : 300
         },
         messages: [
           { role: 'system', text: SYSTEM_PROMPT },
@@ -81,13 +80,7 @@ export default async function handler(req, res) {
     }
 
     const answer = data.result?.alternatives?.[0]?.message?.text || 'Карты сегодня молчат. Попробуйте переформулировать вопрос.';
-
-    // Генерируем фейковые уточняющие вопросы для красоты
-    const followups = [
-      "Что мне мешает сейчас?",
-      "Какой урок я должна извлечь?",
-      "Что изменится, если я сделаю шаг?"
-    ];
+    const followups = ["Что мне мешает сейчас?", "Какой урок я должна извлечь?", "Что изменится, если я сделаю шаг?"];
 
     return res.status(200).json({ answer, followups });
 
