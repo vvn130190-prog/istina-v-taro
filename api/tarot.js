@@ -1,106 +1,55 @@
-import { Redis } from '@upstash/redis';
-
+// api/tarot.js
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { question } = req.body || {};
+
+  if (!question) {
+    return res.status(400).json({ error: 'Вопрос не получен' });
+  }
+
+  // Ваш ключ Яндекса (или другого ИИ)
+  const apiKey = process.env.YANDEX_API_KEY; 
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Ключ ИИ не настроен' });
+  }
+
+  // ЖЕСТКАЯ ИНСТРУКЦИЯ ДЛЯ ИИ (Промпт)
+  const SYSTEM_PROMPT = `
+  Ты — опытный и бережный таролог. Твоя задача — дать глубокий, но КОРОТКИЙ ответ на вопрос пользователя.
   
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Используй POST-запрос.' });
+  ПРАВИЛА:
+  1. Отвечай максимум в 3-4 предложениях.
+  2. Не давай готовых решений (не говори "делай так-то"). Вместо этого говори о скрытых смыслах, энергиях или о том, на что стоит обратить внимание.
+  3. В конце ответа обязательно оставь интригу (например: "Но есть один нюанс, который карты скрывают..." или "Это только верхушка айсберга...").
+  4. Пиши мягко, без мистики, запугиваний и категоричных предсказаний.
+  5. Тон — спокойный, поддерживающий, как у мудрого наставника.
+  
+  Вопрос клиента: "${question}"
+  `;
 
   try {
-    const { question } = req.body;
-    if (!question || question.trim().length < 3) {
-      return res.status(400).json({ error: 'Опиши ситуацию подробнее.' });
-    }
-
-    const apiKey = process.env.YANDEX_API_KEY;
-    const folderId = "b1gva850tfnbt1pfqu7q";
-
-    if (!apiKey) throw new Error("Не настроен ключ Yandex.");
-
-    // --- ОПРЕДЕЛЯЕМ ТИП ВОПРОСА ---
-    const q = question.toLowerCase();
-    const isRelationship = q.includes('люб') || q.includes('отношен') || q.includes('муж') || q.includes('жена') || q.includes('парн') || q.includes('девушк') || q.includes('мужчин') || q.includes('женщин') || q.includes('свидан') || q.includes('развод') || q.includes('чувств');
-    const isTiming = q.includes('когда') || q.includes('срок') || q.includes('через сколько') || q.includes('в каком месяце') || q.includes('как скоро');
-
-    const cardCount = isRelationship ? 3 : 2;
-
-    // --- СПИСОК ВСЕХ КАРТ ---
-    const allCards = [
-      "Туз Жезлов", "2 Жезлов", "3 Жезлов", "4 Жезлов", "5 Жезлов", "6 Жезлов", "7 Жезлов", "8 Жезлов", "9 Жезлов", "10 Жезлов", "Паж Жезлов", "Рыцарь Жезлов", "Королева Жезлов", "Король Жезлов",
-      "Туз Мечей", "2 Мечей", "3 Мечей", "4 Мечей", "5 Мечей", "6 Мечей", "7 Мечей", "8 Мечей", "9 Мечей", "10 Мечей", "Паж Мечей", "Рыцарь Мечей", "Королева Мечей", "Король Мечей",
-      "Туз Кубков", "2 Кубков", "3 Кубков", "4 Кубков", "5 Кубков", "6 Кубков", "7 Кубков", "8 Кубков", "9 Кубков", "10 Кубков", "Паж Кубков", "Рыцарь Кубков", "Королева Кубков", "Король Кубков",
-      "Туз Пентаклей", "2 Пентаклей", "3 Пентаклей", "4 Пентаклей", "5 Пентаклей", "6 Пентаклей", "7 Пентаклей", "8 Пентаклей", "9 Пентаклей", "10 Пентаклей", "Паж Пентаклей", "Рыцарь Пентаклей", "Королева Пентаклей", "Король Пентаклей",
-      "Шут", "Маг", "Верховная Жрица", "Императрица", "Император", "Иерофант", "Влюбленные", "Колесница", "Сила", "Отшельник", "Колесо Фортуны", "Справедливость", "Повешенный", "Смерть", "Умеренность", "Дьявол", "Башня", "Звезда", "Луна", "Солнце", "Суд", "Мир"
-    ];
-
-    const getRandomCards = (count) => {
-      const shuffled = [...allCards].sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, count);
-    };
-
-    const drawnCards = getRandomCards(cardCount);
-
-    // --- ПРОМПТ ДЛЯ ИИ (с учетом всех систем) ---
-    const systemPrompt = `
-Ты — мудрая, бережная наставница и добрая подруга проекта «Истина в Таро». 
-Твоя главная цель — чтобы человек почувствовал поддержку, доверие и захотел вернуться. Обращайся на «ты».
-
-ГЛАВНЫЕ ПРАВИЛА ТВОЕЙ МЕТОДИКИ:
-1. Всё, что происходит в жизни — к лучшему. Любая ситуация делает человека сильнее и мудрее.
-2. Человек — вершитель своей судьбы. Карты — это лишь подсказка. Решения принимает только сам человек.
-3. СТРОГО ЗАПРЕЩЕНО: ставить диагнозы, давать медицинские советы, пугать, использовать слова «смерть», «болезнь», «горесть», «печаль», «суицид», «порча», «предсказание».
-
-ВАЖНО: В этом раскладе выпали ${cardCount} карты. Ты должна истолковать именно их, связав с вопросом клиента.
-Выпавшие карты: ${drawnCards.join(', ')}.
-
-ОПРЕДЕЛЕНИЕ СРОКОВ (если вопрос про сроки):
-1. Сначала определи, о каком масштабе времени спрашивает клиент:
-   - Если он спрашивает «в какие дни?» или «как скоро?» — ищи ответ в днях/неделях.
-   - Если он спрашивает «в каком месяце?» или «когда?» — ищи ответ в месяцах/сезонах.
-   - Если он спрашивает «в каком году?» — ищи ответ в годах.
-
-2. Используй масти:
-   - Жезлы (Огонь) — ДНИ или ВЕСНА.
-   - Мечи (Воздух) — НЕДЕЛИ или ЗИМА (холод).
-   - Кубки (Вода) — МЕСЯЦЫ или ВЕСНА (таяние снега).
-   - Пентакли (Земля) — МЕСЯЦЫ или ГОДЫ (осень). Если карта залита ярким желтым светом — ЛЕТО.
-
-3. Учитывай сочетание мастей:
-   - Если выпали Жезлы + Пентакли — Жезлы УСКОРЯЮТ Пентакли (срок сокращается).
-   - Если выпали Мечи + Кубки — Мечи замедляют Кубки (срок увеличивается).
-
-4. Номиналы: 1 Пентакль — 1 месяц, 2 Пентакля — 2 месяца, 10 Пентаклей — 10 месяцев или 1 год.
-
-5. Активные карты (Рыцари, Короли) — быстро. Пассивные (Пажи, Королевы) — медленно.
-   Старшие Арканы — масштабные события (от дней до десятилетий).
-
-СТРУКТУРА ОТВЕТА:
-- Напиши, какие карты выпали.
-- Дай трактовку каждой карты (по 1 предложению).
-- Свяжи их в общий вывод. Если вопрос про сроки — ОБЯЗАТЕЛЬНО укажи примерный срок, опираясь на масти, сочетания и контекст вопроса.
-- Подскажи, на чем можно сфокусироваться.
-
-ФОРМАТ: Верни ответ СТРОГО в формате JSON: 
-{"answer": "текст ответа (3-5 предложений)", "followups": ["вопрос 1", "вопрос 2", "вопрос 3"]}.
-
-ВОПРОСЫ (followups): Ровно 3 вопроса, связанных с ситуацией клиента.
-Только валидный JSON без markdown.
-`;
-
-    const response = await fetch("https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
-      method: "POST",
+    // ВНИМАНИЕ: Здесь указан эндпоинт Яндекса (YandexGPT). 
+    // Если у вас другой провайдер (например, OpenAI), замените URL и структуру запроса.
+    const response = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+      method: 'POST',
       headers: {
-        "Authorization": `Api-Key ${apiKey}`,
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json',
+        'Authorization': `Api-Key ${apiKey}`
       },
       body: JSON.stringify({
-        modelUri: `gpt://${folderId}/yandexgpt-lite/latest`,
-        completionOptions: { stream: false, temperature: 0.8, maxTokens: 600 },
+        modelUri: 'gpt://b1g.../yandexgpt-lite', // Укажите ваш modelUri из Yandex Cloud
+        completionOptions: {
+          stream: false,
+          temperature: 0.7,
+          maxTokens: 150 // Ограничиваем длину ответа, чтобы ИИ не писал "войну и мир"
+        },
         messages: [
-          { role: "system", text: systemPrompt },
-          { role: "user", text: question.trim() }
+          { role: 'system', text: SYSTEM_PROMPT },
+          { role: 'user', text: question }
         ]
       })
     });
@@ -108,18 +57,24 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(502).json({ error: "Ошибка Яндекса: " + (data.message || JSON.stringify(data)) });
+      console.error('Ошибка ИИ:', data);
+      return res.status(500).json({ error: 'Ошибка генерации ответа' });
     }
 
-    let text = data.result?.alternatives?.[0]?.message?.text;
-    if (!text) return res.status(500).json({ error: "Пустой ответ от Яндекса" });
+    // Извлекаем текст ответа из ответа Яндекса
+    const answer = data.result?.alternatives?.[0]?.message?.text || 'Карты сегодня молчат. Попробуйте переформулировать вопрос.';
 
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const result = JSON.parse(text);
+    // Генерируем фейковые уточняющие вопросы для красоты (если нужно)
+    const followups = [
+      "Что мне мешает сейчас?",
+      "Какой урок я должна извлечь?",
+      "Что изменится, если я сделаю шаг?"
+    ];
 
-    return res.status(200).json(result);
+    return res.status(200).json({ answer, followups });
 
   } catch (error) {
-    return res.status(500).json({ error: "Системная ошибка: " + error.message });
+    console.error('Ошибка сервера ИИ:', error);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 }
