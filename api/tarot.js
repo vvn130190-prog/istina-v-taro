@@ -1,10 +1,21 @@
 // api/tarot.js
 export default async function handler(req, res) {
+  // 1. СНАЧАЛА РАЗРЕШАЕМ CORS (чтобы браузер не блокировал запрос)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // 2. ОТВЕЧАЕМ НА ПРОВЕРОЧНЫЙ ЗАПРОС БРАУЗЕРА (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // 3. ТЕПЕРЬ ПРОВЕРЯЕМ, ЧТО ЭТО POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Получаем вопрос и флаг (бесплатный или платный)
+  // 4. Получаем вопрос и флаг (бесплатный или платный)
   const { question, isFree } = req.body || {};
 
   if (!question) {
@@ -16,7 +27,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Ключ ИИ не настроен' });
   }
 
-  // ПРОМПТ ДЛЯ БЕСПЛАТНОГО ВОПРОСА (Коротко и с интригой)
+  // 5. ПРОМПТ ДЛЯ БЕСПЛАТНОГО ВОПРОСА (Коротко и с интригой)
   const FREE_PROMPT = `
   Ты — опытный и бережный таролог. Твоя задача — дать глубокий, но КОРОТКИЙ ответ на вопрос пользователя.
   ПРАВИЛА:
@@ -27,7 +38,7 @@ export default async function handler(req, res) {
   Вопрос клиента: "${question}"
   `;
 
-  // ПРОМПТ ДЛЯ ПЛАТНОГО ВОПРОСА (Глубокий разбор)
+  // 6. ПРОМПТ ДЛЯ ПЛАТНОГО ВОПРОСА (Глубокий разбор)
   const PAID_PROMPT = `
   Ты — опытный таролог. Твоя задача — дать развернутый, глубокий анализ ситуации клиента (до 8-10 предложений).
   ПРАВИЛА:
@@ -49,7 +60,7 @@ export default async function handler(req, res) {
         'Authorization': `Api-Key ${apiKey}`
       },
       body: JSON.stringify({
-        modelUri: 'gpt://b1g.../yandexgpt-lite', // ЗАМЕНИТЕ b1g... НА ВАШ ID КАТАЛОГА!
+       modelUri: 'gpt://b1gva850tfnbt1pqu7q/yandexgpt-lite', // ЗАМЕНИТЕ b1g... НА ВАШ ID КАТАЛОГА ИЗ YANDEX CLOUD!
         completionOptions: {
           stream: false,
           temperature: 0.7,
@@ -71,7 +82,7 @@ export default async function handler(req, res) {
 
     const answer = data.result?.alternatives?.[0]?.message?.text || 'Карты сегодня молчат. Попробуйте переформулировать вопрос.';
 
-    // Генерируем фейковые уточняющие вопросы для красоты (если понадобятся)
+    // Генерируем фейковые уточняющие вопросы для красоты
     const followups = [
       "Что мне мешает сейчас?",
       "Какой урок я должна извлечь?",
