@@ -219,31 +219,21 @@ footer a:hover{color:var(--gold)}
   </div>
 </section>
 
-<div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-  <div style="background:#fff; padding:30px; border-radius:14px; max-width:400px; width:90%; position:relative;">
+ <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:30px; border-radius:14px; max-width:400px; width:90%; position:relative; text-align:center;">
     <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
-    <h3 style="margin-top:0; text-align:center;">Оформление расклада</h3>
-    <p style="color:#777; font-size:14px; text-align:center; margin-bottom:20px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
+    <h3 style="margin-top:0;">Оплата расклада</h3>
+    <p style="color:#777; font-size:14px; margin-bottom:20px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
     
     <div id="payment-form-wrap">
-      <!-- Контейнер для виджета ЮKassa -->
       <div id="payment-widget-container" style="margin-bottom: 15px;"></div> 
-      
-      <!-- Скрытое поле для суммы -->
       <input type="hidden" id="pay-amount" value="">
-
-      <input type="text" id="pay-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
-      <input type="text" id="pay-contact" placeholder="Telegram или Email" required style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit;">
-      <textarea id="pay-question" placeholder="Ваш вопрос для карт..." required rows="3" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
-      
-      <button type="button" class="btn btn-outline" id="pay-voice-btn" style="width:100%; margin-bottom:15px; padding:10px; font-size:13px;">🎤 Записать голосом</button>
       <button type="button" id="pay-submit-btn" class="btn" style="width:100%;" onclick="submitPayment()">Перейти к оплате</button>
     </div>
     
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
-</div>  
-</section>
+</div></section>
 <section class="section" id="faq">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Частые вопросы</div><h2>Что важно знать</h2></div>
@@ -501,51 +491,45 @@ body: JSON.stringify({
   isFree: getFreeQuestionsCount() < 1 // Передаем серверу, что это бесплатный вопрос
 })});
 
-      if (aiAnswer) {
-  // Если это был бесплатный вопрос, показываем короткий ответ и 3 варианта оплаты
-  const isFree = getFreeQuestionsCount() <= 1; 
-  
-  if (isFree) {
-    aiAnswer.innerHTML = `
-      <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
-      <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold);">
-        <p style="font-size: 14px; margin-bottom: 15px; color: var(--text);">
-          <strong>Карты видят больше.</strong> Хотите узнать, что именно стоит за этой ситуацией и как лучше поступить?
-        </p>
+          if (aiAnswer) {
+        const isFree = getFreeQuestionsCount() <= 1; 
+        let buttonsHtml = '';
         
-        <button type="button" class="btn" onclick="window.openPaymentForm('Уточнить момент — 99 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px;">
-          Уточнить один момент — 99 ₽
-        </button>
-        
-        <button type="button" class="btn" onclick="window.openPaymentForm('Разобрать ситуацию — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A;">
-          Разобрать ситуацию глубже — 299 ₽
-        </button>
-        
-        <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px;">
-          Полный разбор с советами — 499 ₽
-        </button>
-      </div>
-    `;
-  } else {
-    // Если вопрос уже платный, показываем полный ответ
-    aiAnswer.innerHTML = `
-      <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
-    `;
-  }
-}
+        if (isFree) {
+          // Бесплатный ответ — кнопка "Узнать продолжение за 99р"
+          buttonsHtml = `
+            <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
+              <p style="font-size: 14px; margin-bottom: 15px; color: var(--text);">
+                <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
+              </p>
+              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 14px; padding: 12px; background: var(--gold); color: #18120b;">
+                Узнать продолжение — 99 ₽
+              </button>
+            </div>
+          `;
+        } else {
+          // Платный ответ — варианты 299 и 499
+          buttonsHtml = `
+            <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line);">
+              <p style="font-size: 14px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                Хотите полностью разобрать ситуацию?
+              </p>
+              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px;">
+                Узнать причины и скрытые факторы — 299 ₽
+              </button>
+              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A;">
+                Полный разбор с советами и прогнозом — 499 ₽
+              </button>
+            </div>
+          `;
+        }
+
+        aiAnswer.innerHTML = `
+          <p class="answer-text">${escapeHtml(answer).replace(/\n/g, '<br>')}</p>
+          ${buttonsHtml}
+        `;
         aiAnswer.classList.add('visible');
-
-        aiAnswer.querySelectorAll('.followup-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            if (getFreeQuestionsCount() >= 2) {
-              updateFormState();
-              return;
-            }
-            document.getElementById('question').value = btn.textContent;
-aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));          });
-        });
       }
-
       saveReading(question, answer);
       incrementFreeQuestionsCount();
       
@@ -624,8 +608,10 @@ if (payVoiceBtn) {
 }
 
 /* ============================================================
-   6. ОПЛАТА / ЗАЯВКА (Интеграция с ЮKassa)
+/* ============================================================
+   ОПЛАТА И ИИ (Воронка)
    ============================================================ */
+
 window.openPaymentForm = function (packageName) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
@@ -639,19 +625,11 @@ window.openPaymentForm = function (packageName) {
   else if (packageName.includes('499')) amount = 499;
   
   if (amountInput) amountInput.value = amount;
-
-  // Сбрасываем окно в исходное состояние (если открывали до этого)
-  document.getElementById('pay-name').style.display = 'block';
-  document.getElementById('pay-contact').style.display = 'block';
-  document.getElementById('pay-question').style.display = 'block';
-  document.getElementById('pay-voice-btn').style.display = 'block';
-  const btn = document.getElementById('pay-submit-btn');
-  if (btn) {
-    btn.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Перейти к оплате';
-  }
+  
+  // Сбрасываем виджет, если открывали ранее
   document.getElementById('payment-widget-container').innerHTML = '';
+  const btn = document.getElementById('pay-submit-btn');
+  if (btn) { btn.style.display = 'block'; btn.disabled = false; btn.textContent = 'Перейти к оплате'; }
 
   if (modal) modal.style.display = 'flex';
 };
@@ -664,36 +642,24 @@ window.closePaymentForm = function () {
 };
 
 window.submitPayment = async function () {
-  const name = document.getElementById('pay-name').value.trim();
-  const contact = document.getElementById('pay-contact').value.trim();
-  const question = document.getElementById('pay-question').value.trim();
   const amount = document.getElementById('pay-amount').value;
   const msg = document.getElementById('pay-message');
   const submitBtn = document.getElementById('pay-submit-btn');
 
-  if (!name || !contact || !question) {
-    if (msg) { msg.textContent = 'Заполни все поля.'; msg.style.color = '#c0392b'; }
-    return;
-  }
-
-  // СОХРАНЯЕМ ВОПРОС В ПАМЯТЬ БРАУЗЕРА ПЕРЕД ОПЛАТОЙ
-  localStorage.setItem('pendingPaidQuestion', question);
-
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Загрузка формы...';
+    submitBtn.textContent = 'Загрузка...';
   }
-  if (msg) { msg.textContent = ''; }
+  if (msg) msg.textContent = '';
 
   try {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, contact, question, amount: Number(amount) })
+      body: JSON.stringify({ amount: Number(amount) }) // Отправляем только сумму
     });
 
     const data = await response.json();
-
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
 
     const checkout = new window.YooMoneyCheckoutWidget({
@@ -701,72 +667,66 @@ window.submitPayment = async function () {
       return_url: 'https://istina-v-taro.ru',
       error_callback: function(error) {
         console.error('Ошибка виджета:', error);
-        if (msg) { msg.textContent = 'Ошибка оплаты. Попробуйте позже.'; msg.style.color = '#c0392b'; }
+        if (msg) { msg.textContent = 'Ошибка оплаты.'; msg.style.color = '#c0392b'; }
       }
     });
 
-    document.getElementById('pay-name').style.display = 'none';
-    document.getElementById('pay-contact').style.display = 'none';
-    document.getElementById('pay-question').style.display = 'none';
-    document.getElementById('pay-voice-btn').style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
-
     checkout.render('payment-widget-container');
 
   } catch (err) {
     console.error(err);
-    if (msg) {
-      msg.textContent = err.message || 'Ошибка при создании платежа.';
-      msg.style.color = '#c0392b';
-    }
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Перейти к оплате';
-    }
+    if (msg) { msg.textContent = err.message || 'Ошибка.'; msg.style.color = '#c0392b'; }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Перейти к оплате'; }
   }
 };
-/* ============================================================
-   8. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
-   ============================================================ */
+
+// Функция для кнопки "Узнать продолжение" (99р)
+window.openDeeperPayment = function(questionText) {
+  localStorage.setItem('pendingDeeperQuestion', questionText);
+  window.openPaymentForm('Продолжение анализа — 99 ₽');
+};
+
+// Обработка возврата после оплаты
 function checkPaidReading() {
-  const paidQuestion = localStorage.getItem('pendingPaidQuestion');
+  const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
   
-  if (paidQuestion) {
-    // Очищаем память, чтобы не показывать расклад при каждом обновлении
-    localStorage.removeItem('pendingPaidQuestion');
-    
-    // Плавно скроллим к блоку ИИ
+  if (deeperQuestion) {
+    localStorage.removeItem('pendingDeeperQuestion');
     document.getElementById('ai-tarot').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('question').value = deeperQuestion;
+    showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
     
-    // Вставляем вопрос в поле ввода
-    document.getElementById('question').value = paidQuestion;
+    // Временно снимаем лимит, чтобы запрос прошел
+    const oldCount = localStorage.getItem('freeQuestionsData');
+    localStorage.setItem('freeQuestionsData', JSON.stringify({ date: getTodayDateString(), count: 0 }));
     
-    // Выводим сообщение
-    showMessage(aiMessage, 'Оплата прошла успешно! Карты уже раскладываются...');
-    
-    // Имитируем отправку формы, чтобы ИИ выдал ответ
-    const oldCount = localStorage.getItem('freeQuestionsCount');
-    localStorage.setItem('freeQuestionsCount', '0'); 
-    
-    // Отправляем форму
     setTimeout(() => {
-      if (aiForm) {
-        aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-      // Возвращаем лимит обратно
+      if (aiForm) aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      
       setTimeout(() => {
-        localStorage.setItem('freeQuestionsCount', oldCount);
+        // Ставим лимит 2 (чтобы больше не задавал бесплатно)
+        localStorage.setItem('freeQuestionsData', JSON.stringify({ date: getTodayDateString(), count: 2 }));
         updateFormState();
       }, 5000);
     }, 500);
   }
 }
 
-// Запускаем проверку при загрузке страницы
-document.addEventListener('DOMContentLoaded', checkPaidReading);
+// Инициализация
+document.addEventListener('DOMContentLoaded', () => {
+  currentDailyCard = getDailyCard();
+  loadReadings();
+  updateFormState();
+  checkPaidReading(); // Проверяем, не вернулся ли клиент с оплаты
+});
+
 if (document.readyState !== 'loading') {
+  currentDailyCard = getDailyCard();
+  loadReadings();
+  updateFormState();
   checkPaidReading();
 }
 </script>
-  </body>
+</body>
 </html>
