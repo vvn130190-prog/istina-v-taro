@@ -58,9 +58,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 #ai-answer{white-space:pre-wrap;background:#FFF;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:20px;display:none}
 #ai-answer.visible{display:block}
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
-#ai-answer .followups-title{font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin:0 0 10px}
-#ai-answer .followup-btn{display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:#F8F6F0;cursor:pointer;font-family:inherit;font-size:14px;color:var(--text);transition:background .2s,border .2s}
-#ai-answer .followup-btn:hover{background:#F0E8DC;border-color:var(--gold)}
 .my-readings{margin-top:24px}
 .my-readings h3{font-size:18px;margin-bottom:12px}
 .reading-item{border:1px solid var(--line);background:#FFF;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:14px}
@@ -151,7 +148,9 @@ footer a:hover{color:var(--gold)}
     <div class="section-head">
       <div class="eyebrow">Авторская методика «Истина в Таро»</div>
       <h2>Расскажи, что тебя беспокоит</h2>
-<p>Опиши ситуацию своими словами. Первый вопрос — бесплатно. Углубленный разбор и дополнительные вопросы — от 99 ₽.</p>    <div class="ai-card card">
+      <p>Опиши ситуацию своими словами. Первый вопрос — бесплатно. Углубленный разбор и дополнительные вопросы — от 99 ₽.</p>
+    </div>
+    <div class="ai-card card">
       <form id="ai-form" novalidate>
         <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
         <textarea id="question" name="question" maxlength="1000" required placeholder="Что произошло? Что тебя тревожит?"></textarea>
@@ -260,7 +259,8 @@ footer a:hover{color:var(--gold)}
   <div class="eyebrow">Твоё время — сейчас</div>
   <h2>Прислушайся к себе</h2>
   <p>Каждый новый взгляд на ситуацию может стать началом важных личных открытий.</p>
-<p style="color:var(--muted); font-size:14px;">Возвращайтесь завтра за новой картой дня ✧</p></section>
+  <p style="color:var(--muted); font-size:14px;">Возвращайтесь завтра за новой картой дня ✧</p>
+</section>
 </main>
 <footer>
   <div class="container cols">
@@ -400,7 +400,8 @@ function updateFormState() {
       payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽');
       aiSubmit.parentNode.appendChild(payBtn);
     }
-    if (aiMessage) showMessage(aiMessage, 'Хотите узнать больше? Выберите глубину разбора ниже.', false);  } else {
+    if (aiMessage) showMessage(aiMessage, 'Хотите узнать больше? Выберите глубину разбора ниже.', false);
+  } else {
     if (aiSubmit) { aiSubmit.style.display = 'inline-block'; aiSubmit.disabled = false; }
     const payBtn = document.getElementById('ai-pay-btn');
     if (payBtn) payBtn.remove();
@@ -458,35 +459,31 @@ if (aiForm) {
       const data = await resp.json();
       const answer = data.answer || data.text || 'Не удалось получить ответ.';
 
-            if (aiAnswer) {
+      if (aiAnswer) {
         let buttonsHtml = '';
-        
-        // Если пользователь УЖЕ заплатил (лимит бесплатных исчерпан)
         const hasPaid = getFreeQuestionsCount() >= 2;
 
         if (!hasPaid) {
-          // БЕСПЛАТНЫЙ ОТВЕТ (короткий) -> предлагаем 99р
           buttonsHtml = `
-            <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
-              <p style="font-size: 14px; margin-bottom: 15px; color: var(--text);">
+            <div style="margin-top: 15px; padding: 12px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
+              <p style="font-size: 13px; margin-bottom: 12px; color: var(--text); line-height: 1.4;">
                 <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
               </p>
-              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 14px; padding: 12px; background: var(--gold); color: #18120b;">
+              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 13px; padding: 10px; background: var(--gold); color: #18120b; border-radius: 8px;">
                 Узнать продолжение — 99 ₽
               </button>
             </div>
           `;
         } else {
-          // ПОСЛЕ ОПЛАТЫ (глубокий ответ) -> предлагаем 299р и 499р
           buttonsHtml = `
-            <div style="margin-top: 20px; padding: 15px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line);">
-              <p style="font-size: 14px; margin-bottom: 15px; font-weight: bold; text-align: center;">
+            <div style="margin-top: 15px; padding: 12px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line); text-align: center;">
+              <p style="font-size: 13px; margin-bottom: 12px; font-weight: bold; line-height: 1.4;">
                 Хотите полностью разобрать ситуацию?
               </p>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px;">
+              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px; border-radius: 8px;">
                 Узнать причины и скрытые факторы — 299 ₽
               </button>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A;">
+              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A; border-radius: 8px;">
                 Полный разбор с советами и прогнозом — 499 ₽
               </button>
             </div>
