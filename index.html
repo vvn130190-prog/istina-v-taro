@@ -55,7 +55,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 .ai-actions .btn{flex:1;min-width:200px}
 .hint{font-size:13px;color:var(--muted);margin:12px 0 18px}
 .disclaimer{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
-#ai-answer{white-space:pre-wrap;background:#FFF;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:20px;display:none}
+#ai-answer{white-space:normal;background:#FFF;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:20px;display:none}
 #ai-answer.visible{display:block}
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
 .my-readings{margin-top:24px}
@@ -465,25 +465,25 @@ if (aiForm) {
 
         if (!hasPaid) {
           buttonsHtml = `
-            <div style="margin-top: 15px; padding: 12px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
-              <p style="font-size: 13px; margin-bottom: 12px; color: var(--text); line-height: 1.4;">
+            <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
+              <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
                 <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
               </p>
-              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 13px; padding: 10px; background: var(--gold); color: #18120b; border-radius: 8px;">
+              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
                 Узнать продолжение — 99 ₽
               </button>
             </div>
           `;
         } else {
           buttonsHtml = `
-            <div style="margin-top: 15px; padding: 12px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line); text-align: center;">
-              <p style="font-size: 13px; margin-bottom: 12px; font-weight: bold; line-height: 1.4;">
+            <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--line); text-align: center;">
+              <p style="font-size: 13px; margin-bottom: 10px; font-weight: bold; line-height: 1.4;">
                 Хотите полностью разобрать ситуацию?
               </p>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 8px; font-size: 13px; padding: 10px; border-radius: 8px;">
+              <button type="button" class="btn" onclick="window.openPaymentForm('Глубокий разбор — 299 ₽')" style="width: 100%; margin-bottom: 6px; font-size: 13px; padding: 8px; border-radius: 6px;">
                 Узнать причины и скрытые факторы — 299 ₽
               </button>
-              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 10px; background: #29252A; color: #FFF; border-color: #29252A; border-radius: 8px;">
+              <button type="button" class="btn" onclick="window.openPaymentForm('Полный разбор — 499 ₽')" style="width: 100%; font-size: 13px; padding: 8px; background: #29252A; color: #FFF; border-color: #29252A; border-radius: 6px;">
                 Полный разбор с советами и прогнозом — 499 ₽
               </button>
             </div>
