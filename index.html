@@ -120,10 +120,9 @@ footer a:hover{color:var(--gold)}
           <div style="font-family:Georgia, serif; font-size:18px; color:#B99A5B; letter-spacing:2px;">КАРТА ДНЯ</div>
           <div style="font-family:Georgia, serif; font-size:14px; color:#C8AC72; letter-spacing:2px; margin-top:10px;">Нажми на меня ✧</div>
         </div>
-        <div id="card-front" style="display:none; width:100%; min-height:400px; background:#FFF; border:3px solid #B99A5B; border-radius:12px; box-shadow: 0 8px 24px rgba(185,154,91,0.25); padding:10px; box-sizing:border-box;">
-          <div id="card-image" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
-        </div>
-      </div>
+       <div id="card-front" style="display:none; width:100%; height:100%; background:#FFF; border:3px solid #B99A5B; border-radius:12px; box-shadow: 0 8px 24px rgba(185,154,91,0.25); box-sizing:border-box; overflow:hidden;">
+  <img id="card-image" style="width:100%; height:100%; object-fit:contain; display:block;" alt="Карта дня">
+</div>
       <div id="daily-meaning" style="margin-top:20px; color:#77717A; font-size:15px; line-height:1.6; padding:0 10px; min-height:80px;"></div>
     </div>
   </div>
@@ -131,7 +130,7 @@ footer a:hover{color:var(--gold)}
 <section class="section" id="how">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">Авторская методика</div>
+      <div class="eyebrow">Авторская методика Виктории Нос</div>
       <h2>Как это работает</h2>
       <p>Четыре шага от вопроса к ясности — без мистики и запугивания.</p>
     </div>
@@ -356,8 +355,8 @@ function renderDailyCard() {
   const meaningEl = document.getElementById('daily-meaning');
   if (!cardBack || !cardFront || !cardImage) return;
 
-  cardImage.innerHTML = `<img src="${currentDailyCard.image}" alt="${currentDailyCard.name}" loading="lazy" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
-  cardBack.style.display = 'none';
+cardImage.src = currentDailyCard.image;
+cardImage.alt = currentDailyCard.name;  cardBack.style.display = 'none';
   cardFront.style.display = 'flex';
 
   if (meaningEl) {
