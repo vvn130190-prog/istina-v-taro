@@ -694,8 +694,9 @@ document.addEventListener('DOMContentLoaded', () => {
         installBtn.style.display = 'block';
     }
 
-    installBtn.onclick = () => {
+       installBtn.onclick = () => {
         if (window.deferredPrompt) {
+            // Для Android
             window.deferredPrompt.prompt();
             window.deferredPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
@@ -704,7 +705,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.deferredPrompt = null;
             });
         } else {
-            alert('Чтобы сохранить сайт на iPhone:\n\n1. Нажмите кнопку "Поделиться" (квадрат со стрелкой) внизу экрана.\n2. Выберите "На экран Домой".');
+            // Для iPhone (Safari / Яндекс) — рисуем красивую подсказку прямо на сайте
+            const hint = document.createElement('div');
+            hint.style.cssText = `
+                position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+                background: #F8F6F0; border: 2px solid #B99A5B; border-radius: 16px;
+                padding: 15px 20px; width: 85%; max-width: 350px; text-align: center;
+                z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                font-family: -apple-system, sans-serif; color: #29252A;
+            `;
+            hint.innerHTML = `
+                <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
+                <div style="font-weight: bold; color: #B99A5B; margin-bottom: 5px;">Сохранить на iPhone</div>
+                <div style="font-size: 13px; line-height: 1.4;">
+                    Нажмите на кнопку <b>«Поделиться»</b> внизу экрана, затем прокрутите меню и выберите <b>«На экран "Домой"»</b>.
+                </div>
+                <div style="font-size: 20px; margin-top: 10px;">👇</div>
+            `;
+            document.body.appendChild(hint);
+            
+            // Автоматически убираем подсказку через 7 секунд
+            setTimeout(() => hint.remove(), 7000);
         }
     };
 
