@@ -643,17 +643,22 @@ window.openDeeperPayment = function(questionText) {
 
 function checkPaidReading() {
   const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
+  
   if (deeperQuestion) {
     localStorage.removeItem('pendingDeeperQuestion');
     document.getElementById('ai-tarot').scrollIntoView({ behavior: 'smooth' });
     document.getElementById('question').value = deeperQuestion;
     showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
     
-    const oldCount = localStorage.getItem('freeQuestionsCount');
+    // Принудительно снимаем лимит для этого запроса
     localStorage.setItem('freeQuestionsCount', '0'); 
     
     setTimeout(() => {
-      if (aiForm) aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      if (aiForm) {
+        aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+      
+      // Через 5 секунд ставим лимит 1 (чтобы следующий вопрос был платным)
       setTimeout(() => {
         localStorage.setItem('freeQuestionsCount', '1');
         updateFormState();
