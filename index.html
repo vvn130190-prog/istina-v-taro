@@ -8,8 +8,29 @@
 <link rel="manifest" href="/manifest.json">
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      // Проверяем обновления каждую минуту
+      setInterval(() => { reg.update(); }, 60000);
+
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Защита от бесконечной перезагрузки
+            if (!window.sessionStorage.getItem('sw_reloaded')) {
+              window.sessionStorage.setItem('sw_reloaded', 'true');
+              // Показываем окошко клиенту
+              if (confirm('Вышло обновление сайта! Нажмите ОК, чтобы загрузить новую версию.')) {
+                window.location.reload();
+              }
+            }
+          }
+        });
+      });
+    });
+  });
+}
 </script>
 <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
 <style>
