@@ -630,13 +630,16 @@ window.submitPayment = async function () {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
   if (msg) msg.textContent = '';
 
-  try {
+ try {
+    // 1. Сначала объявляем переменную с вопросом
+    const pendingQ = localStorage.getItem('pendingDeeperQuestion') || document.getElementById('question').value.trim() || 'Вопрос не указан';
+    
+    // 2. Потом вызываем fetch
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount })
+      body: JSON.stringify({ amount: amount, question: pendingQ })
     });
-
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
 
