@@ -625,7 +625,6 @@ window.closePaymentForm = function () {
 window.submitPayment = async function () {
   const msg = document.getElementById('pay-message');
   const submitBtn = document.getElementById('pay-submit-btn');
-
   const amount = Number(window.currentAmount) || 99;
 
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
@@ -643,10 +642,32 @@ window.submitPayment = async function () {
 
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
-      return_url: 'https://istina-v-taro.ru',
+      // return_url НЕ указываем — чтобы success сработал на месте, без перезагрузки
       error_callback: function(error) {
         console.error('Ошибка виджета:', error);
         if (msg) { msg.textContent = 'Ошибка оплаты.'; msg.style.color = '#c0392b'; }
+      }
+    });
+
+    // 👇 КЛЮЧЕВОЕ: перехват успешной оплаты
+    checkout.on('success', () => {
+      window.closePaymentForm();
+      try { checkout.destroy(); } catch (e) {}
+
+      const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
+      if (deeperQuestion) {
+        localStorage.removeItem('pendingDeeperQuestion');
+        const section = document.getElementById('ai-tarot');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+        const questionInput = document.getElementById('question');
+        if (questionInput) questionInput.value = deeperQuestion;
+        showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
+
+        setTimeout(() => {
+          requestTarot(deeperQuestion, true);
+        }, 500);
+      } else {
+        showMessage(aiMessage, 'Оплата прошла. Задайте ваш вопрос ✧');
       }
     });
 
@@ -658,11 +679,6 @@ window.submitPayment = async function () {
     if (msg) { msg.textContent = err.message || 'Ошибка.'; msg.style.color = '#c0392b'; }
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Перейти к оплате'; }
   }
-};
-
-window.openDeeperPayment = function(questionText) {
-  localStorage.setItem('pendingDeeperQuestion', questionText);
-  window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
 };
 
 /* ============================================================
