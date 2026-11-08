@@ -65,7 +65,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
 #ai-answer .answer-text strong, #ai-answer .answer-text b { color: var(--gold); }
 
-/* СТИЛИ ДЛЯ ЗОЛОТЫХ РАМОК */
 #ai-answer .tarot-block {
     background: linear-gradient(145deg, #FFFDF8, #F7F3EB);
     border: 2px solid var(--gold);
@@ -221,21 +220,21 @@ footer a:hover{color:var(--gold)}
         <h3>Один вопрос</h3>
         <div class="price">99 ₽</div>
         <p>Полный ответ на один вопрос + 1 уточнение.</p>
-        <button class="btn" onclick="openPaymentForm('Один вопрос — 99 ₽')">Оплатить</button>
+        <button class="btn" onclick="openPaymentForm('Один вопрос — 99 ₽', 99)">Оплатить</button>
       </article>
       <article class="package featured">
         <div class="tag">Популярный выбор</div>
         <h3>Глубже понять ситуацию</h3>
         <div class="price">299 ₽</div>
         <p>Подробный расклад + 3 уточняющих вопроса + вопросы для размышления.</p>
-        <button class="btn" onclick="openPaymentForm('Глубже понять — 299 ₽')">Оплатить</button>
+        <button class="btn" onclick="openPaymentForm('Глубже понять — 299 ₽', 299)">Оплатить</button>
       </article>
       <article class="package">
         <div class="tag">Расширенный разбор</div>
         <h3>Путь к ясности</h3>
         <div class="price">499 ₽</div>
         <p>Расширенный разбор + 5 уточнений + карта дня на неделю.</p>
-        <button class="btn" onclick="openPaymentForm('Путь к ясности — 499 ₽')">Оплатить</button>
+        <button class="btn" onclick="openPaymentForm('Путь к ясности — 499 ₽', 499)">Оплатить</button>
       </article>
     </div>
     <p class="pay-note">🔒 Оплата через <b>ЮKassa</b> или переводом · <a href="/oferta.html">Оферта</a> · <a href="/rekvizity.html">Реквизиты</a></p>
@@ -247,13 +246,13 @@ footer a:hover{color:var(--gold)}
     <span onclick="closePaymentForm()" style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; color:#777;">&times;</span>
     <h3 style="margin-top:0;">Оплата расклада</h3>
     <p style="color:#777; font-size:14px; margin-bottom:20px;">Вы выбрали: <strong id="selected-package-name"></strong></p>
-    
+
     <div id="payment-form-wrap">
-      <div id="payment-widget-container" style="margin-bottom: 15px;"></div> 
+      <div id="payment-widget-container" style="margin-bottom: 15px;"></div>
       <input type="hidden" id="pay-amount" value="">
       <button type="button" id="pay-submit-btn" class="btn" style="width:100%;" onclick="submitPayment()">Перейти к оплате</button>
     </div>
-    
+
     <p id="pay-message" style="text-align:center; margin-top:15px; font-size:14px; color:var(--gold);"></p>
   </div>
 </div>
@@ -302,7 +301,8 @@ footer a:hover{color:var(--gold)}
 /* ============================================================
    1. КОНСТАНТЫ И ДАННЫЕ
    ============================================================ */
-const TAROT_FUNCTION_URL = 'https://istina-v-taro.ru/api/tarot';
+// Относительный путь — работает и на istina-v-taro.ru, и на *.vercel.app
+const TAROT_FUNCTION_URL = '/api/tarot';
 
 // PWA: Установка на телефон
 window.deferredPrompt = null;
@@ -335,6 +335,7 @@ const dailyCards = [
   { name:"Суд", meaning:"Пробуждение и важное решение. Слушай свой внутренний голос.", image:"/icons/20_Judgement.jpg" },
   { name:"Мир", meaning:"Завершение цикла и гармония. Ты на правильном пути.", image:"/icons/21_World.jpg" }
 ];
+
 /* ============================================================
    2. УТИЛИТЫ
    ============================================================ */
@@ -388,10 +389,16 @@ function renderDailyCard() {
   const meaningEl = document.getElementById('daily-meaning');
   if (!cardBack || !cardFront || !cardImage) return;
 
+  cardImage.onerror = () => {
+    cardImage.style.display = 'none';
+    if (meaningEl) {
+      meaningEl.innerHTML = `<div style="font-family:Georgia,serif; font-size:22px; color:#29252A; margin-bottom:10px;">${currentDailyCard.name}</div><div>${currentDailyCard.meaning}</div>`;
+    }
+  };
   cardImage.src = currentDailyCard.image;
   cardImage.alt = currentDailyCard.name;
   cardImage.style.display = 'block';
-  
+
   cardBack.style.display = 'none';
   cardFront.style.display = 'block';
 
@@ -403,7 +410,7 @@ function renderDailyCard() {
 window.flipCard = renderDailyCard;
 
 /* ============================================================
-   4. ИИ-РАСКЛАД И ЛИМИТЫ (ТОЛЬКО 1 БЕСПЛАТНЫЙ ВОПРОС)
+   4. ИИ-РАСКЛАД И ЛИМИТЫ (1 БЕСПЛАТНЫЙ ВОПРОС)
    ============================================================ */
 const aiForm = document.getElementById('ai-form');
 const aiSubmit = document.getElementById('ai-submit');
@@ -411,20 +418,26 @@ const aiMessage = document.getElementById('ai-message');
 const aiAnswer = document.getElementById('ai-answer');
 const readingsList = document.getElementById('readings-list');
 
+// Флаг, чтобы не запускать checkPaidReading дважды
+let paidReadingChecked = false;
+
 function getFreeQuestionsCount() {
   return parseInt(localStorage.getItem('freeQuestionsCount') || '0', 10);
 }
 
-function incrementFreeQuestionsCount() {
-  const count = getFreeQuestionsCount() + 1;
-  localStorage.setItem('freeQuestionsCount', count);
+function setFreeQuestionsCount(n) {
+  localStorage.setItem('freeQuestionsCount', String(n));
   updateFormState();
+}
+
+function incrementFreeQuestionsCount() {
+  setFreeQuestionsCount(getFreeQuestionsCount() + 1);
 }
 
 function updateFormState() {
   const count = getFreeQuestionsCount();
-  if (count >= 1) { 
-    if (aiSubmit) aiSubmit.style.display = 'none'; 
+  if (count >= 1) {
+    if (aiSubmit) aiSubmit.style.display = 'none';
     if (!document.getElementById('ai-pay-btn')) {
       const payBtn = document.createElement('button');
       payBtn.type = 'button';
@@ -432,7 +445,7 @@ function updateFormState() {
       payBtn.className = 'btn';
       payBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
-      payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽');
+      payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
       aiSubmit.parentNode.appendChild(payBtn);
     }
     if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Хотите узнать больше? Выберите глубину разбора ниже.', false);
@@ -470,6 +483,68 @@ function saveReading(question, answer) {
   loadReadings();
 }
 
+/**
+ * Универсальная функция запроса расклада.
+ * @param {string} question — текст вопроса
+ * @param {boolean} isPaidContinuation — true, если это оплаченное продолжение (не тратит бесплатный лимит)
+ */
+async function requestTarot(question, isPaidContinuation = false) {
+  if (aiSubmit) aiSubmit.disabled = true;
+  showMessage(aiMessage, 'Карты раскладываются…');
+  if (aiAnswer) { aiAnswer.classList.remove('visible'); aiAnswer.innerHTML = ''; }
+
+  try {
+    const resp = await fetch(TAROT_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: question, isFree: !isPaidContinuation && getFreeQuestionsCount() < 1 })
+    });
+
+    if (!resp.ok) throw new Error('Ошибка сети');
+
+    const data = await resp.json();
+    const answer = data.answer || data.text || 'Не удалось получить ответ.';
+
+    if (aiAnswer) {
+      let buttonsHtml = '';
+      const hasFreeLeft = getFreeQuestionsCount() < 1;
+
+      if (hasFreeLeft) {
+        buttonsHtml = `
+          <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
+            <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
+              <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
+            </p>
+            <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question).replace(/'/g, "\\'")}')" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
+              Узнать продолжение — 99 ₽
+            </button>
+          </div>
+        `;
+      }
+
+      aiAnswer.innerHTML = `
+        <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
+        ${buttonsHtml}
+      `;
+      aiAnswer.classList.add('visible');
+    }
+
+    saveReading(question, answer);
+
+    // Тратим бесплатный лимит только если это не оплаченное продолжение
+    if (!isPaidContinuation) {
+      incrementFreeQuestionsCount();
+    }
+
+    if (getFreeQuestionsCount() < 1) showMessage(aiMessage, '');
+
+  } catch (err) {
+    console.error(err);
+    showMessage(aiMessage, 'Не удалось получить расклад. Попробуй ещё раз чуть позже.', true);
+    if (aiSubmit) aiSubmit.disabled = false;
+  }
+}
+
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -479,58 +554,7 @@ if (aiForm) {
     document.getElementById('question').value = '';
     if (!question) { showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true); return; }
 
-    aiSubmit.disabled = true;
-    showMessage(aiMessage, 'Карты раскладываются…');
-    if (aiAnswer) { aiAnswer.classList.remove('visible'); aiAnswer.innerHTML = ''; }
-
-    try {
-      const resp = await fetch(TAROT_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: question, isFree: getFreeQuestionsCount() < 1 })
-      });
-
-      if (!resp.ok) throw new Error('Ошибка сети');
-      
-      const data = await resp.json();
-      const answer = data.answer || data.text || 'Не удалось получить ответ.';
-
-      if (aiAnswer) {
-        let buttonsHtml = '';
-        const hasPaid = getFreeQuestionsCount() >= 1;
-
-        if (!hasPaid) {
-          buttonsHtml = `
-            <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
-              <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
-                <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
-              </p>
-              <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question)}')" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
-                Узнать продолжение — 99 ₽
-              </button>
-            </div>
-          `;
-        } else {
-          buttonsHtml = '';
-        }
-
-        aiAnswer.innerHTML = `
-          <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
-          ${buttonsHtml}
-        `;
-        aiAnswer.classList.add('visible');
-      }
-
-      saveReading(question, answer);
-      incrementFreeQuestionsCount();
-      
-      if (getFreeQuestionsCount() < 1) showMessage(aiMessage, '');
-      
-    } catch (err) {
-      console.error(err);
-      showMessage(aiMessage, 'Не удалось получить расклад. Попробуй ещё раз чуть позже.', true);
-      aiSubmit.disabled = false;
-    }
+    await requestTarot(question, false);
   });
 }
 
@@ -544,7 +568,7 @@ function startVoiceInput(targetInputId, buttonElement, statusElement) {
   const recognition = new SR();
   recognition.lang = 'ru-RU';
   recognition.interimResults = false;
-  
+
   const originalText = buttonElement.textContent;
   buttonElement.disabled = true;
   buttonElement.textContent = '🎤 Слушаю...';
@@ -571,14 +595,18 @@ if (voiceBtn) {
 /* ============================================================
    6. ОПЛАТА (Воронка)
    ============================================================ */
-window.openPaymentForm = function (packageName) {
+// Сумма теперь передаётся явным параметром — без парсинга строки
+window.openPaymentForm = function (packageName, amount) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
-  
+
   if (nameEl) nameEl.textContent = packageName;
 
-  // Сохраняем название пакета, чтобы потом взять из него сумму
   window.currentPackageName = packageName;
+  window.currentAmount = Number(amount) || 99;
+
+  const amountInput = document.getElementById('pay-amount');
+  if (amountInput) amountInput.value = String(window.currentAmount);
 
   document.getElementById('payment-widget-container').innerHTML = '';
   const btn = document.getElementById('pay-submit-btn');
@@ -598,12 +626,7 @@ window.submitPayment = async function () {
   const msg = document.getElementById('pay-message');
   const submitBtn = document.getElementById('pay-submit-btn');
 
-  // Берем сумму прямо из названия пакета, а не из скрытого поля
-  const packageName = window.currentPackageName || '';
-  let amount = 99; // По умолчанию
-  if (packageName.includes('299')) amount = 299;
-  else if (packageName.includes('499')) amount = 499;
-  else if (packageName.includes('99')) amount = 99;
+  const amount = Number(window.currentAmount) || 99;
 
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
   if (msg) msg.textContent = '';
@@ -612,7 +635,7 @@ window.submitPayment = async function () {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: Number(amount) }) // Отправляем точную сумму
+      body: JSON.stringify({ amount: amount })
     });
 
     const data = await response.json();
@@ -636,102 +659,106 @@ window.submitPayment = async function () {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Перейти к оплате'; }
   }
 };
+
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
-  window.openPaymentForm('Продолжение анализа — 99 ₽');
+  window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
 };
 
-function checkPaidReading() {
+/* ============================================================
+   7. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
+   ============================================================ */
+async function checkPaidReading() {
+  if (paidReadingChecked) return;
+  paidReadingChecked = true;
+
   const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
-  
-  if (deeperQuestion) {
-    localStorage.removeItem('pendingDeeperQuestion');
-    document.getElementById('ai-tarot').scrollIntoView({ behavior: 'smooth' });
-    document.getElementById('question').value = deeperQuestion;
-    showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
-    
-    // Принудительно снимаем лимит для этого запроса
-    localStorage.setItem('freeQuestionsCount', '0'); 
-    
-    setTimeout(() => {
-      if (aiForm) {
-        aiForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-      
-      // Через 5 секунд ставим лимит 1 (чтобы следующий вопрос был платным)
-      setTimeout(() => {
-        localStorage.setItem('freeQuestionsCount', '1');
-        updateFormState();
-      }, 5000);
-    }, 500);
-  }
+  if (!deeperQuestion) return;
+
+  // Удаляем сразу, чтобы не запустить повторно при перезагрузке
+  localStorage.removeItem('pendingDeeperQuestion');
+
+  const section = document.getElementById('ai-tarot');
+  if (section) section.scrollIntoView({ behavior: 'smooth' });
+
+  const questionInput = document.getElementById('question');
+  if (questionInput) questionInput.value = deeperQuestion;
+
+  showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
+
+  // Небольшая задержка для плавности скролла
+  setTimeout(() => {
+    requestTarot(deeperQuestion, true);
+  }, 500);
 }
 
 /* ============================================================
-   7. ИНИЦИАЛИЗАЦИЯ И PWA
+   8. ИНИЦИАЛИЗАЦИЯ И PWA
    ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  currentDailyCard = getDailyCard();
-  loadReadings();
-  updateFormState();
-  checkPaidReading();
-});
-
-if (document.readyState !== 'loading') {
+function initApp() {
   currentDailyCard = getDailyCard();
   loadReadings();
   updateFormState();
   checkPaidReading();
 }
 
-// Кнопка установки
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// Кнопка установки PWA
 document.addEventListener('DOMContentLoaded', () => {
-    const installBtn = document.createElement('button');
-    installBtn.textContent = '📱 Сохранить на телефон';
-    installBtn.style.cssText = `
-        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-        background: #29252A; color: #FFF; padding: 12px 24px;
-        border-radius: 30px; border: 2px solid #B99A5B; font-weight: bold;
-        z-index: 9999; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        display: none;
-    `;
-    
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        installBtn.style.display = 'block';
+  // Не показываем, если уже установлено
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  const installBtn = document.createElement('button');
+  installBtn.textContent = '📱 Сохранить на телефон';
+  installBtn.style.cssText = `
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #29252A; color: #FFF; padding: 12px 24px;
+      border-radius: 30px; border: 2px solid #B99A5B; font-weight: bold;
+      z-index: 9999; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      display: none;
+  `;
+
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    installBtn.style.display = 'block';
+  }
+
+  installBtn.onclick = () => {
+    installBtn.style.display = 'none';
+
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt();
+      window.deferredPrompt.userChoice.then(() => {
+        window.deferredPrompt = null;
+      });
+    } else {
+      const hint = document.createElement('div');
+      hint.style.cssText = `
+          position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+          background: #F8F6F0; border: 2px solid #B99A5B; border-radius: 16px;
+          padding: 15px 20px; width: 85%; max-width: 350px; text-align: center;
+          z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          font-family: -apple-system, sans-serif; color: #29252A;
+      `;
+      hint.innerHTML = `
+          <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
+          <div style="font-weight: bold; color: #B99A5B; margin-bottom: 5px;">Сохранить на iPhone</div>
+          <div style="font-size: 13px; line-height: 1.4;">
+              Нажмите на кнопку <b>«Поделиться»</b> внизу экрана, затем выберите <b>«На экран "Домой"»</b>.
+          </div>
+          <div style="font-size: 20px; margin-top: 10px;">👇</div>
+      `;
+      document.body.appendChild(hint);
+      setTimeout(() => hint.remove(), 7000);
     }
+  };
 
-    installBtn.onclick = () => {
-        // Прячем кнопку сразу после клика
-        installBtn.style.display = 'none';
-
-        if (window.deferredPrompt) {
-            window.deferredPrompt.prompt();
-            window.deferredPrompt.userChoice.then((choiceResult) => {
-                window.deferredPrompt = null;
-            });
-        } else {
-            const hint = document.createElement('div');
-            hint.style.cssText = `
-                position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-                background: #F8F6F0; border: 2px solid #B99A5B; border-radius: 16px;
-                padding: 15px 20px; width: 85%; max-width: 350px; text-align: center;
-                z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-                font-family: -apple-system, sans-serif; color: #29252A;
-            `;
-            hint.innerHTML = `
-                <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
-                <div style="font-weight: bold; color: #B99A5B; margin-bottom: 5px;">Сохранить на iPhone</div>
-                <div style="font-size: 13px; line-height: 1.4;">
-                    Нажмите на кнопку <b>«Поделиться»</b> внизу экрана, затем выберите <b>«На экран "Домой"»</b>.
-                </div>
-                <div style="font-size: 20px; margin-top: 10px;">👇</div>
-            `;
-            document.body.appendChild(hint);
-            setTimeout(() => hint.remove(), 7000);
-        }
-    };
-
-    document.body.appendChild(installBtn);
+  document.body.appendChild(installBtn);
 });
 </script>
 </body>
