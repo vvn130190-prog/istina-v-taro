@@ -1,53 +1,55 @@
+import { Redis } from '@upstash/redis';
+import { randomUUID } from 'crypto';
+
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
+
 export default async function handler(req, res) {
-  // 1. СНАЧАЛА РАЗРЕШАЕМ CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // 2. ОТВЕЧАЕМ НА ПРОВЕРОЧНЫЙ ЗАПРОС БРАУЗЕРА (OPTIONS)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // 3. ПРОВЕРЯЕМ, ЧТО ЭТО POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // 4. ПОЛУЧАЕМ СУММУ
-  const { amount } = req.body || {};
-
-  if (!amount) {
-    return res.status(400).json({ error: 'Сумма не получена' });
-  }
-
-  const shopId = process.env.YOOKASSA_SHOP_ID;
-  const secretKey = process.env.YOOKASSA_SECRET_KEY;
-
-  if (!shopId || !secretKey) {
-    return res.status(500).json({ error: 'Платежные ключи не настроены' });
-  }
+  
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // 5. СОЗДАЕМ ПЛАТЕЖ В ЮKASSA
+    const { amount, question } = req.body;
+    
+    if (!amount) {
+      return res.status(400).json({ error: 'Не указана сумма' });
+    }
+
+    const shopId = process.env.YOOKASSA_SHOP_ID;
+    const secretKey = process.env.YOOKASSA_SECRET_KEY;
+    
+    if (!shopId || !secretKey) {
+      return res.status(500).json({ error: 'Не настроены ключи ЮKassa в Vercel' });
+    }
+
+    // Генерируем уникальный ключ идемпотентности
+    const idempotenceKey = randomUUID();
+
+    // Создаем платеж в ЮKassa
     const response = await fetch('https://api.yookassa.ru/v3/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Idempotence-Key': Date.now().toString(),
-        'Authorization': 'Basic ' + Buffer.from(`${shopId}:${secretKey}`).toString('base64')
+        'Idempotence-Key': idempotenceKey,
+        'Authorization': 'Basic ' + Buffer.from(shopId + ':' + secretKey).toString('base64')
       },
       body: JSON.stringify({
         amount: {
-          value: Number(amount).toFixed(2),
+          value: String(amount),
           currency: 'RUB'
         },
         capture: true,
         confirmation: {
-          type: 'embedded',
-          return_url: 'https://istina-v-taro.ru'
+          type: 'embedded'
         },
-        description: `Расклад Таро. Сумма: ${amount} руб.`
+        description: 'Расклад Таро'
       })
     });
 
@@ -55,13 +57,26 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error('Ошибка ЮKassa:', data);
-      return res.status(400).json({ error: data.description || 'Ошибка ЮKassa', details: data });
+      return res.status(response.status).json({ error: data.description || 'Ошибка ЮKassa' });
     }
 
-    return res.status(200).json({ confirmation_token: data.confirmation.confirmation_token });
+    // ВАЖНО: Сохраняем вопрос в Redis, чтобы вебхук мог его достать
+    if (question) {
+      await redis.set(`order:${data.id}`, JSON.stringify({
+        question: question,
+        name: 'Клиент',
+        contact: 'Не указано'
+      }), { ex: 86400 }); // Храним 24 часа
+    }
+
+    // Отдаем токен для виджета
+    return res.status(200).json({ 
+      confirmation_token: data.confirmation.confirmation_token,
+      payment_id: data.id 
+    });
 
   } catch (error) {
-    console.error('Ошибка сервера:', error);
+    console.error('Ошибка создания платежа:', error);
     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 }
