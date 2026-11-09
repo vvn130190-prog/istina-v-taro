@@ -651,29 +651,33 @@ window.submitPayment = async function () {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
   if (msg) msg.textContent = '';
 
- try {
-    // 1. Сначала объявляем переменную с вопросом
-    const pendingQ = localStorage.getItem('pendingDeeperQuestion') || document.getElementById('question').value.trim() || 'Вопрос не указан';
+  try {
+    // Безопасно получаем вопрос
+    let pendingQ = 'Вопрос не указан';
+    if (localStorage.getItem('pendingDeeperQuestion')) {
+        pendingQ = localStorage.getItem('pendingDeeperQuestion');
+    } else {
+        const qInput = document.getElementById('question');
+        if (qInput && qInput.value.trim()) pendingQ = qInput.value.trim();
+    }
     
-    // 2. Потом вызываем fetch
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amount, question: pendingQ })
     });
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
 
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
-      // return_url НЕ указываем — чтобы success сработал на месте, без перезагрузки
       error_callback: function(error) {
         console.error('Ошибка виджета:', error);
         if (msg) { msg.textContent = 'Ошибка оплаты.'; msg.style.color = '#c0392b'; }
       }
     });
 
-    // 👇 КЛЮЧЕВОЕ: перехват успешной оплаты
     checkout.on('success', () => {
       window.closePaymentForm();
       try { checkout.destroy(); } catch (e) {}
@@ -703,6 +707,12 @@ window.submitPayment = async function () {
     if (msg) { msg.textContent = err.message || 'Ошибка.'; msg.style.color = '#c0392b'; }
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Перейти к оплате'; }
   }
+};
+
+// 👇 ВОТ ЭТУ ФУНКЦИЮ ВЫ ПОТЕРЯЛИ 👇
+window.openDeeperPayment = function(questionText) {
+  localStorage.setItem('pendingDeeperQuestion', questionText);
+  window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
 };
 
 /* ============================================================
