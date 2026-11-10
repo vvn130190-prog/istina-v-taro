@@ -539,16 +539,34 @@ async function requestTarot(question, isPaidContinuation = false) {
   if (aiAnswer) { aiAnswer.classList.remove('visible'); aiAnswer.innerHTML = ''; }
 
   try {
+    // 1. Достаем историю диалога из памяти (если она есть)
+    let history = [];
+    try { 
+        history = JSON.parse(localStorage.getItem('aiHistory')) || []; 
+    } catch(e) {}
+
     const resp = await fetch(TAROT_FUNCTION_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: question, isFree: !isPaidContinuation && getFreeQuestionsCount() < 1 })
+      body: JSON.stringify({ 
+          question: question, 
+          isFree: !isPaidContinuation && getFreeQuestionsCount() < 1,
+          history: history // Передаем историю, чтобы ИИ помнил, о чем говорили
+      })
     });
 
     if (!resp.ok) throw new Error('Ошибка сети');
 
     const data = await resp.json();
     const answer = data.answer || data.text || 'Не удалось получить ответ.';
+
+    // 2. Сохраняем этот диалог в историю для следующих вопросов
+    history.push({ role: 'user', text: question });
+    history.push({ role: 'assistant', text: answer });
+    
+    // Оставляем только последние 10 сообщений, чтобы не перегружать память
+    if (history.length > 10) history = history.slice(-10);
+    localStorage.setItem('aiHistory', JSON.stringify(history));
 
     if (aiAnswer) {
       let buttonsHtml = '';
