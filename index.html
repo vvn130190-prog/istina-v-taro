@@ -86,22 +86,46 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
 #ai-answer .answer-text strong, #ai-answer .answer-text b { color: var(--gold); }
 
+/* --- СТИЛИ ДЛЯ БЛОКОВ ИИ --- */
+#ai-answer .answer-text {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+/* Делаем блоки компактнее и красивее */
 #ai-answer .tarot-block {
     background: linear-gradient(145deg, #FFFDF8, #F7F3EB);
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    padding: 15px;
-    margin-top: 15px;
-    box-shadow: 0 4px 12px rgba(185,154,91,0.15);
+    border: 1px solid var(--gold); /* Тонкая рамка вместо толстой */
+    border-left: 4px solid var(--gold); /* Акцентная полоса слева */
+    border-radius: 10px;
+    padding: 16px 20px; /* Уменьшили внутренние отступы */
+    margin-top: 18px;
+    box-shadow: 0 2px 8px rgba(185,154,91,0.08);
 }
+
 #ai-answer .tarot-block strong {
     color: var(--gold);
     font-family: Georgia, serif;
     font-size: 16px;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    line-height: 1.4;
 }
-#ai-answer .tarot-block p { margin: 0; }
+
+#ai-answer .tarot-block p { 
+    margin: 0; 
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* Стили для списка карт (если ИИ выдал их текстом) */
+#ai-answer .answer-text br {
+    content: "";
+    display: block;
+    margin-bottom: 8px; /* Делает абзацы воздуха */
+}
 
 .my-readings{margin-top:24px}
 .my-readings h3{font-size:18px;margin-bottom:12px}
