@@ -573,20 +573,24 @@ async function requestTarot(question, isPaidContinuation = false) {
       const hasFreeLeft = getFreeQuestionsCount() < 1;
 
       if (hasFreeLeft) {
+        // Оборачиваем вопрос в data-атрибут, чтобы не было проблем с кавычками
         buttonsHtml = `
           <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
             <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
               <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
             </p>
-            <button type="button" class="btn" onclick="openDeeperPayment('${escapeHtml(question).replace(/'/g, "\\'")}')" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
+            <button type="button" class="btn" data-question="${escapeHtml(question)}" onclick="openDeeperPayment(this.dataset.question)" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
               Узнать продолжение — 99 ₽
             </button>
           </div>
         `;
       }
 
+      // 3. ОБОРАЧИВАЕМ ОТВЕТ В ТАРО-БЛОК (исправление стилей)
       aiAnswer.innerHTML = `
-        <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
+        <div class="tarot-block">
+          <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
+        </div>
         ${buttonsHtml}
       `;
       aiAnswer.classList.add('visible');
@@ -723,22 +727,10 @@ window.submitPayment = async function () {
     checkout.on('success', () => {
       window.closePaymentForm();
       try { checkout.destroy(); } catch (e) {}
-
-      const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
-      if (deeperQuestion) {
-        localStorage.removeItem('pendingDeeperQuestion');
-        const section = document.getElementById('ai-tarot');
-        if (section) section.scrollIntoView({ behavior: 'smooth' });
-        const questionInput = document.getElementById('question');
-        if (questionInput) questionInput.value = deeperQuestion;
-        showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
-
-        setTimeout(() => {
-          requestTarot(deeperQuestion, true);
-        }, 500);
-      } else {
-        showMessage(aiMessage, 'Оплата прошла. Задайте ваш вопрос ✧');
-      }
+      
+      // После оплаты просто перезагружаем страницу.
+      // checkPaidReading() подхватит вопрос из localStorage и плавно его запустит.
+      window.location.reload();
     });
 
     if (submitBtn) submitBtn.style.display = 'none';
@@ -751,7 +743,7 @@ window.submitPayment = async function () {
   }
 };
 
-// 👇 ВОТ ЭТУ ФУНКЦИЮ ВЫ ПОТЕРЯЛИ 👇
+// Сохраняем вопрос и открываем модалку
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
   window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
