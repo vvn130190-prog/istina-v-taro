@@ -490,7 +490,16 @@ function updateFormState() {
       payBtn.className = 'btn';
       payBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
-      payBtn.onclick = () => window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
+payBtn.onclick = () => {
+  // Берем текущий вопрос из поля ввода и сохраняем его
+  const qInput = document.getElementById('question');
+  if (qInput && qInput.value.trim()) {
+    localStorage.setItem('pendingDeeperQuestion', qInput.value.trim());
+  } else {
+    localStorage.setItem('pendingDeeperQuestion', 'Продолжение анализа'); // Заглушка
+  }
+  window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
+};
       aiSubmit.parentNode.appendChild(payBtn);
     }
     if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Хотите узнать больше? Выберите глубину разбора ниже.', false);
