@@ -1,11 +1,4 @@
-self.addEventListener('fetch', (e) => {
-  // Не кэшируем POST-запросы и запросы к API
-  if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
-    return; // Просто пропускаем, браузер сделает запрос напрямую
-  }
-  // ... остальной код для GET-запросов
-});
-const CACHE_NAME = 'tarot-v2'; // Поменяли версию, чтобы старый кэш сбросился
+const CACHE_NAME = 'tarot-v3'; // Обновили версию (v3), чтобы старый кэш 100% сбросился
 
 // 1. Устанавливаем новый Service Worker и сразу его активируем
 self.addEventListener('install', (e) => {
@@ -33,9 +26,9 @@ self.addEventListener('activate', (e) => {
 
 // 3. Перехват запросов (Сначала сеть, потом кэш)
 self.addEventListener('fetch', (e) => {
-  // Пропускаем запросы к API (чтобы не кэшировать ответы ИИ и оплату)
-  if (e.request.url.includes('/api/')) {
-    return;
+  // ЗАЩИТА: Не кэшируем POST-запросы и запросы к API
+  if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
+    return; // Просто пропускаем, браузер сделает запрос напрямую
   }
 
   e.respondWith(
