@@ -1,5 +1,4 @@
 import { Redis } from '@upstash/redis';
-import fetch from 'node-fetch'; // Если у вас Node.js 18+, это может быть не нужно
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
@@ -7,7 +6,7 @@ const redis = new Redis({
 });
 
 const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
-const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID; // Если используете Folder ID
+const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID; 
 
 export default async function handler(req, res) {
   // CORS
@@ -22,7 +21,6 @@ export default async function handler(req, res) {
     const { question, isFree, history } = req.body;
 
     // --- 1. ЗАЩИТА ОТ БЕСПЛАТНЫХ ВОПРОСОВ ---
-    // Получаем IP-адрес пользователя
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
     if (isFree) {
@@ -34,13 +32,10 @@ export default async function handler(req, res) {
         });
       }
       
-      // Записываем, что этот IP использовал бесплатный вопрос (храним 30 дней)
-      // 30 дней * 24 часа * 60 минут * 60 секунд = 2592000 секунд
       await redis.set(`free_trial:${ip}`, 'true', { ex: 2592000 });
     }
 
     // --- 2. ФОРМИРОВАНИЕ ЗАПРОСА К YANDEXGPT ---
-    // Подготовка истории для YandexGPT
     const messages = [
       { 
         role: 'system', 
@@ -48,7 +43,6 @@ export default async function handler(req, res) {
       }
     ];
 
-    // Добавляем историю диалога (если есть)
     if (history && Array.isArray(history)) {
       history.forEach(item => {
         messages.push({ 
@@ -58,7 +52,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Добавляем текущий вопрос
     messages.push({ role: 'user', content: question });
 
     // Запрос к YandexGPT
@@ -69,11 +62,11 @@ export default async function handler(req, res) {
         'Authorization': `Api-Key ${YANDEX_API_KEY}`
       },
       body: JSON.stringify({
-        modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt/latest`, // Убедитесь, что Folder ID верный
+        modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt/latest`, 
         completionOptions: {
           stream: false,
           temperature: 0.6,
-          maxTokens: isFree ? 500 : 1000 // Для платных ответов даем больше токенов
+          maxTokens: isFree ? 800 : 1500 // Немного увеличили лимит
         },
         messages: messages
       })
@@ -82,13 +75,12 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Ошибка YandexGPT:', errorData);
-      throw new Error('Ошибка при генерации ответа');
+      return res.status(500).json({ error: 'Ошибка Yandex API', details: errorData });
     }
 
     const data = await response.json();
     const answer = data.result.alternatives[0].message.text;
 
-    // Возвращаем ответ клиенту
     return res.status(200).json({ answer });
 
   } catch (error) {
