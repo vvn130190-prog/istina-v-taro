@@ -496,16 +496,16 @@ function updateFormState() {
       payBtn.className = 'btn';
       payBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
-payBtn.onclick = () => {
-  // Берем текущий вопрос из поля ввода и сохраняем его
-  const qInput = document.getElementById('question');
-  if (qInput && qInput.value.trim()) {
-    localStorage.setItem('pendingDeeperQuestion', qInput.value.trim());
-  } else {
-    localStorage.setItem('pendingDeeperQuestion', 'Продолжение анализа'); // Заглушка
-  }
-  window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
-};
+      payBtn.onclick = () => {
+        // Берем текущий вопрос из поля ввода и сохраняем его
+        const qInput = document.getElementById('question');
+        if (qInput && qInput.value.trim()) {
+          localStorage.setItem('pendingDeeperQuestion', qInput.value.trim());
+        } else {
+          localStorage.setItem('pendingDeeperQuestion', 'Продолжение анализа'); 
+        }
+        window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
+      };
       aiSubmit.parentNode.appendChild(payBtn);
     }
     if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Хотите узнать больше? Выберите глубину разбора ниже.', false);
@@ -543,18 +543,12 @@ function saveReading(question, answer) {
   loadReadings();
 }
 
-/**
- * Универсальная функция запроса расклада.
- * @param {string} question — текст вопроса
- * @param {boolean} isPaidContinuation — true, если это оплаченное продолжение (не тратит бесплатный лимит)
- */
 async function requestTarot(question, isPaidContinuation = false) {
   if (aiSubmit) aiSubmit.disabled = true;
   showMessage(aiMessage, 'Карты раскладываются…');
   if (aiAnswer) { aiAnswer.classList.remove('visible'); aiAnswer.innerHTML = ''; }
 
   try {
-    // 1. Достаем историю диалога из памяти (если она есть)
     let history = [];
     try { 
         history = JSON.parse(localStorage.getItem('aiHistory')) || []; 
@@ -566,7 +560,7 @@ async function requestTarot(question, isPaidContinuation = false) {
       body: JSON.stringify({ 
           question: question, 
           isFree: !isPaidContinuation && getFreeQuestionsCount() < 1,
-          history: history // Передаем историю, чтобы ИИ помнил, о чем говорили
+          history: history 
       })
     });
 
@@ -575,11 +569,9 @@ async function requestTarot(question, isPaidContinuation = false) {
     const data = await resp.json();
     const answer = data.answer || data.text || 'Не удалось получить ответ.';
 
-    // 2. Сохраняем этот диалог в историю для следующих вопросов
     history.push({ role: 'user', text: question });
     history.push({ role: 'assistant', text: answer });
     
-    // Оставляем только последние 10 сообщений, чтобы не перегружать память
     if (history.length > 10) history = history.slice(-10);
     localStorage.setItem('aiHistory', JSON.stringify(history));
 
@@ -588,7 +580,6 @@ async function requestTarot(question, isPaidContinuation = false) {
       const hasFreeLeft = getFreeQuestionsCount() < 1;
 
       if (hasFreeLeft) {
-        // Оборачиваем вопрос в data-атрибут, чтобы не было проблем с кавычками
         buttonsHtml = `
           <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
             <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
@@ -601,7 +592,9 @@ async function requestTarot(question, isPaidContinuation = false) {
         `;
       }
 
-      // 3. ОБОРАЧИВАЕМ ОТВЕТ В ТАРО-БЛОК (исправление стилей)
+      // Очищаем надпись "Карты раскладываются..."
+      showMessage(aiMessage, '');
+      
       aiAnswer.innerHTML = `
         <div class="tarot-block">
           <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
@@ -613,7 +606,6 @@ async function requestTarot(question, isPaidContinuation = false) {
 
     saveReading(question, answer);
 
-    // Тратим бесплатный лимит только если это не оплаченное продолжение
     if (!isPaidContinuation) {
       incrementFreeQuestionsCount();
     }
@@ -677,7 +669,6 @@ if (voiceBtn) {
 /* ============================================================
    6. ОПЛАТА (Воронка)
    ============================================================ */
-// Сумма теперь передаётся явным параметром — без парсинга строки
 window.openPaymentForm = function (packageName, amount) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
@@ -713,7 +704,6 @@ window.submitPayment = async function () {
   if (msg) msg.textContent = '';
 
   try {
-    // Безопасно получаем вопрос
     let pendingQ = 'Вопрос не указан';
     if (localStorage.getItem('pendingDeeperQuestion')) {
         pendingQ = localStorage.getItem('pendingDeeperQuestion');
@@ -743,8 +733,6 @@ window.submitPayment = async function () {
       window.closePaymentForm();
       try { checkout.destroy(); } catch (e) {}
       
-      // После оплаты просто перезагружаем страницу.
-      // checkPaidReading() подхватит вопрос из localStorage и плавно его запустит.
       window.location.reload();
     });
 
@@ -758,7 +746,6 @@ window.submitPayment = async function () {
   }
 };
 
-// Сохраняем вопрос и открываем модалку
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
   window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
@@ -774,7 +761,6 @@ async function checkPaidReading() {
   const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
   if (!deeperQuestion) return;
 
-  // Удаляем сразу, чтобы не запустить повторно при перезагрузке
   localStorage.removeItem('pendingDeeperQuestion');
 
   const section = document.getElementById('ai-tarot');
@@ -785,7 +771,6 @@ async function checkPaidReading() {
 
   showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
 
-  // Небольшая задержка для плавности скролла
   setTimeout(() => {
     requestTarot(deeperQuestion, true);
   }, 500);
@@ -809,7 +794,6 @@ if (document.readyState === 'loading') {
 
 // Кнопка установки PWA
 document.addEventListener('DOMContentLoaded', () => {
-  // Не показываем, если уже установлено
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isStandalone) return;
 
