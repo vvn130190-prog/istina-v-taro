@@ -43,17 +43,20 @@ export default async function handler(req, res) {
       }
     ];
 
-    if (history && Array.isArray(history)) {
+        if (history && Array.isArray(history)) {
       history.forEach(item => {
-        messages.push({ 
-          role: item.role === 'user' ? 'user' : 'assistant', 
-          content: item.text 
-        });
+        // Яндекс требует поле 'text', а не 'content'
+        if (item.text) {
+          messages.push({ 
+            role: item.role === 'user' ? 'user' : 'assistant', 
+            text: item.text 
+          });
+        }
       });
     }
 
-    messages.push({ role: 'user', content: question });
-
+    // Добавляем текущий вопрос (Яндекс тоже ждет поле 'text')
+    messages.push({ role: 'user', text: question });
     // Запрос к YandexGPT
     const response = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
       method: 'POST',
