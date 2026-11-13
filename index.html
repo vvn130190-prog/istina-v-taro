@@ -623,6 +623,7 @@ async function requestTarot(question, isPaidContinuation = false) {
     console.error(err);
     showMessage(aiMessage, 'Ошибка: ' + err.message, true); // <--- ИЗМЕНЕНИЕ ЗДЕСЬ
 }
+  }
 
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
