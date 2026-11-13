@@ -619,11 +619,9 @@ async function requestTarot(question, isPaidContinuation = false) {
 
     if (getFreeQuestionsCount() < 1) showMessage(aiMessage, '');
 
-  } catch (err) {
+    } catch (err) {
     console.error(err);
-    showMessage(aiMessage, 'Не удалось получить расклад. Попробуй ещё раз чуть позже.', true);
-    if (aiSubmit) aiSubmit.disabled = false;
-  }
+    showMessage(aiMessage, 'Ошибка: ' + err.message, true); // <--- ИЗМЕНЕНИЕ ЗДЕСЬ
 }
 
 if (aiForm) {
