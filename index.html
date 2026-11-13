@@ -522,15 +522,22 @@ function loadReadings() {
   let list = [];
   try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
   list = list.filter(item => item && typeof item.answer === 'string' && typeof item.question === 'string');
+  
   if (!list.length) {
     readingsList.innerHTML = '<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>';
     return;
   }
-  readingsList.innerHTML = list.slice().reverse().map(item => `
-    <div class="reading-item">
-      <div class="date">${item.date || 'Без даты'}</div>
-      <div class="q">${escapeHtml(item.question || '')}</div>
-      <div class="a">${escapeHtml(item.answer || '').slice(0, 300)}${item.answer && item.answer.length > 300 ? '…' : ''}</div>
+
+  // Рендерим карточки с раскрывающимся текстом
+  readingsList.innerHTML = list.slice().reverse().map((item, index) => `
+    <div class="reading-item" style="margin-bottom: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 15px; background: #FFF;">
+      <div class="date" style="color: var(--gold); font-size: 12px; margin-bottom: 5px;">${item.date || 'Без даты'}</div>
+      <div class="q" style="font-weight: 600; margin-bottom: 10px; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+        ${escapeHtml(item.question || '')} <span style="font-size: 12px; color: var(--gold); font-weight: normal;">(нажмите, чтобы раскрыть)</span>
+      </div>
+      <div class="a" style="display: none; color: var(--muted); font-size: 14px; line-height: 1.5; border-top: 1px dashed var(--line); padding-top: 10px;">
+        ${item.answer.replace(/\n/g, '<br>')}
+      </div>
     </div>
   `).join('');
 }
