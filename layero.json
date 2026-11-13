@@ -1,0 +1,4 @@
+{
+  "runtime": "node_web",
+  "startCommand": "npx vercel dev --listen 0.0.0.0:$PORT"
+}
