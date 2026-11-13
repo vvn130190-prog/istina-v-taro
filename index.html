@@ -571,8 +571,10 @@ async function requestTarot(question, isPaidContinuation = false) {
       })
     });
 
-    if (!resp.ok) throw new Error('Ошибка сети');
-
+if (!resp.ok) {
+  const errorData = await resp.json();
+  throw new Error(errorData.error || 'Ошибка сети');
+}
     const data = await resp.json();
     const answer = data.answer || data.text || 'Не удалось получить ответ.';
 
