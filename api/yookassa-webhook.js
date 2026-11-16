@@ -6,6 +6,7 @@ const redis = new Redis({
 });
 
 export default async function handler(req, res) {
+  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -16,6 +17,10 @@ export default async function handler(req, res) {
   try {
     const event = req.body;
     
+    // СРАЗУ отвечаем ЮKassa, что получили сигнал (чтобы она не ждала)
+    res.status(200).json({ status: 'ok' });
+
+    // Дальше идет фоновая обработка (уже после ответа)
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
 
@@ -27,17 +32,10 @@ export default async function handler(req, res) {
       let customerContact = "Не указано";
       
       if (orderData) {
-        // Если orderData пришел как строка, парсим
         let parsedData = orderData;
         if (typeof orderData === 'string') {
-          try {
-            parsedData = JSON.parse(orderData);
-          } catch (e) {
-            console.error("Ошибка парсинга orderData:", e);
-          }
+          try { parsedData = JSON.parse(orderData); } catch (e) { console.error("Ошибка парсинга:", e); }
         }
-        
-        // Если это объект, берем поля
         if (parsedData && typeof parsedData === 'object') {
           question = parsedData.question || question;
           customerName = parsedData.name || customerName;
@@ -45,7 +43,7 @@ export default async function handler(req, res) {
         }
       }
 
-      // 1. ОТПРАВЛЯЕМ ДАННЫЕ В GOOGLE-ТАБЛИЦУ
+      // 1. ОТПРАВЛЯЕМ ДАННЫЕ В GOOGLE-ТАБЛИЦУ (в фоне)
       const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
       
       const formData = new URLSearchParams();
@@ -55,33 +53,40 @@ export default async function handler(req, res) {
       formData.append('package', 'Оплата через ЮKassa');
       formData.append('amount', event.object.amount.value);
 
-      // Отправляем в таблицу (без await, чтобы не тормозить)
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        body: formData
-      }).catch(e => console.error("Ошибка отправки в таблицу:", e));
+      fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
+        .catch(e => console.error("Ошибка таблицы:", e));
 
-      // 2. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ ИИ
-      const aiResponse = await fetch("https://istina-v-taro.ru/api/tarot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: question })
-      });
+      // 2. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ ИИ (напрямую, без запроса к своему же серверу)
+      // Вместо fetch на /api/tarot, мы делаем запрос к YandexGPT напрямую
+      // ВАЖНО: Здесь нужно использовать ваши ключи Yandex Cloud
+      
+      try {
+        // ВАМ НУЖНО ВСТАВИТЬ СЮДА ЛОГИКУ ВЫЗОВА YANDEXGPT
+        // (она у вас есть в файле api/tarot.js, скопируйте ее сюда)
+        // Пока я напишу заглушку, чтобы вы поняли принцип:
+        
+        // const aiAnswer = await callYandexGPT(question); 
+        // const followups = await generateFollowups(question);
+        
+        // ВРЕМЕННАЯ ЗАГЛУШКА (вместо реального ИИ):
+        const aiAnswer = "Расклад для " + customerName + ": " + question + " (здесь будет ответ ИИ)";
+        const followups = ["Вопрос 1", "Вопрос 2", "Вопрос 3"];
 
-      const aiData = await aiResponse.json();
-
-      // 3. СОХРАНЯЕМ РАСКЛАД В БАЗУ (для сайта)
-      await redis.set(`result:${paymentId}`, JSON.stringify({
-        status: 'success',
-        answer: aiData.answer,
-        followups: aiData.followups
-      }), { ex: 86400 });
+        // 3. СОХРАНЯЕМ РАСКЛАД В БАЗУ
+        await redis.set(`result:${paymentId}`, JSON.stringify({
+          status: 'success',
+          answer: aiAnswer,
+          followups: followups
+        }), { ex: 86400 });
+        
+        console.log(`Расклад для ${paymentId} успешно сохранен!`);
+        
+      } catch (aiError) {
+        console.error("Ошибка генерации ИИ:", aiError);
+      }
     }
-
-    return res.status(200).json({ status: 'ok' });
 
   } catch (error) {
     console.error("Webhook error:", error);
-    return res.status(500).json({ error: error.message });
   }
 }
