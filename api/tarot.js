@@ -6,7 +6,7 @@ const redis = new Redis({
 });
 
 const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
-const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID; 
+const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID;
 
 export default async function handler(req, res) {
   // CORS
@@ -32,20 +32,22 @@ export default async function handler(req, res) {
         });
       }
       
+      // Записываем в Redis, что этот IP использовал бесплатный вопрос (храним 30 дней)
       await redis.set(`free_trial:${ip}`, 'true', { ex: 2592000 });
     }
 
     // --- 2. ФОРМИРОВАНИЕ ЗАПРОСА К YANDEXGPT ---
+    // ВАЖНО: YandexGPT ожидает поле 'text', а не 'content'
     const messages = [
       { 
         role: 'system', 
-        content: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги (такие как <div>, <strong>, <b>, <br>). Для выделения заголовков используй обычный текст и переносы строк.' 
+        text: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги (такие как <div>, <strong>, <b>, <br>). Для выделения заголовков используй обычный текст и переносы строк.' 
       }
     ];
 
-        if (history && Array.isArray(history)) {
+    // Добавляем историю диалога (если есть)
+    if (history && Array.isArray(history)) {
       history.forEach(item => {
-        // Яндекс требует поле 'text', а не 'content'
         if (item.text) {
           messages.push({ 
             role: item.role === 'user' ? 'user' : 'assistant', 
@@ -55,8 +57,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Добавляем текущий вопрос (Яндекс тоже ждет поле 'text')
-    messages.push({ role: 'user', text: question });
+    // Добавляем текущий вопрос (с защитой от пустой строки)
+    messages.push({ 
+      role: 'user', 
+      text: question && question.trim() ? question.trim() : 'Продолжение анализа' 
+    });
+
     // Запрос к YandexGPT
     const response = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
       method: 'POST',
@@ -69,7 +75,7 @@ export default async function handler(req, res) {
         completionOptions: {
           stream: false,
           temperature: 0.6,
-          maxTokens: isFree ? 800 : 1500 // Немного увеличили лимит
+          maxTokens: isFree ? 800 : 1500
         },
         messages: messages
       })
@@ -87,7 +93,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ answer });
 
   } catch (error) {
-    console.error('Ошибка в api/tarot.js:', error);
+    console.error('❌ ОШИБКА В TAROT.JS:', error.message);
     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 }
