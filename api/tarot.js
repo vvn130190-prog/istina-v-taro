@@ -75,7 +75,7 @@ export default async function handler(req, res) {
         completionOptions: {
           stream: false,
           temperature: 0.6,
-          maxTokens: isFree ? 800 : 1500
+          maxTokens: isFree ? 500 : 800
         },
         messages: messages
       })
