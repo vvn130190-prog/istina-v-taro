@@ -61,6 +61,7 @@ export default async function handler(req, res) {
 
       // 4. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ YANDEXGPT НАПРЯМУЮ
       try {
+console.log("🚀 ВЕБХУК ЗАПУЩЕН! Начинаю генерацию для:", question); 
         const messages = [
           { 
             role: 'system', 
