@@ -737,12 +737,19 @@ window.submitPayment = async function () {
       }
     });
 
-    checkout.on('success', () => {
-      window.closePaymentForm();
-      try { checkout.destroy(); } catch (e) {}
-      
-      window.location.reload();
-    });
+   checkout.on('success', () => {
+  const paymentId = localStorage.getItem('pendingPaymentId');
+
+  window.closePaymentForm();
+  try { checkout.destroy(); } catch (e) {}
+
+  if (!paymentId) {
+    showMessage(aiMessage, 'Оплата прошла, но не найден номер платежа. Обратитесь в поддержку.');
+    return;
+  }
+
+  checkPaidReading(paymentId);
+});
 
     if (submitBtn) submitBtn.style.display = 'none';
     checkout.render('payment-widget-container');
@@ -762,26 +769,71 @@ window.openDeeperPayment = function(questionText) {
 /* ============================================================
    7. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
    ============================================================ */
-async function checkPaidReading() {
-  if (paidReadingChecked) return;
-  paidReadingChecked = true;
 
-  const deeperQuestion = localStorage.getItem('pendingDeeperQuestion');
-  if (!deeperQuestion) return;
+async function checkPaidReading(paymentId = null) {
+  if (!paymentId) {
+    paymentId = localStorage.getItem('pendingPaymentId');
+  }
 
-  localStorage.removeItem('pendingDeeperQuestion');
+  if (!paymentId) return;
 
   const section = document.getElementById('ai-tarot');
   if (section) section.scrollIntoView({ behavior: 'smooth' });
 
-  const questionInput = document.getElementById('question');
-  if (questionInput) questionInput.value = deeperQuestion;
+  showMessage(aiMessage, 'Оплата прошла! Готовим твой расклад…');
 
-  showMessage(aiMessage, 'Оплата прошла! Получаем глубокий ответ...');
+  let attempts = 0;
+  const maxAttempts = 40;
 
-  setTimeout(() => {
-    requestTarot(deeperQuestion, true);
-  }, 500);
+  while (attempts < maxAttempts) {
+    try {
+      const response = await fetch('/api/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: paymentId })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка получения расклада');
+      }
+
+      if (data.status === 'success' && data.answer) {
+        if (aiAnswer) {
+          aiAnswer.innerHTML = '';
+          aiAnswer.textContent = data.answer;
+          aiAnswer.classList.add('visible');
+        }
+
+        const deeperQuestion = localStorage.getItem('pendingDeeperQuestion') || '';
+        if (deeperQuestion) {
+          saveReading(deeperQuestion, data.answer);
+        }
+
+        localStorage.removeItem('pendingPaymentId');
+        localStorage.removeItem('pendingDeeperQuestion');
+
+        showMessage(aiMessage, 'Твой расклад готов ✧');
+        return;
+      }
+
+      if (data.status !== 'pending') {
+        throw new Error(data.error || 'Не удалось получить расклад');
+      }
+
+    } catch (error) {
+      console.error('Ошибка проверки оплаты:', error);
+    }
+
+    attempts++;
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
+  showMessage(
+    aiMessage,
+    'Оплата прошла. Расклад ещё готовится. Не оплачивай повторно — попробуй обновить страницу чуть позже.'
+  );
 }
 
 /* ============================================================
