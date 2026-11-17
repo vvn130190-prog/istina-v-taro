@@ -71,7 +71,7 @@ export default async function handler(req, res) {
             text: question 
           }
         ];
-
+console.log("🚀 ВЕБХУК ЗАПУЩЕН! Начинаю генерацию для:", question);
         const yandexResponse = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
           method: 'POST',
           headers: {
