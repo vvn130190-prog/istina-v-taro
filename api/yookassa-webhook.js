@@ -5,8 +5,11 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN,
 });
 
+const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
+const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID;
+
 export default async function handler(req, res) {
-  // Настройка CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,14 +20,14 @@ export default async function handler(req, res) {
   try {
     const event = req.body;
     
-    // СРАЗУ отвечаем ЮKassa, что получили сигнал (чтобы она не ждала)
+    // 1. СРАЗУ ОТВЕЧАЕМ ЮKASSA, ЧТОБЫ ОНА НЕ ЖДАЛА (предотвращаем таймаут)
     res.status(200).json({ status: 'ok' });
 
-    // Дальше идет фоновая обработка (уже после ответа)
+    // 2. ФОНОВАЯ ОБРАБОТКА (после ответа)
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
 
-      // Достаем данные из базы
+      // Достаем данные заказа из базы
       const orderData = await redis.get(`order:${paymentId}`);
       
       let question = "Клиент оплатил расклад, но вопрос не найден.";
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
         }
       }
 
-      // 1. ОТПРАВЛЯЕМ ДАННЫЕ В GOOGLE-ТАБЛИЦУ (в фоне)
+      // 3. ОТПРАВЛЯЕМ ДАННЫЕ В GOOGLE-ТАБЛИЦУ (в фоне)
       const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
       
       const formData = new URLSearchParams();
@@ -54,39 +57,63 @@ export default async function handler(req, res) {
       formData.append('amount', event.object.amount.value);
 
       fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
-        .catch(e => console.error("Ошибка таблицы:", e));
+        .catch(e => console.error("Ошибка отправки в таблицу:", e));
 
-      // 2. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ ИИ (напрямую, без запроса к своему же серверу)
-      // Вместо fetch на /api/tarot, мы делаем запрос к YandexGPT напрямую
-      // ВАЖНО: Здесь нужно использовать ваши ключи Yandex Cloud
-      
+      // 4. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ YANDEXGPT НАПРЯМУЮ
       try {
-        // ВАМ НУЖНО ВСТАВИТЬ СЮДА ЛОГИКУ ВЫЗОВА YANDEXGPT
-        // (она у вас есть в файле api/tarot.js, скопируйте ее сюда)
-        // Пока я напишу заглушку, чтобы вы поняли принцип:
-        
-        // const aiAnswer = await callYandexGPT(question); 
-        // const followups = await generateFollowups(question);
-        
-        // ВРЕМЕННАЯ ЗАГЛУШКА (вместо реального ИИ):
-        const aiAnswer = "Расклад для " + customerName + ": " + question + " (здесь будет ответ ИИ)";
-        const followups = ["Вопрос 1", "Вопрос 2", "Вопрос 3"];
+        const messages = [
+          { 
+            role: 'system', 
+            text: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги (такие как <div>, <strong>, <b>, <br>). Для выделения заголовков используй обычный текст и переносы строк.' 
+          },
+          { 
+            role: 'user', 
+            text: question 
+          }
+        ];
 
-        // 3. СОХРАНЯЕМ РАСКЛАД В БАЗУ
+        const yandexResponse = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Api-Key ${YANDEX_API_KEY}`
+          },
+          body: JSON.stringify({
+            modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt/latest`, 
+            completionOptions: {
+              stream: false,
+              temperature: 0.6,
+              maxTokens: 800 // Для платных раскладов даем больше токенов
+            },
+            messages: messages
+          })
+        });
+
+        if (!yandexResponse.ok) {
+          const errorData = await yandexResponse.json();
+          console.error('Ошибка YandexGPT в вебхуке:', errorData);
+          return; // Прерываем выполнение, если ИИ не ответил
+        }
+
+        const aiData = await yandexResponse.json();
+        const aiAnswer = aiData.result.alternatives[0].message.text;
+
+        // 5. СОХРАНЯЕМ ГОТОВЫЙ РАСКЛАД В REDIS (доступен 24 часа)
         await redis.set(`result:${paymentId}`, JSON.stringify({
           status: 'success',
           answer: aiAnswer,
-          followups: followups
+          followups: [] // Здесь можно добавить генерацию уточняющих вопросов, если нужно
         }), { ex: 86400 });
-        
-        console.log(`Расклад для ${paymentId} успешно сохранен!`);
-        
+
+        console.log(`✅ Расклад для платежа ${paymentId} успешно сгенерирован и сохранен!`);
+
       } catch (aiError) {
-        console.error("Ошибка генерации ИИ:", aiError);
+        console.error("❌ Ошибка при генерации расклада в вебхуке:", aiError);
       }
     }
 
   } catch (error) {
-    console.error("Webhook error:", error);
+    console.error("❌ Webhook error:", error);
+    // Ответ уже отправлен выше, поэтому здесь просто логируем
   }
 }
