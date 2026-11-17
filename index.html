@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+а<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -728,7 +728,7 @@ window.submitPayment = async function () {
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
-
+localStorage.setItem('pendingPaymentId', data.payment_id);
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
       error_callback: function(error) {
