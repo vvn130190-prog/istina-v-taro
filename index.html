@@ -10,17 +10,13 @@
   if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
-      // Проверяем обновления каждую минуту
       setInterval(() => { reg.update(); }, 60000);
-
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Защита от бесконечной перезагрузки
             if (!window.sessionStorage.getItem('sw_reloaded')) {
               window.sessionStorage.setItem('sw_reloaded', 'true');
-              // Показываем окошко клиенту
               if (confirm('Вышло обновление сайта! Нажмите ОК, чтобы загрузить новую версию.')) {
                 window.location.reload();
               }
@@ -86,20 +82,18 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 #ai-answer .answer-text{font-size:16px;margin:0 0 16px}
 #ai-answer .answer-text strong, #ai-answer .answer-text b { color: var(--gold); }
 
-/* --- СТИЛИ ДЛЯ БЛОКОВ ИИ --- */
 #ai-answer .answer-text {
     font-size: 16px;
     line-height: 1.7;
     color: var(--text);
 }
 
-/* Делаем блоки компактнее и красивее */
 #ai-answer .tarot-block {
     background: linear-gradient(145deg, #FFFDF8, #F7F3EB);
-    border: 1px solid var(--gold); /* Тонкая рамка вместо толстой */
-    border-left: 4px solid var(--gold); /* Акцентная полоса слева */
+    border: 1px solid var(--gold);
+    border-left: 4px solid var(--gold);
     border-radius: 10px;
-    padding: 16px 20px; /* Уменьшили внутренние отступы */
+    padding: 16px 20px;
     margin-top: 18px;
     box-shadow: 0 2px 8px rgba(185,154,91,0.08);
 }
@@ -120,11 +114,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
     line-height: 1.6;
 }
 
-/* Стили для списка карт (если ИИ выдал их текстом) */
 #ai-answer .answer-text br {
     content: "";
     display: block;
-    margin-bottom: 8px; /* Делает абзацы воздуха */
+    margin-bottom: 8px;
 }
 
 .my-readings{margin-top:24px}
@@ -164,7 +157,7 @@ footer a:hover{color:var(--gold)}
       <a href="#packages">Расклады</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn" href="#packages">Оплатить</a>
+    <a class="btn" href="#" onclick="openTopicsMenu(); return false;">Выбрать расклад ✧</a>
   </div>
 </header>
 <main>
@@ -173,7 +166,6 @@ footer a:hover{color:var(--gold)}
     <div class="eyebrow">Пространство для себя</div>
     <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
     
-    <!-- Золотые цифры 24/7 -->
     <div style="font-family: Georgia, serif; font-size: 22px; color: var(--gold); letter-spacing: 4px; margin: 15px 0 20px; opacity: 0.9;">
       24 / 7
     </div>
@@ -330,6 +322,14 @@ footer a:hover{color:var(--gold)}
       <details><summary>Можно ли вернуть деньги?</summary><p>Условия возврата описаны в оферте. Если расклад не был получен по технической причине — вернём оплату.</p></details>
       <details><summary>Это заменяет психолога?</summary><p>Нет. Сервис не является психологической, медицинской или юридической помощью.</p></details>
       <details><summary>Где хранятся мои расклады?</summary><p>На вашем устройстве (в браузере). Если очистите кэш — они удалятся. Личный кабинет — скоро.</p></details>
+      <details>
+        <summary>В чем особенность вашей авторской методики?</summary>
+        <p>Методика Виктории Нос — это синтез классического Таро и практической психологии. Мы не используем карты для фатальных предсказаний. Наша цель — помочь вам увидеть ситуацию объемно, заметить скрытые мотивы и найти внутренние ресурсы для решения. Это инструмент для саморефлексии и мягких, но точных решений.</p>
+      </details>
+      <details>
+        <summary>Почему ответы ИИ такие глубокие?</summary>
+        <p>Наш искусственный интеллект обучен специально для этого проекта. Он не выдает шаблонные фразы из интернета, а анализирует именно вашу ситуацию, подбирая нужные архетипы и энергию карт. Каждый расклад уникален, потому что он создается под ваш конкретный запрос.</p>
+      </details>
     </div>
   </div>
 </section>
@@ -349,16 +349,129 @@ footer a:hover{color:var(--gold)}
     </div>
   </div>
 </footer>
-<div class="sticky-cta"><a class="btn" href="#packages">Выбрать расклад ✧</a></div>
+<div class="sticky-cta"><a class="btn" href="#" onclick="openTopicsMenu(); return false;">Выбрать расклад ✧</a></div>
+
+<!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ С ТЕМАМИ -->
+<div id="topics-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:999; backdrop-filter:blur(3px);" onclick="closeTopicsMenu()"></div>
+
+<div id="topics-drawer" style="position:fixed; top:0; right:-100%; width:100%; max-width:400px; height:100%; background:var(--bg); z-index:1000; box-shadow:-10px 0 30px rgba(0,0,0,0.1); transition:right 0.3s ease-in-out; overflow-y:auto; padding:20px; box-sizing:border-box; -webkit-overflow-scrolling: touch;">
+  
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:15px;">
+    <h3 style="margin:0; font-family:Georgia, serif; color:var(--text);">Выбери тему</h3>
+    <span onclick="closeTopicsMenu()" style="cursor:pointer; font-size:28px; color:var(--muted); line-height:1;">&times;</span>
+  </div>
+
+  <div style="margin-bottom:25px;">
+    <div class="eyebrow" style="margin-bottom:10px;">Отношения</div>
+    <div class="topic-card" onclick="selectTopic('Отношения: Что он/она чувствует ко мне? Какие мысли и планы? Что между нами и к чему всё идёт?', 299)">
+      <h4>Чувства и планы партнёра</h4>
+      <p>Мысли, действия, что между вами и к чему это приведёт.</p>
+      <span class="price-tag">299 ₽</span>
+    </div>
+  </div>
+
+  <div style="margin-bottom:25px;">
+    <div class="eyebrow" style="margin-bottom:10px;">Личность и путь</div>
+    <div class="topic-card" onclick="selectTopic('Разбор по дате рождения: Мои сильные стороны, скрытые таланты и кармические уроки. Что мне мешает и куда двигаться?', 499)">
+      <h4>Матрица судьбы (по дате рождения)</h4>
+      <p>Твои таланты, кармические уроки и советы по жизни.</p>
+      <span class="price-tag">499 ₽</span>
+    </div>
+  </div>
+
+  <div style="margin-bottom:25px;">
+    <div class="eyebrow" style="margin-bottom:10px;">Прогноз на год</div>
+    <div class="topic-card" onclick="selectTopic('Каким будет 2027 год? Подробный прогноз: чего ждать в личной жизни, в работе и финансах. Какие главные уроки и возможности года?', 499)" style="background: linear-gradient(145deg, #FFFDF8, #F4EDE4); border-color: var(--gold);">
+      <h4>✨ Каким будет 2027?</h4>
+      <p>Глобальный прогноз: любовь, карьера, финансы. Что готовит год.</p>
+      <span class="price-tag">499 ₽</span>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.topic-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+.topic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(185,154,91,0.15);
+  border-color: var(--gold);
+}
+.topic-card h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: var(--text);
+  font-family: Georgia, serif;
+  padding-right: 50px;
+}
+.topic-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.topic-card .price-tag {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--gold);
+  color: #18120b;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+#topics-drawer {
+  -webkit-overflow-scrolling: touch;
+  background: #F8F6F0;
+}
+</style>
+
+<script>
+function openTopicsMenu() {
+  document.getElementById('topics-overlay').style.display = 'block';
+  document.getElementById('topics-drawer').style.right = '0';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTopicsMenu() {
+  document.getElementById('topics-overlay').style.display = 'none';
+  document.getElementById('topics-drawer').style.right = '-100%';
+  document.body.style.overflow = '';
+}
+
+function selectTopic(questionText, amount) {
+  closeTopicsMenu();
+  
+  const input = document.getElementById('question');
+  if (input) {
+    input.value = questionText;
+  }
+  
+  localStorage.setItem('pendingDeeperQuestion', questionText);
+  
+  setTimeout(() => {
+    window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
+  }, 300);
+}
+</script>
 
 <script>
 /* ============================================================
    1. КОНСТАНТЫ И ДАННЫЕ
    ============================================================ */
-// Относительный путь — работает и на istina-v-taro.ru, и на *.vercel.app
 const TAROT_FUNCTION_URL = '/api/tarot';
 
-// PWA: Установка на телефон
 window.deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -464,7 +577,7 @@ function renderDailyCard() {
 window.flipCard = renderDailyCard;
 
 /* ============================================================
-   4. ИИ-РАСКЛАД И ЛИМИТЫ (1 БЕСПЛАТНЫЙ ВОПРОС)
+   4. ИИ-РАСКЛАД И ЛИМИТЫ
    ============================================================ */
 const aiForm = document.getElementById('ai-form');
 const aiSubmit = document.getElementById('ai-submit');
@@ -472,7 +585,6 @@ const aiMessage = document.getElementById('ai-message');
 const aiAnswer = document.getElementById('ai-answer');
 const readingsList = document.getElementById('readings-list');
 
-// Флаг, чтобы не запускать checkPaidReading дважды
 let paidReadingChecked = false;
 
 function getFreeQuestionsCount() {
@@ -500,7 +612,6 @@ function updateFormState() {
       payBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       payBtn.style.width = '100%';
       payBtn.onclick = () => {
-        // Берем текущий вопрос из поля ввода и сохраняем его
         const qInput = document.getElementById('question');
         if (qInput && qInput.value.trim()) {
           localStorage.setItem('pendingDeeperQuestion', qInput.value.trim());
@@ -531,7 +642,6 @@ function loadReadings() {
     return;
   }
 
-  // Рендерим карточки с раскрывающимся текстом
   readingsList.innerHTML = list.slice().reverse().map((item, index) => `
     <div class="reading-item" style="margin-bottom: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 15px; background: #FFF;">
       <div class="date" style="color: var(--gold); font-size: 12px; margin-bottom: 5px;">${item.date || 'Без даты'}</div>
@@ -604,7 +714,6 @@ if (!resp.ok) {
         `;
       }
 
-      // Очищаем надпись "Карты раскладываются..."
       showMessage(aiMessage, '');
       
       aiAnswer.innerHTML = `
@@ -626,7 +735,7 @@ if (!resp.ok) {
 
     } catch (err) {
     console.error(err);
-    showMessage(aiMessage, 'Ошибка: ' + err.message, true); // <--- ИЗМЕНЕНИЕ ЗДЕСЬ
+    showMessage(aiMessage, 'Ошибка: ' + err.message, true);
 }
   }
 
@@ -855,7 +964,6 @@ if (document.readyState === 'loading') {
   initApp();
 }
 
-// Кнопка установки PWA
 document.addEventListener('DOMContentLoaded', () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isStandalone) return;
