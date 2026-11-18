@@ -19,12 +19,13 @@ export default async function handler(req, res) {
   try {
     const event = req.body;
     
-    // 1. СРАЗУ ОТВЕЧАЕМ ЮKASSA, ЧТОБЫ ОНА НЕ ЖДАЛА (предотвращаем таймаут)
+    // 1. СРАЗУ ОТВЕЧАЕМ ЮKASSA, ЧТОБЫ ОНА НЕ ЖДАЛА
     res.status(200).json({ status: 'ok' });
 
     // 2. ФОНОВАЯ ОБРАБОТКА (после ответа)
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
+      const amount = event.object.amount.value; // Получаем сумму платежа
 
       // Достаем данные заказа из базы
       const orderData = await redis.get(`order:${paymentId}`);
@@ -53,24 +54,32 @@ export default async function handler(req, res) {
       formData.append('contact', customerContact);
       formData.append('question', question);
       formData.append('package', 'Оплата через ЮKassa');
-      formData.append('amount', event.object.amount.value);
+      formData.append('amount', amount);
 
       fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
         .catch(e => console.error("Ошибка отправки в таблицу:", e));
 
-      // 4. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ YANDEXGPT НАПРЯМУЮ
+      // 4. ВЫБИРАЕМ ГЛУБИНУ ОТВЕТА В ЗАВИСИМОСТИ ОТ СУММЫ
+      let maxTokens = 500; // Базовая длина для 99 руб.
+      let systemPrompt = 'Ты — таролог. Дай краткий, но глубокий ответ на вопрос клиента. Отвечай честно и по делу. Пиши простым текстом, без HTML-тегов.';
+
+      if (amount >= 299 && amount < 499) {
+        // Для 299 руб. — развернутый ответ
+        maxTokens = 800;
+        systemPrompt = 'Ты — опытный таролог. Дай развернутый ответ на вопрос клиента. Опиши текущую ситуацию, укажи на возможные препятствия и дай практический совет. В конце задай 1 глубокий вопрос для размышления. Пиши простым текстом, без HTML-тегов.';
+      } else if (amount >= 499) {
+        // Для 499 руб. — максимально глубокий разбор
+        maxTokens = 1200;
+        systemPrompt = 'Ты — глубокий таролог. Проведи полный анализ ситуации клиента. Опиши 3 аспекта: 1) Что происходит сейчас. 2) Что мешает или на что обратить внимание. 3) Что нужно сделать. Дай развернутый совет. В конце предложи 3 вопроса для глубокой рефлексии и краткий прогноз на неделю. Пиши простым текстом, без HTML-тегов.';
+      }
+
+      // 5. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ YANDEXGPT
       try {
-        console.log("🚀 ВЕБХУК ЗАПУЩЕН! Начинаю генерацию для:", question);
+        console.log(`🚀 ВЕБХУК ЗАПУЩЕН! Сумма: ${amount}₽. Генерация для:`, question);
 
         const messages = [
-          { 
-            role: 'system', 
-            text: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги.' 
-          },
-          { 
-            role: 'user', 
-            text: question 
-          }
+          { role: 'system', text: systemPrompt },
+          { role: 'user', text: question }
         ];
 
         const yandexResponse = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
@@ -84,7 +93,7 @@ export default async function handler(req, res) {
             completionOptions: {
               stream: false,
               temperature: 0.6,
-              maxTokens: 800
+              maxTokens: maxTokens // Применяем выбранную длину
             },
             messages: messages
           })
@@ -99,14 +108,14 @@ export default async function handler(req, res) {
         const aiData = await yandexResponse.json();
         const aiAnswer = aiData.result.alternatives[0].message.text;
 
-        // 5. СОХРАНЯЕМ ГОТОВЫЙ РАСКЛАД В REDIS (доступен 24 часа)
+        // 6. СОХРАНЯЕМ ГОТОВЫЙ РАСКЛАД В REDIS (доступен 24 часа)
         await redis.set(`result:${paymentId}`, JSON.stringify({
           status: 'success',
           answer: aiAnswer,
           followups: []
         }), { ex: 86400 });
 
-        console.log(`✅ Расклад для платежа ${paymentId} успешно сгенерирован и сохранен!`);
+        console.log(`✅ Расклад для платежа ${paymentId} (${amount}₽) успешно сгенерирован и сохранен!`);
 
       } catch (aiError) {
         console.error("❌ Ошибка при генерации расклада в вебхуке:", aiError);
