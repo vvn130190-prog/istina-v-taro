@@ -1,4 +1,3 @@
-
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
@@ -10,46 +9,35 @@ const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
 const YANDEX_FOLDER_ID = process.env.YANDEX_FOLDER_ID;
 
 export default async function handler(req, res) {
-  // Настройки CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const event = req.body;
+    
+    // 1. СРАЗУ ОТВЕЧАЕМ ЮKASSA, ЧТОБЫ ОНА НЕ ЖДАЛА (предотвращаем таймаут)
+    res.status(200).json({ status: 'ok' });
 
-    // Обрабатываем только успешную оплату
+    // 2. ФОНОВАЯ ОБРАБОТКА (после ответа)
     if (event.event === 'payment.succeeded') {
       const paymentId = event.object.id;
 
-      console.log('Получено уведомление об оплате:', paymentId);
-
-      // Получаем данные заказа из Redis
+      // Достаем данные заказа из базы
       const orderData = await redis.get(`order:${paymentId}`);
-
-      let question = 'Клиент оплатил расклад, но вопрос не найден.';
-      let customerName = 'Не указано';
-      let customerContact = 'Не указано';
-
+      
+      let question = "Клиент оплатил расклад, но вопрос не найден.";
+      let customerName = "Не указано";
+      let customerContact = "Не указано";
+      
       if (orderData) {
         let parsedData = orderData;
-
         if (typeof orderData === 'string') {
-          try {
-            parsedData = JSON.parse(orderData);
-          } catch (e) {
-            console.error('Ошибка парсинга заказа:', e);
-          }
+          try { parsedData = JSON.parse(orderData); } catch (e) { console.error("Ошибка парсинга:", e); }
         }
-
         if (parsedData && typeof parsedData === 'object') {
           question = parsedData.question || question;
           customerName = parsedData.name || customerName;
@@ -57,10 +45,9 @@ export default async function handler(req, res) {
         }
       }
 
-      // Отправляем информацию в Google-таблицу
-      const GOOGLE_SCRIPT_URL =
-        'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
-
+      // 3. ОТПРАВЛЯЕМ ДАННЫЕ В GOOGLE-ТАБЛИЦУ (в фоне)
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
+      
       const formData = new URLSearchParams();
       formData.append('name', customerName);
       formData.append('contact', customerContact);
@@ -68,106 +55,65 @@ export default async function handler(req, res) {
       formData.append('package', 'Оплата через ЮKassa');
       formData.append('amount', event.object.amount.value);
 
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        body: formData
-      }).catch(e => {
-        console.error('Ошибка отправки в Google-таблицу:', e);
-      });
+      fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData })
+        .catch(e => console.error("Ошибка отправки в таблицу:", e));
 
-      // Проверяем настройки YandexGPT
-      if (!YANDEX_API_KEY || !YANDEX_FOLDER_ID) {
-        console.error('Не настроены ключи YandexGPT');
-        return res.status(500).json({
-          error: 'Не настроены ключи YandexGPT'
-        });
-      }
-
-      // Генерируем расклад через YandexGPT
+      // 4. ГЕНЕРИРУЕМ РАСКЛАД ЧЕРЕЗ YANDEXGPT НАПРЯМУЮ
       try {
-        console.log('Начинаю генерацию расклада для:', question);
+        console.log("🚀 ВЕБХУК ЗАПУЩЕН! Начинаю генерацию для:", question);
 
         const messages = [
-          {
-            role: 'system',
-            text: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги (такие как <div>, <strong>, <b>, <br>). Для выделения заголовков используй обычный текст и переносы строк.'
+          { 
+            role: 'system', 
+            text: 'Ты — таролог. Отвечай честно, глубоко и по делу. ВАЖНО: Пиши ответ простым текстом. НЕ ИСПОЛЬЗУЙ HTML-теги.' 
           },
-          {
-            role: 'user',
-            text: question
+          { 
+            role: 'user', 
+            text: question 
           }
         ];
 
-        const yandexResponse = await fetch(
-          'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Api-Key ${YANDEX_API_KEY}`
+        const yandexResponse = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Api-Key ${YANDEX_API_KEY}`
+          },
+          body: JSON.stringify({
+            modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt/latest`, 
+            completionOptions: {
+              stream: false,
+              temperature: 0.6,
+              maxTokens: 800
             },
-            body: JSON.stringify({
-              modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt/latest`,
-              completionOptions: {
-                stream: false,
-                temperature: 0.6,
-                maxTokens: 800
-              },
-              messages: messages
-            })
-          }
-        );
+            messages: messages
+          })
+        });
 
         if (!yandexResponse.ok) {
           const errorData = await yandexResponse.json();
           console.error('Ошибка YandexGPT в вебхуке:', errorData);
-
-          return res.status(502).json({
-            error: 'Ошибка генерации расклада'
-          });
+          return;
         }
 
         const aiData = await yandexResponse.json();
         const aiAnswer = aiData.result.alternatives[0].message.text;
 
-        if (!aiAnswer) {
-          throw new Error('YandexGPT вернул пустой ответ');
-        }
+        // 5. СОХРАНЯЕМ ГОТОВЫЙ РАСКЛАД В REDIS (доступен 24 часа)
+        await redis.set(`result:${paymentId}`, JSON.stringify({
+          status: 'success',
+          answer: aiAnswer,
+          followups: []
+        }), { ex: 86400 });
 
-        // Сохраняем готовый расклад в Redis на 24 часа
-        await redis.set(
-          `result:${paymentId}`,
-          JSON.stringify({
-            status: 'success',
-            answer: aiAnswer,
-            followups: []
-          }),
-          { ex: 86400 }
-        );
-
-        console.log(
-          `Расклад для платежа ${paymentId} успешно создан и сохранён!`
-        );
+        console.log(`✅ Расклад для платежа ${paymentId} успешно сгенерирован и сохранен!`);
 
       } catch (aiError) {
-        console.error(
-          'Ошибка при генерации расклада в вебхуке:',
-          aiError
-        );
-
-        return res.status(502).json({
-          error: 'Не удалось сгенерировать расклад'
-        });
+        console.error("❌ Ошибка при генерации расклада в вебхуке:", aiError);
       }
     }
 
-    return res.status(200).json({ status: 'ok' });
-
   } catch (error) {
-    console.error('Webhook error:', error);
-
-    return res.status(500).json({
-      error: 'Ошибка обработки уведомления'
-    });
+    console.error("❌ Webhook error:", error);
   }
 }
