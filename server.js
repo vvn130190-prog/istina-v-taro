@@ -31,6 +31,7 @@ const loadApi = async (modulePath, req, res) => {
 app.post('/api/tarot', (req, res) => loadApi('./api/tarot.js', req, res));
 app.post('/api/create-payment', (req, res) => loadApi('./api/create-payment.js', req, res));
 app.post('/api/yookassa-webhook', (req, res) => loadApi('./api/yookassa-webhook.js', req, res));
+app.post('/api/check-payment', (req, res) => loadApi('./api/check-payment.js', req, res)); // <-- ДОБАВЛЕНА СТРОКА
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
