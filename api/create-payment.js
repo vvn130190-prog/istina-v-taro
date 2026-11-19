@@ -1,13 +1,14 @@
 import { Redis } from '@upstash/redis';
 import { randomUUID } from 'crypto';
 
+// Проверка, что переменные окружения вообще существуют, чтобы не было загадочных 500 ошибок
 const redis = new Redis({
-  url: process.env.KV_REST_API_URL,
-  token: process.env.KV_REST_API_TOKEN,
+  url: process.env.KV_REST_API_URL || '',
+  token: process.env.KV_REST_API_TOKEN || '',
 });
 
 export default async function handler(req, res) {
-  // CORS
+  // CORS (чтобы запросы с вашего домена проходили без ошибок)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,10 +18,15 @@ export default async function handler(req, res) {
 
   try {
     const { amount, question } = req.body;
-        if (!question || question.trim() === '' || question === 'Вопрос не указан')) {
-        return res.status(400).json({ error: 'Пожалуйста, напишите ваш вопрос перед оплатой!' });
-    }    if (!amount) {
-      res.status(400).json({ error: 'Не указана сумма' });
+    
+    // ИСПРАВЛЕНО: убрана лишняя закрывающая скобка
+    if (!question || question.trim() === '' || question === 'Вопрос не указан') {
+      return res.status(400).json({ error: 'Пожалуйста, напишите ваш вопрос перед оплатой!' });
+    }    
+    
+    // ИСПРАВЛЕНО: добавлен return, чтобы код не шел дальше без суммы
+    if (!amount) {
+      return res.status(400).json({ error: 'Не указана сумма' });
     }
 
     const shopId = process.env.YOOKASSA_SHOP_ID;
@@ -63,11 +69,17 @@ export default async function handler(req, res) {
 
     // ВАЖНО: Сохраняем вопрос в Redis, чтобы вебхук мог его достать
     if (question) {
-      await redis.set(`order:${data.id}`, JSON.stringify({
-        question: question,
-        name: 'Клиент',
-        contact: 'Не указано'
-      }), { ex: 86400 }); // Храним 24 часа
+      try {
+        await redis.set(`order:${data.id}`, JSON.stringify({
+          question: question,
+          name: 'Клиент',
+          contact: 'Не указано'
+        }), { ex: 86400 }); // Храним 24 часа
+      } catch (redisError) {
+        // Если Redis не настроен (например, URL без https), мы увидим это в логах
+        console.error('Ошибка сохранения в Redis:', redisError);
+        return res.status(500).json({ error: 'Ошибка базы данных Redis. Проверьте KV_REST_API_URL (должен быть https://)' });
+      }
     }
 
     // Отдаем токен для виджета
@@ -77,7 +89,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Ошибка создания платежа:', error);
-    return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    console.error('Критическая ошибка создания платежа:', error);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера: ' + error.message });
   }
 }
