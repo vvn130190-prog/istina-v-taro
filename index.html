@@ -669,7 +669,7 @@ function loadReadings() {
         ${escapeHtml(item.question || '')} <span style="font-size: 12px; color: var(--gold); font-weight: normal;">(нажмите, чтобы раскрыть)</span>
       </div>
       <div class="a" style="display: none; color: var(--muted); font-size: 14px; line-height: 1.5; border-top: 1px dashed var(--line); padding-top: 10px;">
-        ${item.answer.replace(/\n/g, '<br>')}
+        ${formatTarotText(item.answer)}
       </div>
     </div>
   `).join('');
@@ -903,8 +903,7 @@ async function checkPaidReading(paymentId = null) {
       if (data.status === 'success' && data.answer) {
         if (aiAnswer) {
           let text = data.answer;
-                   const cardImages = {
-            // Старшие Арканы
+          const cardImages = {
             'Шут': '00_Fool.jpg', 'Маг': '01_Magician.jpg', 'Жрица': '02_High_Priestess.jpg',
             'Императрица': '03_Empress.jpg', 'Император': '04_Emperor.jpg', 'Иерофант': '05_Hierophant.jpg',
             'Влюбленные': '06_Lovers.jpg', 'Колесница': '07_Chariot.jpg', 'Сила': '08_Strength.jpg',
@@ -912,66 +911,66 @@ async function checkPaidReading(paymentId = null) {
             'Повешенный': '12_Hanged_Man.jpg', 'Смерть': '13_Death.jpg', 'Умеренность': '14_Temperance.jpg',
             'Дьявол': '15_Devil.jpg', 'Башня': '16_Tower.jpg', 'Звезда': '17_Star.jpg',
             'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg',
-            
-            // Кубки (Cups)
             'Туз Кубков': 'Cups01.jpg', 'Двойка Кубков': 'Cups02.jpg', 'Тройка Кубков': 'Cups03.jpg',
             'Четверка Кубков': 'Cups04.jpg', 'Пятерка Кубков': 'Cups05.jpg', 'Шестерка Кубков': 'Cups06.jpg',
             'Семерка Кубков': 'Cups07.jpg', 'Восьмерка Кубков': 'Cups08.jpg', 'Девятка Кубков': 'Cups09.jpg',
             'Десятка Кубков': 'Cups10.jpg', 'Паж Кубков': 'Cups11.jpg', 'Рыцарь Кубков': 'Cups12.jpg',
             'Королева Кубков': 'Cups13.jpg', 'Король Кубков': 'Cups14.jpg',
-
-            // Пентакли (Pentacles) - добавьте их, когда загрузите
             'Туз Пентаклей': 'Pentacles01.jpg', 'Двойка Пентаклей': 'Pentacles02.jpg', 'Тройка Пентаклей': 'Pentacles03.jpg',
             'Четверка Пентаклей': 'Pentacles04.jpg', 'Пятерка Пентаклей': 'Pentacles05.jpg', 'Шестерка Пентаклей': 'Pentacles06.jpg',
             'Семерка Пентаклей': 'Pentacles07.jpg', 'Восьмерка Пентаклей': 'Pentacles08.jpg', 'Девятка Пентаклей': 'Pentacles09.jpg',
             'Десятка Пентаклей': 'Pentacles10.jpg', 'Паж Пентаклей': 'Pentacles11.jpg', 'Рыцарь Пентаклей': 'Pentacles12.jpg',
             'Королева Пентаклей': 'Pentacles13.jpg', 'Король Пентаклей': 'Pentacles14.jpg',
-
-            // Мечи (Swords) - добавьте их, когда загрузите
             'Туз Мечей': 'Swords01.jpg', 'Двойка Мечей': 'Swords02.jpg', 'Тройка Мечей': 'Swords03.jpg',
             'Четверка Мечей': 'Swords04.jpg', 'Пятерка Мечей': 'Swords05.jpg', 'Шестерка Мечей': 'Swords06.jpg',
             'Семерка Мечей': 'Swords07.jpg', 'Восьмерка Мечей': 'Swords08.jpg', 'Девятка Мечей': 'Swords09.jpg',
             'Десятка Мечей': 'Swords10.jpg', 'Паж Мечей': 'Swords11.jpg', 'Рыцарь Мечей': 'Swords12.jpg',
             'Королева Мечей': 'Swords13.jpg', 'Король Мечей': 'Swords14.jpg',
-
-            // Жезлы (Wands) - добавьте их, когда загрузите
             'Туз Жезлов': 'Wands01.jpg', 'Двойка Жезлов': 'Wands02.jpg', 'Тройка Жезлов': 'Wands03.jpg',
             'Четверка Жезлов': 'Wands04.jpg', 'Пятерка Жезлов': 'Wands05.jpg', 'Шестерка Жезлов': 'Wands06.jpg',
             'Семерка Жезлов': 'Wands07.jpg', 'Восьмерка Жезлов': 'Wands08.jpg', 'Девятка Жезлов': 'Wands09.jpg',
             'Десятка Жезлов': 'Wands10.jpg', 'Паж Жезлов': 'Wands11.jpg', 'Рыцарь Жезлов': 'Wands12.jpg',
             'Королева Жезлов': 'Wands13.jpg', 'Король Жезлов': 'Wands14.jpg'
           };
+
           const getImg = (name) => {
             let file = '00_Fool.jpg';
             for (const [key, img] of Object.entries(cardImages)) {
               if (name.toLowerCase().includes(key.toLowerCase())) { file = img; break; }
             }
-            return `<div style="text-align:center; width:80px; flex-shrink:0;"><img src="/icons/${file}" style="width:100%; border-radius:6px; border:1px solid var(--gold);"><div style="font-size:10px; color:var(--muted); margin-top:4px;">${name}</div></div>`;
+            return `<div style="text-align:center; width:90px; flex-shrink:0; margin:0 5px;"><img src="/icons/${file}" style="width:100%; border-radius:8px; border:1px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.15);"><div style="font-size:12px; color:var(--gold); margin-top:6px; font-weight:600;">${name}</div></div>`;
           };
 
-          const sections = text.split(/(?=КАРТЫ ГОДА:|ЛИЧНАЯ ЖИЗНЬ:|КАРЬЕРА И САМОПОЗНАНИЕ:|ФИНАНСЫ:|СОВЕТ НА ГОД:)/);
-          let html = `<h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:24px; margin-bottom:15px;">Каким будет для тебя 2027 год</h3>`;
+          const blocks = text.split('###').filter(b => b.trim() !== '');
+          let html = `<h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:26px; margin-bottom:25px;">✨ Каким будет для тебя 2027 год ✨</h3>`;
 
-          sections.forEach(sec => {
-            const match = sec.match(/^(КАРТЫ ГОДА|ЛИЧНАЯ ЖИЗНЬ|КАРЬЕРА И САМОПОЗНАНИЕ|ФИНАНСЫ|СОВЕТ НА ГОД):\s*([А-Яа-яA-Za-z\s]+),\s*([А-Яа-яA-Za-z\s]+)\n?/i);
+          blocks.forEach(block => {
+            const lines = block.trim().split('\n');
+            const titleLine = lines[0].trim();
+            const bodyText = lines.slice(1).join('\n').trim();
+
+            const match = titleLine.match(/^(.*?):\s*(.*)$/);
+            let title = titleLine;
+            let cardsHtml = '';
+
             if (match) {
-                const title = match[1].toUpperCase();
-                const card1 = match[2].trim();
-                const card2 = match[3].trim();
-                const restOfText = sec.replace(match[0], '').trim();
-                html += `
-                  <div style="margin-bottom: 20px;">
-                    <div style="font-weight:bold; color:var(--gold); font-family:Georgia, serif; margin-bottom:10px; font-size:16px;">${title}</div>
-                    <div style="display:flex; gap:10px; margin-bottom:10px; justify-content:center;">${getImg(card1)}${getImg(card2)}</div>
-                    <div style="line-height:1.8; color:#29252A;">${formatTarotText(restOfText)}</div>
-                  </div>
-                `;
-            } else {
-                html += `<div style="line-height:1.8; color:#29252A; margin-bottom:20px;">${formatTarotText(sec)}</div>`;
+              title = match[1].trim();
+              const cardNames = match[2].split(',').map(c => c.trim());
+              if (cardNames.length >= 2) {
+                cardsHtml = `<div style="display:flex; gap:15px; margin: 20px 0; justify-content:center; align-items:flex-start;">${getImg(cardNames[0])}${getImg(cardNames[1])}</div>`;
+              }
             }
+
+            html += `
+              <div style="margin-bottom: 40px; background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--line);">
+                <div style="font-weight:bold; color:var(--gold); font-family:Georgia, serif; font-size:20px; text-align:center; margin-bottom:10px;">${title}</div>
+                ${cardsHtml}
+                <div style="line-height:1.8; color:#29252A; font-size:16px;">${formatTarotText(bodyText)}</div>
+              </div>
+            `;
           });
 
-          aiAnswer.innerHTML = `<div class="tarot-block" style="padding: 20px;">${html}</div>`;
+          aiAnswer.innerHTML = `<div class="tarot-block" style="padding: 25px; background: #FCFAF5;">${html}</div>`;
           aiAnswer.classList.add('visible');
         }
 
