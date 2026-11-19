@@ -10,15 +10,27 @@
   if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
+      // Проверяем обновления каждые 60 секунд
       setInterval(() => { reg.update(); }, 60000);
+
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Защита от бесконечной перезагрузки
             if (!window.sessionStorage.getItem('sw_reloaded')) {
               window.sessionStorage.setItem('sw_reloaded', 'true');
-              if (confirm('Вышло обновление сайта! Нажмите ОК, чтобы загрузить новую версию.')) {
-                window.location.reload();
+              
+              // УМНОЕ ОБНОВЛЕНИЕ: Проверяем, не занят ли клиент важным делом
+              const isPaymentOpen = document.getElementById('payment-modal') && document.getElementById('payment-modal').style.display === 'flex';
+              const questionText = document.getElementById('question') ? document.getElementById('question').value : '';
+              
+              if (isPaymentOpen || questionText.length > 10) {
+                  // Если клиент в процессе оплаты или пишет длинный вопрос — НЕ трогаем его!
+                  console.log('Обновление отложено: клиент занят важным действием.');
+              } else {
+                  // Если клиент просто смотрит сайт — тихо перезагружаем
+                  window.location.reload();
               }
             }
           }
