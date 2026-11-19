@@ -903,14 +903,43 @@ async function checkPaidReading(paymentId = null) {
       if (data.status === 'success' && data.answer) {
         if (aiAnswer) {
           let text = data.answer;
-          const cardImages = {
+                   const cardImages = {
+            // Старшие Арканы
             'Шут': '00_Fool.jpg', 'Маг': '01_Magician.jpg', 'Жрица': '02_High_Priestess.jpg',
             'Императрица': '03_Empress.jpg', 'Император': '04_Emperor.jpg', 'Иерофант': '05_Hierophant.jpg',
             'Влюбленные': '06_Lovers.jpg', 'Колесница': '07_Chariot.jpg', 'Сила': '08_Strength.jpg',
             'Отшельник': '09_Hermit.jpg', 'Фортуны': '10_Wheel_of_Fortune.jpg', 'Справедливость': '11_Justice.jpg',
             'Повешенный': '12_Hanged_Man.jpg', 'Смерть': '13_Death.jpg', 'Умеренность': '14_Temperance.jpg',
             'Дьявол': '15_Devil.jpg', 'Башня': '16_Tower.jpg', 'Звезда': '17_Star.jpg',
-            'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg'
+            'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg',
+            
+            // Кубки (Cups)
+            'Туз Кубков': 'Cups01.jpg', 'Двойка Кубков': 'Cups02.jpg', 'Тройка Кубков': 'Cups03.jpg',
+            'Четверка Кубков': 'Cups04.jpg', 'Пятерка Кубков': 'Cups05.jpg', 'Шестерка Кубков': 'Cups06.jpg',
+            'Семерка Кубков': 'Cups07.jpg', 'Восьмерка Кубков': 'Cups08.jpg', 'Девятка Кубков': 'Cups09.jpg',
+            'Десятка Кубков': 'Cups10.jpg', 'Паж Кубков': 'Cups11.jpg', 'Рыцарь Кубков': 'Cups12.jpg',
+            'Королева Кубков': 'Cups13.jpg', 'Король Кубков': 'Cups14.jpg',
+
+            // Пентакли (Pentacles) - добавьте их, когда загрузите
+            'Туз Пентаклей': 'Pentacles01.jpg', 'Двойка Пентаклей': 'Pentacles02.jpg', 'Тройка Пентаклей': 'Pentacles03.jpg',
+            'Четверка Пентаклей': 'Pentacles04.jpg', 'Пятерка Пентаклей': 'Pentacles05.jpg', 'Шестерка Пентаклей': 'Pentacles06.jpg',
+            'Семерка Пентаклей': 'Pentacles07.jpg', 'Восьмерка Пентаклей': 'Pentacles08.jpg', 'Девятка Пентаклей': 'Pentacles09.jpg',
+            'Десятка Пентаклей': 'Pentacles10.jpg', 'Паж Пентаклей': 'Pentacles11.jpg', 'Рыцарь Пентаклей': 'Pentacles12.jpg',
+            'Королева Пентаклей': 'Pentacles13.jpg', 'Король Пентаклей': 'Pentacles14.jpg',
+
+            // Мечи (Swords) - добавьте их, когда загрузите
+            'Туз Мечей': 'Swords01.jpg', 'Двойка Мечей': 'Swords02.jpg', 'Тройка Мечей': 'Swords03.jpg',
+            'Четверка Мечей': 'Swords04.jpg', 'Пятерка Мечей': 'Swords05.jpg', 'Шестерка Мечей': 'Swords06.jpg',
+            'Семерка Мечей': 'Swords07.jpg', 'Восьмерка Мечей': 'Swords08.jpg', 'Девятка Мечей': 'Swords09.jpg',
+            'Десятка Мечей': 'Swords10.jpg', 'Паж Мечей': 'Swords11.jpg', 'Рыцарь Мечей': 'Swords12.jpg',
+            'Королева Мечей': 'Swords13.jpg', 'Король Мечей': 'Swords14.jpg',
+
+            // Жезлы (Wands) - добавьте их, когда загрузите
+            'Туз Жезлов': 'Wands01.jpg', 'Двойка Жезлов': 'Wands02.jpg', 'Тройка Жезлов': 'Wands03.jpg',
+            'Четверка Жезлов': 'Wands04.jpg', 'Пятерка Жезлов': 'Wands05.jpg', 'Шестерка Жезлов': 'Wands06.jpg',
+            'Семерка Жезлов': 'Wands07.jpg', 'Восьмерка Жезлов': 'Wands08.jpg', 'Девятка Жезлов': 'Wands09.jpg',
+            'Десятка Жезлов': 'Wands10.jpg', 'Паж Жезлов': 'Wands11.jpg', 'Рыцарь Жезлов': 'Wands12.jpg',
+            'Королева Жезлов': 'Wands13.jpg', 'Король Жезлов': 'Wands14.jpg'
           };
           const getImg = (name) => {
             let file = '00_Fool.jpg';
