@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(114362542, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true,
+        ecommerce:"dataLayer"
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/114362542" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+  <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F8F6F0">
@@ -819,6 +837,7 @@ if (voiceBtn) {
   else voiceBtn.addEventListener('click', () => { if (getFreeQuestionsCount() < 1) startVoiceInput('question', voiceBtn, aiMessage); });
 }
 
+
 /* ============================================================
    6. ОПЛАТА (Воронка)
    ============================================================ */
@@ -865,6 +884,9 @@ window.submitPayment = async function () {
         if (qInput && qInput.value.trim()) pendingQ = qInput.value.trim();
     }
     
+    // 1. ФИКСИРУЕМ КЛИК ПО КНОПКЕ "ПЕРЕЙТИ К ОПЛАТЕ"
+    if (window.ym) window.ym(114362542, 'reachGoal', 'payment_click');
+
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -873,7 +895,8 @@ window.submitPayment = async function () {
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
-localStorage.setItem('pendingPaymentId', data.payment_id);
+    localStorage.setItem('pendingPaymentId', data.payment_id);
+
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
       error_callback: function(error) {
@@ -882,19 +905,21 @@ localStorage.setItem('pendingPaymentId', data.payment_id);
       }
     });
 
-   checkout.on('success', () => {
-  const paymentId = localStorage.getItem('pendingPaymentId');
+    // 2. ФИКСИРУЕМ УСПЕШНУЮ ОПЛАТУ (только когда клиент реально заплатил)
+    checkout.on('success', () => {
+      if (window.ym) window.ym(114362542, 'reachGoal', 'payment_success');
+      
+      const paymentId = localStorage.getItem('pendingPaymentId');
+      window.closePaymentForm();
+      try { checkout.destroy(); } catch (e) {}
 
-  window.closePaymentForm();
-  try { checkout.destroy(); } catch (e) {}
+      if (!paymentId) {
+        showMessage(aiMessage, 'Оплата прошла, но не найден номер платежа. Обратитесь в поддержку.');
+        return;
+      }
 
-  if (!paymentId) {
-    showMessage(aiMessage, 'Оплата прошла, но не найден номер платежа. Обратитесь в поддержку.');
-    return;
-  }
-
-  checkPaidReading(paymentId);
-});
+      checkPaidReading(paymentId);
+    });
 
     if (submitBtn) submitBtn.style.display = 'none';
     checkout.render('payment-widget-container');
@@ -909,9 +934,7 @@ localStorage.setItem('pendingPaymentId', data.payment_id);
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
   window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
-};
-
-/* ============================================================
+};/* ============================================================
    7. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
    ============================================================ */
 
@@ -1047,6 +1070,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.body.appendChild(installBtn);
 });
+</script>
+<!-- Баннер куки -->
+<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:rgba(41,37,42,0.95); color:#FFF; padding:15px; text-align:center; font-size:13px; z-index:9999; backdrop-filter:blur(5px);">
+  Мы используем куки для работы сайта. Продолжая, вы соглашаетесь с этим. <button onclick="document.getElementById('cookie-banner').style.display='none'; localStorage.setItem('cookie_accepted','true');" style="background:var(--gold); border:none; padding:5px 15px; border-radius:20px; margin-left:10px; cursor:pointer; font-weight:bold;">ОК</button>
+</div>
+<script>
+  if (!localStorage.getItem('cookie_accepted')) {
+    setTimeout(() => { document.getElementById('cookie-banner').style.display = 'block'; }, 2000);
+  }
 </script>
 </body>
 </html>
