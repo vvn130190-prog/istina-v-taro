@@ -29,26 +29,18 @@
   if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
-      // Проверяем обновления каждые 60 секунд
       setInterval(() => { reg.update(); }, 60000);
-
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Защита от бесконечной перезагрузки
             if (!window.sessionStorage.getItem('sw_reloaded')) {
               window.sessionStorage.setItem('sw_reloaded', 'true');
-              
-              // УМНОЕ ОБНОВЛЕНИЕ: Проверяем, не занят ли клиент важным делом
               const isPaymentOpen = document.getElementById('payment-modal') && document.getElementById('payment-modal').style.display === 'flex';
               const questionText = document.getElementById('question') ? document.getElementById('question').value : '';
-              
               if (isPaymentOpen || questionText.length > 10) {
-                  // Если клиент в процессе оплаты или пишет длинный вопрос — НЕ трогаем его!
-                  console.log('Обновление отложено: клиент занят важным действием.');
+                  console.log('Обновление отложено: клиент занят.');
               } else {
-                  // Если клиент просто смотрит сайт — тихо перезагружаем
                   window.location.reload();
               }
             }
@@ -196,11 +188,9 @@ footer a:hover{color:var(--gold)}
   <div class="container">
     <div class="eyebrow">Пространство для себя</div>
     <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
-    
     <div style="font-family: Georgia, serif; font-size: 22px; color: var(--gold); letter-spacing: 4px; margin: 15px 0 20px; opacity: 0.9;">
       24 / 7
     </div>
-    
     <p>Остановись на мгновение. Посмотри на свою ситуацию с другой стороны и прислушайся к тому, что действительно важно для тебя.</p>
   </div>
 </section>
@@ -213,14 +203,11 @@ footer a:hover{color:var(--gold)}
     </div>
     <div class="card daily-card" style="text-align:center; padding:24px;">
      <div id="card-container" onclick="flipCard()" style="cursor:pointer; display:block; width:100%; max-width:260px; aspect-ratio: 260 / 455; margin: 0 auto; position:relative;">
-    <!-- Рубашка карты -->
     <div id="card-back" style="position:absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #FDFBF7 0%, #F4EDE4 100%); border:3px solid #B99A5B; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(185,154,91,0.25); box-sizing: border-box;">
         <div style="font-size:60px; color:#B99A5B; margin-bottom:10px;">✧</div>
         <div style="font-family:Georgia, serif; font-size:18px; color:#B99A5B; letter-spacing:2px;">КАРТА ДНЯ</div>
         <div style="font-family:Georgia, serif; font-size:14px; color:#C8AC72; letter-spacing:2px; margin-top:10px;">Нажми на меня ✧</div>
     </div>
-    
-    <!-- Лицо карты -->
     <div id="card-front" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#FFF; border:3px solid #B99A5B; border-radius:12px; box-shadow: 0 8px 24px rgba(185,154,91,0.25); box-sizing:border-box; overflow:hidden;">
         <img id="card-image" style="width:100%; height:100%; object-fit:cover; display:block;" alt="Карта дня">
     </div>
@@ -386,7 +373,6 @@ footer a:hover{color:var(--gold)}
 <div id="topics-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:999; backdrop-filter:blur(3px);" onclick="closeTopicsMenu()"></div>
 
 <div id="topics-drawer" style="position:fixed; top:0; right:-100%; width:100%; max-width:400px; height:100%; background:var(--bg); z-index:1000; box-shadow:-10px 0 30px rgba(0,0,0,0.1); transition:right 0.3s ease-in-out; overflow-y:auto; padding:20px; box-sizing:border-box; -webkit-overflow-scrolling: touch;">
-  
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:15px;">
     <h3 style="margin:0; font-family:Georgia, serif; color:var(--text);">Выбери тему</h3>
     <span onclick="closeTopicsMenu()" style="cursor:pointer; font-size:28px; color:var(--muted); line-height:1;">&times;</span>
@@ -418,7 +404,6 @@ footer a:hover{color:var(--gold)}
       <span class="price-tag">499 ₽</span>
     </div>
   </div>
-
 </div>
 
 <style>
@@ -483,14 +468,9 @@ function closeTopicsMenu() {
 
 function selectTopic(questionText, amount) {
   closeTopicsMenu();
-  
   const input = document.getElementById('question');
-  if (input) {
-    input.value = questionText;
-  }
-  
+  if (input) input.value = questionText;
   localStorage.setItem('pendingDeeperQuestion', questionText);
-  
   setTimeout(() => {
     window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
   }, 300);
@@ -557,15 +537,9 @@ function escapeHtml(str) {
 
 function formatTarotText(text) {
   if (!text) return '';
-  // Превращаем **Заголовок** в красивый золотой заголовок
   let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--gold); font-family: Georgia, serif; font-size: 18px; display: block; margin-top: 18px; margin-bottom: 6px;">$1</strong>');
-  
-  // Делаем списки красивыми (если ИИ использует цифры 1. 2. 3.)
   formatted = formatted.replace(/(\d\.)\s/g, '<br>$1 ');
-  
-  // Обычные переносы строк
   formatted = formatted.replace(/\n/g, '<br>');
-  
   return formatted;
 }
 
@@ -579,7 +553,6 @@ function getDailyCard() {
   const today = todayStr();
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('dailyTarotCard')); } catch (e) {}
-
   let card = null;
   if (saved && saved.date === today) {
     card = dailyCards.find(c => c.name === saved.card);
@@ -594,7 +567,6 @@ function getDailyCard() {
 function renderDailyCard() {
   if (isFlipped || !currentDailyCard) return;
   isFlipped = true;
-
   const cardBack = document.getElementById('card-back');
   const cardFront = document.getElementById('card-front');
   const cardImage = document.getElementById('card-image');
@@ -610,15 +582,12 @@ function renderDailyCard() {
   cardImage.src = currentDailyCard.image;
   cardImage.alt = currentDailyCard.name;
   cardImage.style.display = 'block';
-
   cardBack.style.display = 'none';
   cardFront.style.display = 'block';
-
   if (meaningEl) {
     meaningEl.innerHTML = `<div style="font-family:Georgia,serif; font-size:22px; color:#29252A; margin-bottom:10px;">${currentDailyCard.name}</div><div>${currentDailyCard.meaning}</div>`;
   }
 }
-
 window.flipCard = renderDailyCard;
 
 /* ============================================================
@@ -630,17 +599,13 @@ const aiMessage = document.getElementById('ai-message');
 const aiAnswer = document.getElementById('ai-answer');
 const readingsList = document.getElementById('readings-list');
 
-let paidReadingChecked = false;
-
 function getFreeQuestionsCount() {
   return parseInt(localStorage.getItem('freeQuestionsCount') || '0', 10);
 }
-
 function setFreeQuestionsCount(n) {
   localStorage.setItem('freeQuestionsCount', String(n));
   updateFormState();
 }
-
 function incrementFreeQuestionsCount() {
   setFreeQuestionsCount(getFreeQuestionsCount() + 1);
 }
@@ -652,7 +617,6 @@ function updateFormState() {
 
   if (count >= 1) {
     if (aiSubmit) aiSubmit.style.display = 'none';
-    
     if (!payBtn) {
       const newBtn = document.createElement('button');
       newBtn.type = 'button';
@@ -660,8 +624,7 @@ function updateFormState() {
       newBtn.className = 'btn';
       newBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
       newBtn.style.width = '100%';
-      newBtn.style.opacity = '0.5'; // Изначально неактивна
-      
+      newBtn.style.opacity = '0.5';
       newBtn.onclick = () => {
         const question = qInput ? qInput.value.trim() : '';
         if (!question) {
@@ -674,22 +637,14 @@ function updateFormState() {
       };
       aiSubmit.parentNode.appendChild(newBtn);
     }
-
-    // Следим за вводом текста, чтобы активировать кнопку
     if (payBtn && qInput) {
         const checkQuestion = () => {
-            if (qInput.value.trim().length > 0) {
-                payBtn.style.opacity = '1';
-                payBtn.disabled = false;
-            } else {
-                payBtn.style.opacity = '0.5';
-                payBtn.disabled = true;
-            }
+            if (qInput.value.trim().length > 0) { payBtn.style.opacity = '1'; payBtn.disabled = false; }
+            else { payBtn.style.opacity = '0.5'; payBtn.disabled = true; }
         };
         qInput.addEventListener('input', checkQuestion);
         checkQuestion(); 
     }
-
     if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Напишите новый вопрос выше и оплатите его.', false);
   } else {
     if (aiSubmit) { aiSubmit.style.display = 'inline-block'; aiSubmit.disabled = false; }
@@ -697,17 +652,16 @@ function updateFormState() {
     if (aiMessage) showMessage(aiMessage, '');
   }
 }
+
 function loadReadings() {
   if (!readingsList) return;
   let list = [];
   try { list = JSON.parse(localStorage.getItem('myReadings')) || []; } catch (e) {}
   list = list.filter(item => item && typeof item.answer === 'string' && typeof item.question === 'string');
-  
   if (!list.length) {
     readingsList.innerHTML = '<p class="muted" style="font-size:14px">Пока пусто. Задай первый вопрос — он сохранится здесь.</p>';
     return;
   }
-
   readingsList.innerHTML = list.slice().reverse().map((item, index) => `
     <div class="reading-item" style="margin-bottom: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 15px; background: #FFF;">
       <div class="date" style="color: var(--gold); font-size: 12px; margin-bottom: 5px;">${item.date || 'Без даты'}</div>
@@ -736,9 +690,7 @@ async function requestTarot(question, isPaidContinuation = false) {
 
   try {
     let history = [];
-    try { 
-        history = JSON.parse(localStorage.getItem('aiHistory')) || []; 
-    } catch(e) {}
+    try { history = JSON.parse(localStorage.getItem('aiHistory')) || []; } catch(e) {}
 
     const resp = await fetch(TAROT_FUNCTION_URL, {
       method: 'POST',
@@ -750,23 +702,21 @@ async function requestTarot(question, isPaidContinuation = false) {
       })
     });
 
-if (!resp.ok) {
-  const errorData = await resp.json();
-  throw new Error(errorData.error || 'Ошибка сети');
-}
+    if (!resp.ok) {
+      const errorData = await resp.json();
+      throw new Error(errorData.error || 'Ошибка сети');
+    }
     const data = await resp.json();
     const answer = data.answer || data.text || 'Не удалось получить ответ.';
 
     history.push({ role: 'user', text: question });
     history.push({ role: 'assistant', text: answer });
-    
     if (history.length > 10) history = history.slice(-10);
     localStorage.setItem('aiHistory', JSON.stringify(history));
 
     if (aiAnswer) {
       let buttonsHtml = '';
       const hasFreeLeft = getFreeQuestionsCount() < 1;
-
       if (hasFreeLeft) {
         buttonsHtml = `
           <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
@@ -779,9 +729,7 @@ if (!resp.ok) {
           </div>
         `;
       }
-
       showMessage(aiMessage, '');
-      
       aiAnswer.innerHTML = `
         <div class="tarot-block">
           <p class="answer-text">${formatTarotText(answer)}</p>
@@ -792,28 +740,21 @@ if (!resp.ok) {
     }
 
     saveReading(question, answer);
-
-    if (!isPaidContinuation) {
-      incrementFreeQuestionsCount();
-    }
-
+    if (!isPaidContinuation) incrementFreeQuestionsCount();
     if (getFreeQuestionsCount() < 1) showMessage(aiMessage, '');
-
-    } catch (err) {
+  } catch (err) {
     console.error(err);
     showMessage(aiMessage, 'Ошибка: ' + err.message, true);
-}
   }
+}
 
 if (aiForm) {
   aiForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (getFreeQuestionsCount() >= 1) { updateFormState(); return; }
-
     const question = document.getElementById('question').value.trim();
     document.getElementById('question').value = '';
     if (!question) { showMessage(aiMessage, 'Напиши, пожалуйста, свой вопрос.', true); return; }
-
     await requestTarot(question, false);
   });
 }
@@ -822,36 +763,30 @@ if (aiForm) {
    5. ГОЛОСОВОЙ ВВОД
    ============================================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 function startVoiceInput(targetInputId, buttonElement, statusElement) {
   if (!SR) { alert('Ваш браузер не поддерживает голосовой ввод.'); return; }
   const recognition = new SR();
   recognition.lang = 'ru-RU';
   recognition.interimResults = false;
-
   const originalText = buttonElement.textContent;
   buttonElement.disabled = true;
   buttonElement.textContent = '🎤 Слушаю...';
   if (statusElement) showMessage(statusElement, 'Говорите...');
-
   recognition.onresult = (event) => {
     const text = event.results[0][0].transcript;
     const input = document.getElementById(targetInputId);
     if (input) input.value = input.value ? (input.value + ' ' + text).trim() : text.trim();
     if (statusElement) showMessage(statusElement, '');
   };
-
   recognition.onerror = () => { if (statusElement) showMessage(statusElement, 'Не удалось распознать речь.', true); };
   recognition.onend = () => { buttonElement.disabled = false; buttonElement.textContent = originalText; };
   recognition.start();
 }
-
 const voiceBtn = document.getElementById('voice-btn');
 if (voiceBtn) {
   if (!SR) voiceBtn.style.display = 'none';
   else voiceBtn.addEventListener('click', () => { if (getFreeQuestionsCount() < 1) startVoiceInput('question', voiceBtn, aiMessage); });
 }
-
 
 /* ============================================================
    6. ОПЛАТА (Воронка)
@@ -859,19 +794,14 @@ if (voiceBtn) {
 window.openPaymentForm = function (packageName, amount) {
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
-
   if (nameEl) nameEl.textContent = packageName;
-
   window.currentPackageName = packageName;
   window.currentAmount = Number(amount) || 99;
-
   const amountInput = document.getElementById('pay-amount');
   if (amountInput) amountInput.value = String(window.currentAmount);
-
   document.getElementById('payment-widget-container').innerHTML = '';
   const btn = document.getElementById('pay-submit-btn');
   if (btn) { btn.style.display = 'block'; btn.disabled = false; btn.textContent = 'Перейти к оплате'; }
-
   if (modal) modal.style.display = 'flex';
 };
 
@@ -886,7 +816,6 @@ window.submitPayment = async function () {
   const msg = document.getElementById('pay-message');
   const submitBtn = document.getElementById('pay-submit-btn');
   const amount = Number(window.currentAmount) || 99;
-
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...'; }
   if (msg) msg.textContent = '';
 
@@ -898,8 +827,6 @@ window.submitPayment = async function () {
         const qInput = document.getElementById('question');
         if (qInput && qInput.value.trim()) pendingQ = qInput.value.trim();
     }
-    
-    // 1. ФИКСИРУЕМ КЛИК ПО КНОПКЕ "ПЕРЕЙТИ К ОПЛАТЕ"
     if (window.ym) window.ym(114362542, 'reachGoal', 'payment_click');
 
     const response = await fetch('/api/create-payment', {
@@ -907,12 +834,10 @@ window.submitPayment = async function () {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amount, question: pendingQ })
     });
-
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
     localStorage.setItem('pendingPaymentId', data.payment_id);
 
-    // Проверка на наличие виджета (чтобы не было ошибки на телефонах)
     if (!window.YooMoneyCheckoutWidget) {
       throw new Error('Виджет оплаты еще не загрузился. Пожалуйста, обновите страницу.');
     }
@@ -925,25 +850,20 @@ window.submitPayment = async function () {
       }
     });
 
-    // 2. ФИКСИРУЕМ УСПЕШНУЮ ОПЛАТУ (только когда клиент реально заплатил)
     checkout.on('success', () => {
       if (window.ym) window.ym(114362542, 'reachGoal', 'payment_success');
-      
       const paymentId = localStorage.getItem('pendingPaymentId');
       window.closePaymentForm();
       try { checkout.destroy(); } catch (e) {}
-
       if (!paymentId) {
         showMessage(aiMessage, 'Оплата прошла, но не найден номер платежа. Обратитесь в поддержку.');
         return;
       }
-
       checkPaidReading(paymentId);
     });
 
     if (submitBtn) submitBtn.style.display = 'none';
     checkout.render('payment-widget-container');
-
   } catch (err) {
     console.error(err);
     if (msg) { msg.textContent = err.message || 'Ошибка.'; msg.style.color = '#c0392b'; }
@@ -959,21 +879,16 @@ window.openDeeperPayment = function(questionText) {
 /* ============================================================
    7. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
    ============================================================ */
-
 async function checkPaidReading(paymentId = null) {
-  if (!paymentId) {
-    paymentId = localStorage.getItem('pendingPaymentId');
-  }
-
+  if (!paymentId) paymentId = localStorage.getItem('pendingPaymentId');
   if (!paymentId) return;
 
   const section = document.getElementById('ai-tarot');
   if (section) section.scrollIntoView({ behavior: 'smooth' });
-
   showMessage(aiMessage, 'Оплата прошла! Карты раскладываются... Это может занять до 20 секунд ✧');
 
   let attempts = 0;
-  const maxAttempts = 15; // 15 попыток * 3 сек = 45 секунд максимум
+  const maxAttempts = 15;
 
   while (attempts < maxAttempts) {
     try {
@@ -982,117 +897,82 @@ async function checkPaidReading(paymentId = null) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: paymentId })
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Ошибка получения расклада');
-      }
+      if (!response.ok) throw new Error(data.error || 'Ошибка получения расклада');
 
       if (data.status === 'success' && data.answer) {
         if (aiAnswer) {
-          // --- ХИТРОСТЬ: Вытаскиваем первые три карты из начала текста ---
-          let answerText = data.answer;
-          let cardNamesHtml = '';
-          
-          // Ищем первую строчку с запятыми (там, где ИИ перечислил карты)
-          const firstLineMatch = answerText.match(/^([А-Яа-яA-Za-z\s]+,\s*[А-Яа-яA-Za-z\s]+,\s*[А-Яа-яA-Za-z\s]+)/);
-          
-          if (firstLineMatch) {
-            const cardsString = firstLineMatch[0];
-            const cardList = cardsString.split(',').map(c => c.trim());
-            
-            const cardImages = {
-               'Шут': '00_Fool.jpg', 'Маг': '01_Magician.jpg', 'Жрица': '02_High_Priestess.jpg',
-               'Императрица': '03_Empress.jpg', 'Император': '04_Emperor.jpg', 'Иерофант': '05_Hierophant.jpg',
-               'Влюбленные': '06_Lovers.jpg', 'Колесница': '07_Chariot.jpg', 'Сила': '08_Strength.jpg',
-               'Отшельник': '09_Hermit.jpg', 'Фортуны': '10_Wheel_of_Fortune.jpg', 'Справедливость': '11_Justice.jpg',
-               'Повешенный': '12_Hanged_Man.jpg', 'Смерть': '13_Death.jpg', 'Умеренность': '14_Temperance.jpg',
-               'Дьявол': '15_Devil.jpg', 'Башня': '16_Tower.jpg', 'Звезда': '17_Star.jpg',
-               'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg'
-            };
+          let text = data.answer;
+          const cardImages = {
+            'Шут': '00_Fool.jpg', 'Маг': '01_Magician.jpg', 'Жрица': '02_High_Priestess.jpg',
+            'Императрица': '03_Empress.jpg', 'Император': '04_Emperor.jpg', 'Иерофант': '05_Hierophant.jpg',
+            'Влюбленные': '06_Lovers.jpg', 'Колесница': '07_Chariot.jpg', 'Сила': '08_Strength.jpg',
+            'Отшельник': '09_Hermit.jpg', 'Фортуны': '10_Wheel_of_Fortune.jpg', 'Справедливость': '11_Justice.jpg',
+            'Повешенный': '12_Hanged_Man.jpg', 'Смерть': '13_Death.jpg', 'Умеренность': '14_Temperance.jpg',
+            'Дьявол': '15_Devil.jpg', 'Башня': '16_Tower.jpg', 'Звезда': '17_Star.jpg',
+            'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg'
+          };
+          const getImg = (name) => {
+            let file = '00_Fool.jpg';
+            for (const [key, img] of Object.entries(cardImages)) {
+              if (name.toLowerCase().includes(key.toLowerCase())) { file = img; break; }
+            }
+            return `<div style="text-align:center; width:80px; flex-shrink:0;"><img src="/icons/${file}" style="width:100%; border-radius:6px; border:1px solid var(--gold);"><div style="font-size:10px; color:var(--muted); margin-top:4px;">${name}</div></div>`;
+          };
 
-            cardNamesHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`;
-            
-            cardList.forEach(cardName => {
-              let imgFile = '00_Fool.jpg'; // Дефолтная картинка, если не нашли
-              for (const [key, file] of Object.entries(cardImages)) {
-                if (cardName.includes(key)) {
-                  imgFile = file;
-                  break;
-                }
-              }
-              
-              cardNamesHtml += `
-                <div style="text-align:center; width:90px;">
-                  <img src="/icons/${imgFile}" style="width:100%; border-radius:6px; border:1px solid var(--gold); box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="${cardName}">
-                  <div style="font-size:10px; color:var(--muted); margin-top:5px; line-height:1.2;">${cardName}</div>
-                </div>
-              `;
-            });
-            cardNamesHtml += `</div>`;
-            
-            // Убираем эту строчку из основного текста, чтобы не дублировалась
-            answerText = answerText.replace(firstLineMatch[0], '');
-          }
+          const sections = text.split(/(?=КАРТЫ ГОДА:|ЛИЧНАЯ ЖИЗНЬ:|КАРЬЕРА И САМОПОЗНАНИЕ:|ФИНАНСЫ:|СОВЕТ НА ГОД:)/);
+          let html = `<h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:24px; margin-bottom:15px;">Каким будет для тебя 2027 год</h3>`;
 
-          // Формируем финальный блок
-          aiAnswer.innerHTML = `
-            <div class="tarot-block" style="padding: 20px;">
-              <h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:24px; margin-bottom:15px;">Каким будет для тебя 2027 год</h3>
-              ${cardNamesHtml}
-              <div class="answer-text" style="line-height: 1.8; color: #29252A;">${formatTarotText(answerText)}</div>
-            </div>
-          `;
+          sections.forEach(sec => {
+            const match = sec.match(/^(КАРТЫ ГОДА|ЛИЧНАЯ ЖИЗНЬ|КАРЬЕРА И САМОПОЗНАНИЕ|ФИНАНСЫ|СОВЕТ НА ГОД):\s*([А-Яа-яA-Za-z\s]+),\s*([А-Яа-яA-Za-z\s]+)\n?/i);
+            if (match) {
+                const title = match[1].toUpperCase();
+                const card1 = match[2].trim();
+                const card2 = match[3].trim();
+                const restOfText = sec.replace(match[0], '').trim();
+                html += `
+                  <div style="margin-bottom: 20px;">
+                    <div style="font-weight:bold; color:var(--gold); font-family:Georgia, serif; margin-bottom:10px; font-size:16px;">${title}</div>
+                    <div style="display:flex; gap:10px; margin-bottom:10px; justify-content:center;">${getImg(card1)}${getImg(card2)}</div>
+                    <div style="line-height:1.8; color:#29252A;">${formatTarotText(restOfText)}</div>
+                  </div>
+                `;
+            } else {
+                html += `<div style="line-height:1.8; color:#29252A; margin-bottom:20px;">${formatTarotText(sec)}</div>`;
+            }
+          });
+
+          aiAnswer.innerHTML = `<div class="tarot-block" style="padding: 20px;">${html}</div>`;
           aiAnswer.classList.add('visible');
         }
 
         const deeperQuestion = localStorage.getItem('pendingDeeperQuestion') || '';
-        if (deeperQuestion) {
-          saveReading(deeperQuestion, data.answer);
-        }
-
+        if (deeperQuestion) saveReading(deeperQuestion, data.answer);
         localStorage.removeItem('pendingPaymentId');
         localStorage.removeItem('pendingDeeperQuestion');
 
-        // Убираем старую кнопку "Проверить еще раз", если она была
         const oldBtn = document.getElementById('check-again-btn');
         if (oldBtn) oldBtn.remove();
-
         showMessage(aiMessage, 'Твой расклад готов ✧');
         return;
       }
 
-      if (data.status !== 'pending') {
-        throw new Error(data.error || 'Не удалось получить расклад');
-      }
-
+      if (data.status !== 'pending') throw new Error(data.error || 'Не удалось получить расклад');
     } catch (error) {
       console.error('Ошибка проверки оплаты:', error);
     }
-
     attempts++;
     await new Promise(resolve => setTimeout(resolve, 3000));
   }
 
-  // Если время вышло (45 секунд), показываем кнопку ручной проверки
-  showMessage(
-    aiMessage,
-    'Карты все еще раскладываются. Нажмите кнопку ниже, чтобы проверить готовность.',
-    false
-  );
-  
-  // Добавляем кнопку "Обновить" если её нет
+  showMessage(aiMessage, 'Карты все еще раскладываются. Нажмите кнопку ниже, чтобы проверить готовность.', false);
   if (!document.getElementById('check-again-btn')) {
     const btn = document.createElement('button');
     btn.id = 'check-again-btn';
     btn.className = 'btn';
     btn.textContent = 'Проверить еще раз ✧';
     btn.style.marginTop = '10px';
-    btn.onclick = () => {
-        btn.remove();
-        checkPaidReading(paymentId);
-    };
+    btn.onclick = () => { btn.remove(); checkPaidReading(paymentId); };
     aiMessage.parentNode.appendChild(btn);
   }
 }
@@ -1106,7 +986,6 @@ function initApp() {
   updateFormState();
   checkPaidReading();
 }
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
@@ -1116,51 +995,23 @@ if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isStandalone) return;
-
   const installBtn = document.createElement('button');
   installBtn.textContent = '📱 Сохранить на телефон';
-  installBtn.style.cssText = `
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: #29252A; color: #FFF; padding: 12px 24px;
-      border-radius: 30px; border: 2px solid #B99A5B; font-weight: bold;
-      z-index: 9999; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      display: none;
-  `;
-
-  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    installBtn.style.display = 'block';
-  }
-
+  installBtn.style.cssText = `position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #29252A; color: #FFF; padding: 12px 24px; border-radius: 30px; border: 2px solid #B99A5B; font-weight: bold; z-index: 9999; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: none;`;
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) installBtn.style.display = 'block';
   installBtn.onclick = () => {
     installBtn.style.display = 'none';
-
     if (window.deferredPrompt) {
       window.deferredPrompt.prompt();
-      window.deferredPrompt.userChoice.then(() => {
-        window.deferredPrompt = null;
-      });
+      window.deferredPrompt.userChoice.then(() => { window.deferredPrompt = null; });
     } else {
       const hint = document.createElement('div');
-      hint.style.cssText = `
-          position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-          background: #F8F6F0; border: 2px solid #B99A5B; border-radius: 16px;
-          padding: 15px 20px; width: 85%; max-width: 350px; text-align: center;
-          z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-          font-family: -apple-system, sans-serif; color: #29252A;
-      `;
-      hint.innerHTML = `
-          <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
-          <div style="font-weight: bold; color: #B99A5B; margin-bottom: 5px;">Сохранить на iPhone</div>
-          <div style="font-size: 13px; line-height: 1.4;">
-              Нажмите на кнопку <b>«Поделиться»</b> внизу экрана, затем выберите <b>«На экран "Домой"»</b>.
-          </div>
-          <div style="font-size: 20px; margin-top: 10px;">👇</div>
-      `;
+      hint.style.cssText = `position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #F8F6F0; border: 2px solid #B99A5B; border-radius: 16px; padding: 15px 20px; width: 85%; max-width: 350px; text-align: center; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: -apple-system, sans-serif; color: #29252A;`;
+      hint.innerHTML = `<div style="font-size: 32px; margin-bottom: 10px;">📤</div><div style="font-weight: bold; color: #B99A5B; margin-bottom: 5px;">Сохранить на iPhone</div><div style="font-size: 13px; line-height: 1.4;">Нажмите на кнопку <b>«Поделиться»</b> внизу экрана, затем выберите <b>«На экран "Домой"»</b>.</div><div style="font-size: 20px; margin-top: 10px;">👇</div>`;
       document.body.appendChild(hint);
       setTimeout(() => hint.remove(), 7000);
     }
   };
-
   document.body.appendChild(installBtn);
 });
 </script>
