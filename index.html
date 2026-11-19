@@ -554,7 +554,19 @@ function showMessage(el, text, isError = false) {
 function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
-
+function formatTarotText(text) {
+  if (!text) return '';
+  // Превращаем **Заголовок** в красивый золотой заголовок
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--gold); font-family: Georgia, serif; font-size: 18px; display: block; margin-top: 18px; margin-bottom: 6px;">$1</strong>');
+  
+  // Делаем списки красивыми (если ИИ использует цифры 1. 2. 3.)
+  formatted = formatted.replace(/(\d\.)\s/g, '<br>$1 ');
+  
+  // Обычные переносы строк
+  formatted = formatted.replace(/\n/g, '<br>');
+  
+  return formatted;
+}
 /* ============================================================
    3. КАРТА ДНЯ
    ============================================================ */
@@ -949,10 +961,10 @@ async function checkPaidReading(paymentId = null) {
   const section = document.getElementById('ai-tarot');
   if (section) section.scrollIntoView({ behavior: 'smooth' });
 
-  showMessage(aiMessage, 'Оплата прошла! Готовим твой расклад…');
+  showMessage(aiMessage, 'Оплата прошла! Карты раскладываются... Это может занять до 20 секунд ✧');
 
   let attempts = 0;
-  const maxAttempts = 40;
+  const maxAttempts = 15; // 15 попыток * 3 сек = 45 секунд максимум
 
   while (attempts < maxAttempts) {
     try {
@@ -970,8 +982,12 @@ async function checkPaidReading(paymentId = null) {
 
       if (data.status === 'success' && data.answer) {
         if (aiAnswer) {
-          aiAnswer.innerHTML = '';
-          aiAnswer.textContent = data.answer;
+          // Вставляем текст с красивым форматированием и заголовками
+          aiAnswer.innerHTML = `
+            <div class="tarot-block">
+              <div class="answer-text" style="line-height: 1.8; color: #29252A;">${formatTarotText(data.answer)}</div>
+            </div>
+          `;
           aiAnswer.classList.add('visible');
         }
 
@@ -982,6 +998,10 @@ async function checkPaidReading(paymentId = null) {
 
         localStorage.removeItem('pendingPaymentId');
         localStorage.removeItem('pendingDeeperQuestion');
+
+        // Убираем старую кнопку "Проверить еще раз", если она была
+        const oldBtn = document.getElementById('check-again-btn');
+        if (oldBtn) oldBtn.remove();
 
         showMessage(aiMessage, 'Твой расклад готов ✧');
         return;
@@ -999,13 +1019,27 @@ async function checkPaidReading(paymentId = null) {
     await new Promise(resolve => setTimeout(resolve, 3000));
   }
 
+  // Если время вышло (45 секунд), показываем кнопку ручной проверки
   showMessage(
     aiMessage,
-    'Оплата прошла. Расклад ещё готовится. Не оплачивай повторно — попробуй обновить страницу чуть позже.'
+    'Карты все еще раскладываются. Нажмите кнопку ниже, чтобы проверить готовность.',
+    false
   );
-}
-
-/* ============================================================
+  
+  // Добавляем кнопку "Обновить" если её нет
+  if (!document.getElementById('check-again-btn')) {
+    const btn = document.createElement('button');
+    btn.id = 'check-again-btn';
+    btn.className = 'btn';
+    btn.textContent = 'Проверить еще раз ✧';
+    btn.style.marginTop = '10px';
+    btn.onclick = () => {
+        btn.remove();
+        checkPaidReading(paymentId);
+    };
+    aiMessage.parentNode.appendChild(btn);
+  }
+}/* ============================================================
    8. ИНИЦИАЛИЗАЦИЯ И PWA
    ============================================================ */
 function initApp() {
