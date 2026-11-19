@@ -1,8 +1,7 @@
 // ============================================================
 // ВАЖНО: Меняйте эту версию каждый раз, когда вносите изменения на сайт!
-// Было v2, стало v3, потом v4 и так далее.
 // ============================================================
-const CACHE_NAME = 'istina-taro-v4'; 
+const CACHE_NAME = 'istina-taro-v5'; // Обновил версию
 
 const urlsToCache = [
   '/',
@@ -10,9 +9,9 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
-// 1. УСТАНОВКА (Скачиваем новые файлы в кэш)
+// 1. УСТАНОВКА
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Принудительно активируем новый Service Worker
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(urlsToCache);
@@ -20,7 +19,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// 2. АКТИВАЦИЯ (Удаляем старый кэш, но НЕ ТРОГАЕМ localStorage с раскладами)
+// 2. АКТИВАЦИЯ
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -34,15 +33,13 @@ self.addEventListener('activate', event => {
       );
     }).then(() => {
         self.clients.claim();
-        // Принудительная проверка обновлений при каждом запуске
-        return self.registration.update(); 
+        // Убрали self.registration.update() во избежание циклов
     })
   );
 });
 
-// 3. ОБРАБОТКА ЗАПРОСОВ (Стратегия: Сначала сеть, потом кэш)
+// 3. ОБРАБОТКА ЗАПРОСОВ
 self.addEventListener('fetch', event => {
-  // Не кэшируем API-запросы (оплата, ИИ, check-payment должны идти напрямую)
   if (event.request.url.includes('/api/')) {
     return;
   }
@@ -50,7 +47,6 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Если сеть работает, возвращаем свежий ответ и обновляем кэш
         const responseClone = response.clone();
         caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, responseClone);
@@ -58,7 +54,6 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        // Если интернета нет, берем из кэша
         return caches.match(event.request);
       })
   );
