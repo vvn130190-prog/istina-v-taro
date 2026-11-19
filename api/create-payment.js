@@ -17,16 +17,17 @@ export default async function handler(req, res) {
 
   try {
     const { amount, question } = req.body;
-    
-    if (!amount) {
-      return res.status(400).json({ error: 'Не указана сумма' });
+        if (!question || question.trim() === '' || question === 'Вопрос не указан')) {
+        return res.status(400).json({ error: 'Пожалуйста, напишите ваш вопрос перед оплатой!' });
+    }    if (!amount) {
+      res.status(400).json({ error: 'Не указана сумма' });
     }
 
     const shopId = process.env.YOOKASSA_SHOP_ID;
     const secretKey = process.env.YOOKASSA_SECRET_KEY;
     
     if (!shopId || !secretKey) {
-      return res.status(500).json({ error: 'Не настроены ключи ЮKassa в Vercel' });
+      return res.status(500).json({ error: 'Не настроены ключи ЮKassa' });
     }
 
     // Генерируем уникальный ключ идемпотентности
