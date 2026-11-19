@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
-    <head>
+<head>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -554,6 +554,7 @@ function showMessage(el, text, isError = false) {
 function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
+
 function formatTarotText(text) {
   if (!text) return '';
   // Превращаем **Заголовок** в красивый золотой заголовок
@@ -567,6 +568,7 @@ function formatTarotText(text) {
   
   return formatted;
 }
+
 /* ============================================================
    3. КАРТА ДНЯ
    ============================================================ */
@@ -782,7 +784,7 @@ if (!resp.ok) {
       
       aiAnswer.innerHTML = `
         <div class="tarot-block">
-          <p class="answer-text">${answer.replace(/\n/g, '<br>')}</p>
+          <p class="answer-text">${formatTarotText(answer)}</p>
         </div>
         ${buttonsHtml}
       `;
@@ -910,6 +912,11 @@ window.submitPayment = async function () {
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
     localStorage.setItem('pendingPaymentId', data.payment_id);
 
+    // Проверка на наличие виджета (чтобы не было ошибки на телефонах)
+    if (!window.YooMoneyCheckoutWidget) {
+      throw new Error('Виджет оплаты еще не загрузился. Пожалуйста, обновите страницу.');
+    }
+
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: data.confirmation_token,
       error_callback: function(error) {
@@ -947,7 +954,9 @@ window.submitPayment = async function () {
 window.openDeeperPayment = function(questionText) {
   localStorage.setItem('pendingDeeperQuestion', questionText);
   window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
-};/* ============================================================
+};
+
+/* ============================================================
    7. ПРОВЕРКА ОПЛАТЫ И АВТОЗАПУСК РАСКЛАДА
    ============================================================ */
 
@@ -982,10 +991,57 @@ async function checkPaidReading(paymentId = null) {
 
       if (data.status === 'success' && data.answer) {
         if (aiAnswer) {
-          // Вставляем текст с красивым форматированием и заголовками
+          // --- ХИТРОСТЬ: Вытаскиваем первые три карты из начала текста ---
+          let answerText = data.answer;
+          let cardNamesHtml = '';
+          
+          // Ищем первую строчку с запятыми (там, где ИИ перечислил карты)
+          const firstLineMatch = answerText.match(/^([А-Яа-яA-Za-z\s]+,\s*[А-Яа-яA-Za-z\s]+,\s*[А-Яа-яA-Za-z\s]+)/);
+          
+          if (firstLineMatch) {
+            const cardsString = firstLineMatch[0];
+            const cardList = cardsString.split(',').map(c => c.trim());
+            
+            const cardImages = {
+               'Шут': '00_Fool.jpg', 'Маг': '01_Magician.jpg', 'Жрица': '02_High_Priestess.jpg',
+               'Императрица': '03_Empress.jpg', 'Император': '04_Emperor.jpg', 'Иерофант': '05_Hierophant.jpg',
+               'Влюбленные': '06_Lovers.jpg', 'Колесница': '07_Chariot.jpg', 'Сила': '08_Strength.jpg',
+               'Отшельник': '09_Hermit.jpg', 'Фортуны': '10_Wheel_of_Fortune.jpg', 'Справедливость': '11_Justice.jpg',
+               'Повешенный': '12_Hanged_Man.jpg', 'Смерть': '13_Death.jpg', 'Умеренность': '14_Temperance.jpg',
+               'Дьявол': '15_Devil.jpg', 'Башня': '16_Tower.jpg', 'Звезда': '17_Star.jpg',
+               'Луна': '18_Moon.jpg', 'Солнце': '19_Sun.jpg', 'Суд': '20_Judgement.jpg', 'Мир': '21_World.jpg'
+            };
+
+            cardNamesHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`;
+            
+            cardList.forEach(cardName => {
+              let imgFile = '00_Fool.jpg'; // Дефолтная картинка, если не нашли
+              for (const [key, file] of Object.entries(cardImages)) {
+                if (cardName.includes(key)) {
+                  imgFile = file;
+                  break;
+                }
+              }
+              
+              cardNamesHtml += `
+                <div style="text-align:center; width:90px;">
+                  <img src="/icons/${imgFile}" style="width:100%; border-radius:6px; border:1px solid var(--gold); box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="${cardName}">
+                  <div style="font-size:10px; color:var(--muted); margin-top:5px; line-height:1.2;">${cardName}</div>
+                </div>
+              `;
+            });
+            cardNamesHtml += `</div>`;
+            
+            // Убираем эту строчку из основного текста, чтобы не дублировалась
+            answerText = answerText.replace(firstLineMatch[0], '');
+          }
+
+          // Формируем финальный блок
           aiAnswer.innerHTML = `
-            <div class="tarot-block">
-              <div class="answer-text" style="line-height: 1.8; color: #29252A;">${formatTarotText(data.answer)}</div>
+            <div class="tarot-block" style="padding: 20px;">
+              <h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:24px; margin-bottom:15px;">Каким будет для тебя 2027 год</h3>
+              ${cardNamesHtml}
+              <div class="answer-text" style="line-height: 1.8; color: #29252A;">${formatTarotText(answerText)}</div>
             </div>
           `;
           aiAnswer.classList.add('visible');
@@ -1039,7 +1095,9 @@ async function checkPaidReading(paymentId = null) {
     };
     aiMessage.parentNode.appendChild(btn);
   }
-}/* ============================================================
+}
+
+/* ============================================================
    8. ИНИЦИАЛИЗАЦИЯ И PWA
    ============================================================ */
 function initApp() {
