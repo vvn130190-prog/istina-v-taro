@@ -104,13 +104,19 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error('Ошибка ЮKassa:', data);
-      return res.status(response.status).json({
-        console.log('Ответ ЮKassa:', JSON.stringify(data));
-        error: data.description || 'Ошибка ЮKassa.'
-      });
-    }
+console.log('ЮKassa:', {
+  id: data.id,
+  status: data.status,
+  confirmation_type: data.confirmation?.type,
+  token_received: Boolean(data.confirmation?.confirmation_token)
+});
+
+if (!response.ok) {
+  console.error('Ошибка ЮKassa:', data);
+  return res.status(response.status).json({
+    error: data.description || 'Ошибка ЮKassa.'
+  });
+}
 
     const order = {
       question: question || '',
