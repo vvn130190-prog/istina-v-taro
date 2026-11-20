@@ -289,13 +289,24 @@ export default async function handler(req, res) {
       throw new Error('В заказе отсутствуют пять вопросов пакета.');
     }
 
-    const positions = getPositions(
-      order.spreadType || 'single',
-      order.questions || []
-    );
+   const isBirthDateProduct =
+  order.spreadType === 'life_code' ||
+  order.spreadType === 'life_navigator';
 
-    const cards = drawCards(positions);
-    const instructions = makeInstructions(order, cards);
+if (isBirthDateProduct && !order.birthDate) {
+  throw new Error('В заказе отсутствует дата рождения.');
+}
+
+const positions = getPositions(
+  order.spreadType || 'single',
+  order.questions || []
+);
+
+const cards = isBirthDateProduct
+  ? createBirthDateCards(order)
+  : drawCards(positions);
+
+const instructions = makeInstructions(order, cards);
 
     const GOOGLE_SCRIPT_URL =
       'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
