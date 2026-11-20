@@ -372,16 +372,14 @@ footer a:hover{color:var(--gold)}
 <div id="topics-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:999; backdrop-filter:blur(3px);" onclick="closeTopicsMenu()"></div>
 
 <div id="topics-drawer" style="position:fixed; top:0; right:-100%; width:100%; max-width:400px; height:100%; background:var(--bg); z-index:1000; box-shadow:-10px 0 30px rgba(0,0,0,0.1); transition:right 0.3s ease-in-out; overflow-y:auto; padding:20px; box-sizing:border-box; -webkit-overflow-scrolling: touch;">
+
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:15px;">
     <h3 style="margin:0; font-family:Georgia, serif; color:var(--text);">Выбери тему</h3>
     <span onclick="closeTopicsMenu()" style="cursor:pointer; font-size:28px; color:var(--muted); line-height:1;">&times;</span>
   </div>
 
-
-<div style="margin-bottom:25px;">
-  <div class="eyebrow" style="margin-bottom:10px;">Любовь и отношения</div>
-
-    <div style="margin-bottom:25px;">
+  <!-- 1. ПРОГНОЗ НА ГОД -->
+  <div style="margin-bottom:25px;">
     <div class="eyebrow" style="margin-bottom:10px;">Прогноз на год</div>
     <div class="topic-card" onclick="selectTopic('Каким будет 2027 год? Подробный прогноз: чего ждать в личной жизни, в работе и финансах. Какие главные уроки и возможности года?', 499)" style="background: linear-gradient(145deg, #FFFDF8, #F4EDE4); border-color: var(--gold);">
       <h4>✨ Каким будет 2027?</h4>
@@ -389,31 +387,45 @@ footer a:hover{color:var(--gold)}
       <span class="price-tag">499 ₽</span>
     </div>
   </div>
-   
-  <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?', 99, 'love_year')">
-    <h4>Встречу ли я в этом году свою любовь?</h4>
-    <p>Что говорят карты о возможности новых отношений.</p>
-    <span class="price-tag">99 ₽</span>
+
+  <!-- 2. ЛИЧНОСТЬ И ПУТЬ -->
+  <div style="margin-bottom:25px;">
+    <div class="eyebrow" style="margin-bottom:10px;">Личность и путь</div>
+    <div class="topic-card" onclick="selectTopic('Разбор по дате рождения: Мои сильные стороны, скрытые таланты и кармические уроки. Что мне мешает и куда двигаться?', 499)">
+      <h4>Твой жизненный код (по дате рождения)</h4>
+      <p>Твои таланты, кармические уроки и советы по жизни.</p>
+      <span class="price-tag">499 ₽</span>
+    </div>
   </div>
 
-  <div class="topic-card" onclick="selectTopic('Свой вопрос о любви и отношениях', 99, 'custom_question')">
-    <h4>Свой вопрос</h4>
-    <p>Расскажи о своей ситуации и задай волнующий вопрос.</p>
-    <span class="price-tag">99 ₽</span>
-  </div>
+  <!-- 3. ЛЮБОВЬ И ОТНОШЕНИЯ -->
+  <div style="margin-bottom:25px;">
+    <div class="eyebrow" style="margin-bottom:10px;">Любовь и отношения</div>
 
-  <div class="topic-card" onclick="selectTopic('Мысли, чувства и действия', 499, 'relationship_8')">
-    <h4>Мысли, чувства и действия</h4>
-    <p>Мысли, чувства и действия обоих партнёров и перспектива отношений.</p>
-    <span class="price-tag">499 ₽</span>
-  </div>
+    <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?', 99, 'love_year')">
+      <h4>Встречу ли я в этом году свою любовь?</h4>
+      <p>Что говорят карты о возможности новых отношений.</p>
+      <span class="price-tag">99 ₽</span>
+    </div>
 
-  <div class="topic-card" onclick="openCompatibilityForm()">
-  <h4>Совместимость по датам рождения</h4>
-  <p>Авторский анализ особенностей и взаимодействия двух людей.</p>
-  <span class="price-tag">499 ₽</span>
-</div>
-</div>
+    <div class="topic-card" onclick="selectTopic('Свой вопрос о любви и отношениях', 99, 'custom_question')">
+      <h4>Свой вопрос</h4>
+      <p>Расскажи о своей ситуации и задай волнующий вопрос.</p>
+      <span class="price-tag">99 ₽</span>
+    </div>
+
+    <div class="topic-card" onclick="selectTopic('Мысли, чувства и действия', 499, 'relationship_8')">
+      <h4>Мысли, чувства и действия</h4>
+      <p>Мысли, чувства и действия обоих партнёров и перспектива отношений.</p>
+      <span class="price-tag">499 ₽</span>
+    </div>
+
+    <div class="topic-card" onclick="openCompatibilityForm()">
+      <h4>Совместимость по датам рождения</h4>
+      <p>Авторский анализ особенностей и взаимодействия двух людей.</p>
+      <span class="price-tag">499 ₽</span>
+    </div>
+  </div>
 
 </div>
 
