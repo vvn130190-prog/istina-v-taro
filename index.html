@@ -399,13 +399,12 @@ footer a:hover{color:var(--gold)}
     <span class="price-tag">499 ₽</span>
   </div>
 
-  <div class="topic-card" onclick="selectTopic('Совместимость по датам рождения', 499, 'compatibility')">
-    <h4>Совместимость по датам рождения</h4>
-    <p>Авторский анализ особенностей и взаимодействия двух людей.</p>
-    <span class="price-tag">499 ₽</span>
-  </div>
+  <div class="topic-card" onclick="openCompatibilityForm()">
+  <h4>Совместимость по датам рождения</h4>
+  <p>Авторский анализ особенностей и взаимодействия двух людей.</p>
+  <span class="price-tag">499 ₽</span>
 </div>
-
+</div>
 
   <div style="margin-bottom:25px;">
     <div class="eyebrow" style="margin-bottom:10px;">Личность и путь</div>
@@ -500,6 +499,92 @@ function selectTopic(questionText, amount, spreadType = 'single') {
     window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
   }, 300);
 }
+
+window.openCompatibilityForm = function() {
+  const oldModal = document.getElementById('compatibility-modal');
+  if (oldModal) oldModal.remove();
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const modal = document.createElement('div');
+  modal.id = 'compatibility-modal';
+
+  modal.innerHTML = `
+    <div style="
+      position:fixed;
+      inset:0;
+      background:rgba(35,30,30,0.65);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:99999;
+    ">
+      <div style="
+        background:#F8F6F0;
+        border:1px solid #B99A5B;
+        border-radius:16px;
+        padding:28px 22px;
+        width:100%;
+        max-width:420px;
+        box-sizing:border-box;
+        color:#29252A;
+      ">
+        <div style="text-align:right;">
+          <button id="compat-close" type="button"
+            style="border:0;background:none;font-size:25px;color:#777;cursor:pointer;">×</button>
+        </div>
+
+        <h3 style="font-family:Georgia,serif;text-align:center;color:#9C7B42;margin:0 0 12px;">
+          Совместимость по датам рождения
+        </h3>
+
+        <p style="text-align:center;line-height:1.6;margin-bottom:24px;">
+          Укажи даты рождения обоих партнёров, чтобы я могла подготовить ваш индивидуальный расклад.
+        </p>
+
+        <label style="display:block;margin-bottom:8px;">Дата рождения первого партнёра</label>
+        <input id="compat-date-1" type="date" max="${today}"
+          style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #B99A5B;border-radius:8px;margin-bottom:20px;font-size:16px;">
+
+        <label style="display:block;margin-bottom:8px;">Дата рождения второго партнёра</label>
+        <input id="compat-date-2" type="date" max="${today}"
+          style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #B99A5B;border-radius:8px;margin-bottom:14px;font-size:16px;">
+
+        <p id="compat-error" style="color:#A33;text-align:center;display:none;font-size:14px;"></p>
+
+        <button id="compat-continue" type="button"
+          style="width:100%;padding:15px;background:#B99A5B;color:white;border:0;border-radius:8px;font-size:16px;cursor:pointer;">
+          Продолжить к оплате — 499 ₽
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('compat-close').onclick = () => modal.remove();
+
+  document.getElementById('compat-continue').onclick = () => {
+    const date1 = document.getElementById('compat-date-1').value;
+    const date2 = document.getElementById('compat-date-2').value;
+    const error = document.getElementById('compat-error');
+
+    if (!date1 || !date2) {
+      error.textContent = 'Пожалуйста, укажи обе даты рождения.';
+      error.style.display = 'block';
+      return;
+    }
+
+    localStorage.setItem('pendingBirthDate1', date1);
+    localStorage.setItem('pendingBirthDate2', date2);
+    localStorage.setItem('pendingDeeperQuestion', 'Совместимость по датам рождения');
+    localStorage.setItem('pendingSpreadType', 'compatibility');
+
+    modal.remove();
+    window.openPaymentForm('Совместимость по датам рождения — 499 ₽', 499);
+  };
+};
 
 </script>
 
