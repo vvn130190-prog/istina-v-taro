@@ -137,7 +137,28 @@ function getPositions(spreadType, questions) {
 
   return SPREAD_POSITIONS.single;
 }
+// СОЗДАНИЕ РАССЧИТАННЫХ КАРТ
+function createBirthDateCards(order) {
+  let arcanaNumbers;
+  let positions;
 
+  if (order.spreadType === 'life_code') {
+    arcanaNumbers = [calculateLifeCode(order.birthDate)];
+    positions = ['Твой главный Аркан — жизненный код'];
+  } else {
+    arcanaNumbers = calculateLifeNavigator(order.birthDate);
+    positions = [
+      'До 18 лет — Аркан дня рождения',
+      'От 18 до 36 лет — Аркан месяца рождения',
+      'С 36 лет и далее — Аркан года рождения'
+    ];
+  }
+
+  return arcanaNumbers.map((number, index) => ({
+    position: positions[index],
+    name: DECK[number - 1]
+  }));
+}
 function makeInstructions(order, cards) {
   if (order.spreadType === 'relationship_8') {
     return `Клиентский вопрос:
