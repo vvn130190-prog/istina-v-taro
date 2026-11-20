@@ -160,6 +160,45 @@ function createBirthDateCards(order) {
   }));
 }
 function makeInstructions(order, cards) {
+    if (order.spreadType === 'life_code') {
+    return `Ты проводишь авторский разбор жизненного кода человека.
+
+Дата рождения: ${order.birthDate}
+
+Рассчитанный главный Аркан:
+${cards[0].name}
+
+Раскрой:
+1. Главные качества и особенности личности.
+2. Сильные стороны, таланты и природные способности.
+3. Возможные слабости и теневые проявления.
+4. Главные жизненные уроки.
+5. Практические советы, как раскрыть потенциал этого Аркана.
+
+Не используй общие фразы. Дай глубокий, индивидуальный и связный разбор.
+В конце сформулируй главный вывод.`;
+  }
+
+  if (order.spreadType === 'life_navigator') {
+    return `Ты проводишь авторский разбор жизненного пути человека по трём рассчитанным Арканам.
+
+Дата рождения: ${order.birthDate}
+
+Три Аркана и периоды жизни:
+${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
+
+Для каждого периода раскрой:
+1. Главные качества и особенности.
+2. Сильные стороны, таланты и ресурсы.
+3. Возможные ловушки и теневые проявления.
+4. Важные жизненные уроки и практические рекомендации.
+
+Затем свяжи три Аркана между собой.
+Покажи, как особенности каждого периода дополняют друг друга.
+Заверши единым содержательным выводом о жизненном пути человека.
+
+Пиши тепло, глубоко и конкретно. Не представляй трактовку как неизбежную судьбу.`;
+  }
   if (order.spreadType === 'relationship_8') {
     return `Клиентский вопрос:
 ${order.question}
@@ -293,10 +332,20 @@ export default async function handler(req, res) {
   order.spreadType === 'life_code' ||
   order.spreadType === 'life_navigator';
 
-if (isBirthDateProduct && !order.birthDate) {
-  throw new Error('В заказе отсутствует дата рождения.');
-}
+const parsedBirthDate = new Date(
+  `${order.birthDate}T00:00:00.000Z`
+);
 
+const validBirthDate =
+  typeof order.birthDate === 'string' &&
+  /^\d{4}-\d{2}-\d{2}$/.test(order.birthDate) &&
+  !isNaN(parsedBirthDate.getTime()) &&
+  parsedBirthDate.toISOString().slice(0, 10) === order.birthDate &&
+  parsedBirthDate <= new Date();
+
+if (isBirthDateProduct && !validBirthDate) {
+  throw new Error('Дата рождения отсутствует или указана неверно.');
+}
 const positions = getPositions(
   order.spreadType || 'single',
   order.questions || []
