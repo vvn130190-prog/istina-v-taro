@@ -1008,6 +1008,8 @@ if (voiceBtn) {
    6. ОПЛАТА (Воронка)
    ============================================================ */
 window.openPaymentForm = function (packageName, amount) {
+     if (typeof window.closeTopicsMenu === 'function') window.closeTopicsMenu();
+   
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
   if (nameEl) nameEl.textContent = packageName;
