@@ -15,6 +15,8 @@ const SPREAD_PRICES = {
   compatibility: 499,
   my_path_pack: 399,
   choices_pack: 399,
+  life_navigator: 599,
+  life_code: 199,
 };
 
 export default async function handler(req, res) {
