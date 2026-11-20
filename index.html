@@ -856,13 +856,17 @@ window.submitPayment = async function () {
     if (window.ym) window.ym(114362542, 'reachGoal', 'payment_click');
 
     const response = await fetch('/api/create-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-  amount: amount,
-  question: pendingQ,
-  spreadType: localStorage.getItem('pendingSpreadType') || 'single'
-})    });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    amount: amount,
+    question: pendingQ,
+    spreadType: localStorage.getItem('pendingSpreadType') || 'single',
+    questions: JSON.parse(localStorage.getItem('pendingPackQuestions') || '[]'),
+    birthDate1: localStorage.getItem('pendingBirthDate1') || '',
+    birthDate2: localStorage.getItem('pendingBirthDate2') || ''
+  })
+});
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
     localStorage.setItem('pendingPaymentId', data.payment_id);
