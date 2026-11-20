@@ -999,33 +999,107 @@ const getImg = (name) => {
 };
 
 
-          const blocks = text.split('###').filter(b => b.trim() !== '');
+       
+const cards = Array.isArray(data.cards) ? data.cards : [];
+
 let html = '';
-          blocks.forEach(block => {
-            const lines = block.trim().split('\n');
-            const titleLine = lines[0].trim();
-            const bodyText = lines.slice(1).join('\n').trim();
 
-            const match = titleLine.match(/^(.*?):\s*(.*)$/);
-            let title = titleLine;
-            let cardsHtml = '';
+if (cards.length > 0) {
+  const cardsHtml = cards.map(card => `
+    <div style="
+      text-align:center;
+      width:110px;
+      flex: 0 0 110px;
+      margin:8px;
+    ">
+      <div style="
+        color:var(--gold);
+        font-size:13px;
+        font-weight:600;
+        margin-bottom:8px;
+        min-height:34px;
+      ">${card.position || 'Карта'}</div>
+      ${getImg(card.name)}
+    </div>
+  `).join('');
 
-            if (match) {
-              title = match[1].trim();
-              const cardNames = match[2].split(',').map(c => c.trim());
-              if (cardNames.length >= 2) {
-                cardsHtml = `<div style="display:flex; gap:15px; margin: 20px 0; justify-content:center; align-items:flex-start;">${getImg(cardNames[0])}${getImg(cardNames[1])}</div>`;
-              }
-            }
+  html += `
+    <div style="
+      margin-bottom:30px;
+      background:rgba(255,255,255,0.6);
+      padding:20px;
+      border-radius:12px;
+      border:1px solid var(--line);
+    ">
+      <div style="
+        font-weight:bold;
+        color:var(--gold);
+        font-family:Georgia,serif;
+        font-size:20px;
+        text-align:center;
+        margin-bottom:20px;
+      ">
+        Выпавшие карты
+      </div>
 
-            html += `
-              <div style="margin-bottom: 40px; background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--line);">
-                <div style="font-weight:bold; color:var(--gold); font-family:Georgia, serif; font-size:20px; text-align:center; margin-bottom:10px;">${title}</div>
-                ${cardsHtml}
-                <div style="line-height:1.8; color:#29252A; font-size:16px;">${formatTarotText(bodyText)}</div>
-              </div>
-            `;
-          });
+      <div style="
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        justify-content:center;
+        align-items:flex-start;
+      ">
+        ${cardsHtml}
+      </div>
+    </div>
+  `;
+}
+
+const blocks = text.split('###').filter(b => b.trim() !== '');
+
+blocks.forEach(block => {
+  const lines = block.trim().split('\n');
+  const titleLine = lines[0].trim();
+  const bodyText = lines.slice(1).join('\n').trim();
+
+  html += `
+    <div style="
+      margin-bottom:30px;
+      background:rgba(255,255,255,0.6);
+      padding:20px;
+      border-radius:12px;
+      border:1px solid var(--line);
+    ">
+      <div style="
+        font-weight:bold;
+        color:var(--gold);
+        font-family:Georgia,serif;
+        font-size:20px;
+        text-align:center;
+        margin-bottom:15px;
+      ">
+        ${titleLine}
+      </div>
+
+      <div style="
+        line-height:1.8;
+        color:#29252A;
+        font-size:16px;
+      ">
+        ${formatTarotText(bodyText || titleLine)}
+      </div>
+    </div>
+  `;
+});
+
+if (blocks.length === 0 && cards.length === 0) {
+  html = `
+    <div style="line-height:1.8;color:#29252A;font-size:16px;">
+      ${formatTarotText(text)}
+    </div>
+  `;
+}
+
 
           aiAnswer.innerHTML = `<div class="tarot-block" style="padding: 25px; background: #FCFAF5;">${html}</div>`;
           aiAnswer.classList.add('visible');
