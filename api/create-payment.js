@@ -107,6 +107,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       console.error('Ошибка ЮKassa:', data);
       return res.status(response.status).json({
+        console.log('Ответ ЮKassa:', JSON.stringify(data));
         error: data.description || 'Ошибка ЮKassa.'
       });
     }
