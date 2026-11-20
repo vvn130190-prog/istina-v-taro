@@ -88,7 +88,39 @@ function drawCards(positions) {
     name: deck[index]
   }));
 }
+// РАСЧЁТ АРКАНА ПО ДАТЕ РОЖДЕНИЯ
+function calculateArcana(number) {
+  while (number > 22) {
+    number -= 22;
+  }
+  return number;
+}
 
+// АРКАН ЖИЗНЕННОГО КОДА
+function calculateLifeCode(birthDate) {
+  const digits = birthDate.replace(/\D/g, '');
+  const sum = digits.split('').reduce(
+    (total, digit) => total + Number(digit), 0
+  );
+
+  return calculateArcana(sum);
+}
+
+// ТРИ АРКАНА НАВИГАТОРА ПО ЖИЗНИ
+function calculateLifeNavigator(birthDate) {
+  const [year, month, day] = birthDate.split('-').map(Number);
+
+  const dayArcana = calculateArcana(day);
+  const monthArcana = calculateArcana(month);
+
+  const yearSum = String(year).split('').reduce(
+    (total, digit) => total + Number(digit), 0
+  );
+
+  const yearArcana = calculateArcana(yearSum);
+
+  return [dayArcana, monthArcana, yearArcana];
+}
 function getPositions(spreadType, questions) {
   if (SPREAD_POSITIONS[spreadType]) {
     return SPREAD_POSITIONS[spreadType];
