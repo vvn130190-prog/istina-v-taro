@@ -377,14 +377,35 @@ footer a:hover{color:var(--gold)}
     <span onclick="closeTopicsMenu()" style="cursor:pointer; font-size:28px; color:var(--muted); line-height:1;">&times;</span>
   </div>
 
-  <div style="margin-bottom:25px;">
-    <div class="eyebrow" style="margin-bottom:10px;">Отношения</div>
-    <div class="topic-card" onclick="selectTopic('Отношения: Что он/она чувствует ко мне? Какие мысли и планы? Что между нами и к чему всё идёт?', 299)">
-      <h4>Чувства и планы партнёра</h4>
-      <p>Мысли, действия, что между вами и к чему это приведёт.</p>
-      <span class="price-tag">299 ₽</span>
-    </div>
+
+<div style="margin-bottom:25px;">
+  <div class="eyebrow" style="margin-bottom:10px;">Любовь и отношения</div>
+
+  <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?', 99, 'love_year')">
+    <h4>Встречу ли я в этом году свою любовь?</h4>
+    <p>Что говорят карты о возможности новых отношений.</p>
+    <span class="price-tag">99 ₽</span>
   </div>
+
+  <div class="topic-card" onclick="selectTopic('Свой вопрос о любви и отношениях', 99, 'custom_question')">
+    <h4>Свой вопрос</h4>
+    <p>Расскажи о своей ситуации и задай волнующий вопрос.</p>
+    <span class="price-tag">99 ₽</span>
+  </div>
+
+  <div class="topic-card" onclick="selectTopic('Мысли, чувства и действия — расклад на 8 карт', 499, 'relationship_8')">
+    <h4>Мысли, чувства и действия — 8 карт</h4>
+    <p>Мысли, чувства и действия обоих партнёров и перспектива отношений.</p>
+    <span class="price-tag">499 ₽</span>
+  </div>
+
+  <div class="topic-card" onclick="selectTopic('Совместимость по датам рождения', 499, 'compatibility')">
+    <h4>Совместимость по датам рождения</h4>
+    <p>Авторский анализ особенностей и взаимодействия двух людей.</p>
+    <span class="price-tag">499 ₽</span>
+  </div>
+</div>
+
 
   <div style="margin-bottom:25px;">
     <div class="eyebrow" style="margin-bottom:10px;">Личность и путь</div>
@@ -465,15 +486,21 @@ function closeTopicsMenu() {
   document.body.style.overflow = '';
 }
 
-function selectTopic(questionText, amount) {
+
+function selectTopic(questionText, amount, spreadType = 'single') {
   closeTopicsMenu();
+
   const input = document.getElementById('question');
   if (input) input.value = questionText;
+
   localStorage.setItem('pendingDeeperQuestion', questionText);
+  localStorage.setItem('pendingSpreadType', spreadType);
+
   setTimeout(() => {
     window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
   }, 300);
 }
+
 </script>
 
 <script>
@@ -831,8 +858,11 @@ window.submitPayment = async function () {
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount, question: pendingQ })
-    });
+body: JSON.stringify({
+  amount: amount,
+  question: pendingQ,
+  spreadType: localStorage.getItem('pendingSpreadType') || 'single'
+})    });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
     localStorage.setItem('pendingPaymentId', data.payment_id);
