@@ -597,7 +597,100 @@ window.openCompatibilityForm = function() {
     window.openPaymentForm('Совместимость по датам рождения — 499 ₽', 499);
   };
 };
+// ФОРМА ДАТЫ РОЖДЕНИЯ ДЛЯ НОВЫХ РАСКЛАДОВ
+window.openBirthDateForm = function(spreadType) {
+  const oldModal = document.getElementById('birthdate-modal');
+  if (oldModal) oldModal.remove();
 
+  const isNavigator = spreadType === 'life_navigator';
+  const title = isNavigator ? 'Твой навигатор по жизни' : 'Твой жизненный код';
+  const amount = isNavigator ? 599 : 199;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const modal = document.createElement('div');
+  modal.id = 'birthdate-modal';
+
+  modal.innerHTML = `
+    <div style="
+      position:fixed;
+      inset:0;
+      background:rgba(35,30,30,0.65);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:99999;
+    ">
+      <div style="
+        background:#F8F6F0;
+        border:1px solid #B99A5B;
+        border-radius:16px;
+        padding:28px 22px;
+        width:100%;
+        max-width:420px;
+        box-sizing:border-box;
+        color:#29252A;
+      ">
+        <div style="text-align:right;">
+          <button id="birthdate-close" type="button"
+            style="border:0;background:none;font-size:25px;color:#777;cursor:pointer;">×</button>
+        </div>
+
+        <h3 style="font-family:Georgia,serif;text-align:center;color:#9C7B42;margin:0 0 12px;">
+          ${title}
+        </h3>
+
+        <p style="text-align:center;line-height:1.6;margin-bottom:24px;">
+          Укажи свою дату рождения, чтобы я могла подготовить твой индивидуальный разбор.
+        </p>
+
+        <label style="display:block;margin-bottom:8px;">Твоя дата рождения</label>
+        <input id="birthdate-input" type="date" max="${today}"
+          style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #B99A5B;border-radius:8px;margin-bottom:14px;font-size:16px;">
+
+        <p id="birthdate-error"
+          style="color:#A33;text-align:center;display:none;font-size:14px;"></p>
+
+        <button id="birthdate-continue" type="button"
+          style="width:100%;padding:15px;background:#B99A5B;color:white;border:0;border-radius:8px;font-size:16px;cursor:pointer;">
+          Продолжить к оплате — ${amount} ₽
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('birthdate-close').onclick = () => modal.remove();
+
+  document.getElementById('birthdate-continue').onclick = () => {
+    const birthDate = document.getElementById('birthdate-input').value;
+    const error = document.getElementById('birthdate-error');
+
+    if (!birthDate) {
+      error.textContent = 'Пожалуйста, укажи дату рождения.';
+      error.style.display = 'block';
+      return;
+    }
+
+    if (birthDate > today) {
+      error.textContent = 'Дата рождения не может быть в будущем.';
+      error.style.display = 'block';
+      return;
+    }
+
+    localStorage.setItem('pendingBirthDate', birthDate);
+    localStorage.setItem('pendingSpreadType', spreadType);
+    localStorage.setItem('pendingDeeperQuestion', title);
+
+    localStorage.removeItem('pendingBirthDate1');
+    localStorage.removeItem('pendingBirthDate2');
+
+    modal.remove();
+    window.openPaymentForm(title + ' — ' + amount + ' ₽', amount);
+  };
+};
 </script>
 
 <script>
@@ -960,8 +1053,9 @@ window.submitPayment = async function () {
     question: pendingQ,
     spreadType: localStorage.getItem('pendingSpreadType') || 'single',
     questions: JSON.parse(localStorage.getItem('pendingPackQuestions') || '[]'),
-    birthDate1: localStorage.getItem('pendingBirthDate1') || '',
-    birthDate2: localStorage.getItem('pendingBirthDate2') || ''
+   birthDate1: localStorage.getItem('pendingBirthDate1') || '',
+birthDate2: localStorage.getItem('pendingBirthDate2') || '',
+birthDate: localStorage.getItem('pendingBirthDate') || ''
   })
 });
     const data = await response.json();
