@@ -31,14 +31,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const {
-      amount,
-      question,
-      spreadType = 'single',
-      questions = [],
-      birthDate1,
-      birthDate2
-    } = req.body || {};
+  const {
+    amount,
+    question,
+    spreadType = 'single',
+    questions = [],
+    birthDate1,
+    birthDate2,
+    birthDate
+  } = req.body || {};
 
     const expectedAmount = SPREAD_PRICES[spreadType];
 
@@ -116,6 +117,7 @@ export default async function handler(req, res) {
       amount: expectedAmount,
       birthDate1: birthDate1 || '',
       birthDate2: birthDate2 || '',
+      birthDate: birthDate || '',
       name: 'Клиент',
       contact: 'Не указано',
       createdAt: new Date().toISOString()
