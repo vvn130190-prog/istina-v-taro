@@ -971,8 +971,7 @@ const getImg = (name) => {
 
 
           const blocks = text.split('###').filter(b => b.trim() !== '');
-          let html = `<h3 style="text-align:center; color:var(--gold); font-family:Georgia, serif; font-size:26px; margin-bottom:25px;">✨ Каким будет для тебя 2027 год ✨</h3>`;
-
+let html = '';
           blocks.forEach(block => {
             const lines = block.trim().split('\n');
             const titleLine = lines[0].trim();
