@@ -38,152 +38,142 @@ const DECK = [
   'Паж Жезлов', 'Рыцарь Жезлов', 'Королева Жезлов', 'Король Жезлов'
 ];
 
+const SPREAD_POSITIONS = {
+  single: [
+    'Главная энергия ситуации',
+    'Что важно понять',
+    'Совет карт'
+  ],
+
+  love_year: [
+    'Что происходит в личной жизни сейчас',
+    'Какие возможности для встречи любви открываются',
+    'К чему может привести этот период'
+  ],
+
+  custom_question: [
+    'Суть ситуации',
+    'Что скрыто или пока не очевидно',
+    'Совет и возможное направление развития'
+  ],
+
+  relationship_8: [
+    'Мысли мужчины',
+    'Чувства мужчины',
+    'Действия мужчины',
+    'Мысли женщины',
+    'Чувства женщины',
+    'Действия женщины',
+    'Что происходит между ними сейчас',
+    'Куда могут прийти отношения'
+  ],
+
+  compatibility: [
+    'Энергия первого человека',
+    'Энергия второго человека',
+    'Что объединяет пару',
+    'Возможные сложности',
+    'Потенциал отношений',
+    'Совет для пары'
+  ]
+};
+
 function drawCards(positions) {
-  const shuffled = [...DECK].sort(() => Math.random() - 0.5);
+  const deck = [...DECK];
+
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
 
   return positions.map((position, index) => ({
     position,
-    name: shuffled[index]
+    name: deck[index]
   }));
 }
 
-function reduceToTwentyTwo(value) {
-  let number = value;
-
-  while (number > 22) {
-    number -= 22;
-  }
-
-  return number;
-}
-
-function birthDateNumbers(date) {
-  const parts = String(date).split('-');
-
-  if (parts.length !== 3) {
-    throw new Error('Неверный формат даты рождения.');
-  }
-
-  const [year, month, day] = parts;
-
-  if (!year || !month || !day) {
-    throw new Error('Неверная дата рождения.');
-  }
-
-  const sumDigits = value =>
-    String(value).split('').reduce((sum, digit) => sum + Number(digit), 0);
-
-  return {
-    day: reduceToTwentyTwo(sumDigits(day)),
-    month: reduceToTwentyTwo(sumDigits(month)),
-    year: reduceToTwentyTwo(sumDigits(year))
-  };
-}
-
-function makeReadingInstructions(order, cards) {
-  if (order.spreadType === 'relationship_8') {
-    return `Сделай расклад «Мысли, чувства и действия» по восьми картам.
-
-Позиции и выпавшие карты:
-${cards.map((card, i) => `${i + 1}. ${card.position}: ${card.name}`).join('\n')}
-
-Разбери каждую позицию применительно к вопросу клиента.
-Не ограничивайся словарными значениями карт.
-Покажи, как карты взаимодействуют и дополняют друг друга.
-После разбора дай единый связный вывод о динамике отношений,
-возможном направлении развития и практический совет.
-Не утверждай, что будущее предопределено. Пиши бережно,
-конкретно и обращайся к клиенту на «ты».`;
-  }
-
-  if (order.spreadType === 'compatibility') {
-    const first = birthDateNumbers(order.birthDate1);
-    const second = birthDateNumbers(order.birthDate2);
-
-    return `Сделай разбор совместимости по датам рождения.
-
-Первая дата рождения: ${order.birthDate1}.
-Числа первого человека по авторскому расчёту:
-день — ${first.day}, месяц — ${first.month}, год — ${first.year}.
-
-Вторая дата рождения: ${order.birthDate2}.
-Числа второго человека:
-день — ${second.day}, месяц — ${second.month}, год — ${second.year}.
-
-Используй следующие карты как символические подсказки:
-${cards.map((card, i) => `${i + 1}. ${card.position}: ${card.name}`).join('\n')}
-
-Раскрой сильные стороны взаимодействия, возможные трудности,
-эмоциональную динамику, взаимное влияние и перспективы отношений.
-Не выдавай расчёты за научный прогноз. Дай бережный и конкретный совет.`;
-  }
-
-  if (order.spreadType === 'my_path_pack' ||
-      order.spreadType === 'choices_pack') {
-    return `Подготовь пять самостоятельных ответов на пять вопросов клиента.
-Для каждого вопроса используй указанную карту.
-Не объединяй вопросы в один общий ответ.
-
-${order.questions.map((question, i) =>
-  `${i + 1}. Вопрос: ${question}\nКарта: ${cards[i].name}`
-).join('\n\n')}
-
-Для каждого вопроса дай конкретный, содержательный ответ,
-объясни связь карты с ситуацией и предложи практический совет.
-В конце сделай короткое общее заключение по всем пяти вопросам.
-Обращайся к клиенту на «ты».`;
-  }
-
-  const card = cards[0];
-
-  return `Ответь на вопрос клиента с помощью одной карты Таро.
-
-Вопрос клиента: ${order.question}
-Выпавшая карта: ${card.name}
-
-Сначала назови карту, затем дай конкретный ответ применительно
-к вопросу клиента. Объясни основную ситуацию, возможные тенденции
-и практический совет. Не перечисляй общие значения карты отдельно.
-Пиши бережно, ясно и обращайся к клиенту на «ты».`;
-}
-
-function getPositions(spreadType) {
-  if (spreadType === 'relationship_8') {
-    return [
-      'Мысли мужчины',
-      'Чувства мужчины',
-      'Действия мужчины',
-      'Мысли женщины',
-      'Чувства женщины',
-      'Действия женщины',
-      'Что происходит между ними сейчас',
-      'Куда могут прийти отношения'
-    ];
-  }
-
-  if (spreadType === 'compatibility') {
-    return [
-      'Энергия первого человека',
-      'Энергия второго человека',
-      'Что объединяет',
-      'Возможные сложности',
-      'Потенциал отношений',
-      'Совет для пары'
-    ];
+function getPositions(spreadType, questions) {
+  if (SPREAD_POSITIONS[spreadType]) {
+    return SPREAD_POSITIONS[spreadType];
   }
 
   if (spreadType === 'my_path_pack' ||
       spreadType === 'choices_pack') {
-    return [
-      'Ответ на первый вопрос',
-      'Ответ на второй вопрос',
-      'Ответ на третий вопрос',
-      'Ответ на четвёртый вопрос',
-      'Ответ на пятый вопрос'
-    ];
+    return questions.flatMap((question, index) => [
+      `Вопрос ${index + 1}: ${question} — первая карта`,
+      `Вопрос ${index + 1}: ${question} — вторая карта`,
+      `Вопрос ${index + 1}: ${question} — третья карта`
+    ]);
   }
 
-  return ['Главная карта ответа'];
+  return SPREAD_POSITIONS.single;
+}
+
+function makeInstructions(order, cards) {
+  if (order.spreadType === 'relationship_8') {
+    return `Клиентский вопрос:
+${order.question}
+
+Выпавшие карты и позиции:
+${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
+
+Проведи глубокий разбор отношений по всем восьми позициям.
+Рассмотри мысли, чувства и действия мужчины и женщины,
+затем проанализируй связь между ними и возможное направление отношений.
+
+Не ограничивайся отдельными значениями карт.
+Обязательно учитывай сочетания, противоречия и общую картину.
+В конце дай единый связный вывод и практический совет.
+Не представляй будущее как неизбежное.`;
+  }
+
+  if (order.spreadType === 'compatibility') {
+    return `Проведи разбор совместимости двух людей по датам рождения.
+
+Первая дата: ${order.birthDate1}
+Вторая дата: ${order.birthDate2}
+
+Выпавшие карты:
+${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
+
+Рассмотри характер взаимодействия, сильные стороны союза,
+возможные трудности, эмоциональную близость и перспективы.
+Свяжи карты между собой и дай общий вывод и совет.
+Не выдавай трактовку за неизбежный прогноз.`;
+  }
+
+  if (order.spreadType === 'my_path_pack' ||
+      order.spreadType === 'choices_pack') {
+    return `Дай пять самостоятельных, подробных ответов на вопросы клиента.
+Для каждого вопроса используй строго три соответствующие карты.
+Не смешивай карты одного вопроса с другим.
+
+${order.questions.map((question, index) => {
+  const questionCards = cards.slice(index * 3, index * 3 + 3);
+  return `
+ВОПРОС ${index + 1}: ${question}
+
+Карты:
+${questionCards.map(c => `${c.position}: ${c.name}`).join('\n')}
+
+Составь единый связный ответ по сочетанию этих трёх карт.
+`;
+}).join('\n')}
+
+В конце добавь общее заключение по всем пяти вопросам.`;
+  }
+
+  return `Вопрос клиента:
+${order.question}
+
+Три выпавшие карты:
+${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
+
+Сделай содержательный авторский разбор.
+Рассмотри сочетание всех трёх карт как единую историю,
+а не как три независимых словарных значения.
+Дай конкретный ответ на вопрос, объясни ситуацию
+и предложи практический совет.`;
 }
 
 export default async function handler(req, res) {
@@ -230,17 +220,32 @@ export default async function handler(req, res) {
     const amount = Number(event.object.amount?.value || 0);
 
     if (amount !== Number(order.amount)) {
-      console.error('Сумма платежа не совпадает с заказом:', paymentId);
-      return res.status(400).json({ error: 'Сумма платежа не совпадает.' });
+      return res.status(400).json({
+        error: 'Сумма платежа не совпадает с заказом.'
+      });
     }
 
     if (!YANDEX_API_KEY || !YANDEX_FOLDER_ID) {
       throw new Error('Не настроены ключи YandexGPT.');
     }
 
-    const positions = getPositions(order.spreadType);
+    const isPack =
+      order.spreadType === 'my_path_pack' ||
+      order.spreadType === 'choices_pack';
+
+    if (isPack &&
+        (!Array.isArray(order.questions) ||
+         order.questions.length !== 5)) {
+      throw new Error('В заказе отсутствуют пять вопросов пакета.');
+    }
+
+    const positions = getPositions(
+      order.spreadType || 'single',
+      order.questions || []
+    );
+
     const cards = drawCards(positions);
-    const instructions = makeReadingInstructions(order, cards);
+    const instructions = makeInstructions(order, cards);
 
     const GOOGLE_SCRIPT_URL =
       'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
@@ -250,9 +255,7 @@ export default async function handler(req, res) {
     formData.append('contact', order.contact || 'Не указано');
     formData.append(
       'question',
-      order.questions?.length
-        ? order.questions.join('\n')
-        : order.question || ''
+      isPack ? order.questions.join('\n') : order.question || ''
     );
     formData.append('package', order.spreadType || 'single');
     formData.append('amount', String(amount));
@@ -277,16 +280,18 @@ export default async function handler(req, res) {
           completionOptions: {
             stream: false,
             temperature: 0.7,
-            maxTokens: order.spreadType === 'relationship_8' ? 3000 : 1800
+            maxTokens: isPack ? 4500 : 3000
           },
           messages: [
             {
               role: 'system',
               text: `Ты — опытный таролог, работающий в авторской методике Виктории.
-Твоя задача — внимательно анализировать вопрос, позиции и сочетания карт.
-Не давай отдельные шаблонные значения карт вместо ответа на ситуацию.
-Пиши на русском языке, структурированно, тепло и содержательно.
-Не запугивай клиента и не представляй трактовку как неизбежное будущее.`
+Ты анализируешь ситуацию клиента через позиции и сочетания карт.
+Не перечисляй изолированные значения карт вместо цельного ответа.
+Пиши на русском языке, тепло, конкретно и содержательно.
+Обращайся к клиенту на «ты».
+Не запугивай и не представляй будущее как предопределённое.
+В ответе используй только те карты, которые указаны в раскладе.`
             },
             {
               role: 'user',
@@ -326,6 +331,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Ошибка вебхука:', error);
+
     return res.status(500).json({
       error: 'Ошибка обработки платежа: ' + error.message
     });
