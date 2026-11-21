@@ -156,8 +156,19 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 .pay-note{margin-top:24px;text-align:center;font-size:12px;color:var(--muted)}
 .pay-note a{color:var(--gold);text-decoration:underline}
 @media(max-width:780px){.topics,.packages{grid-template-columns:1fr}}
-.ai-card{max-width:640px;margin:0 auto}
-.ai-card textarea{display:block;width:100%;min-height:120px;padding:16px;border:1px solid var(--gold);border-radius:var(--radius);resize:vertical;font-family:inherit;font-size:15px;background:#FFF;color:var(--text)}
+.ai-card{
+  max-width:640px;
+  margin:0 auto;
+  position:relative;
+  z-index:5;
+  background:rgba(255,253,248,0.82);
+  border:1px solid var(--gold);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 8px 28px rgba(80,60,30,0.10);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}   .ai-card textarea{display:block;width:100%;min-height:120px;padding:16px;border:1px solid var(--gold);border-radius:var(--radius);resize:vertical;font-family:inherit;font-size:15px;background:#FFF;color:var(--text)}
 .ai-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
 .ai-actions .btn{flex:1;min-width:200px}
 .hint{font-size:13px;color:var(--muted);margin:12px 0 18px}
