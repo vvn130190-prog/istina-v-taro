@@ -457,8 +457,7 @@ footer a:hover{color:var(--gold)}
       <h4>Совместимость по датам рождения</h4>
       <span class="price-tag">499 ₽</span>
     </div>
-    <div class="topic-card" onclick="selectTopic('Свой вопрос о любви и отношениях',99,'custom_question')">
-      <h4>Свой вопрос</h4>
+<div class="topic-card" onclick="openCustomQuestionForm()"><h4>Свой вопрос</h4>
       <span class="price-tag">99 ₽</span>
     </div>
   </div>
@@ -796,6 +795,71 @@ footer a:hover{color:var(--gold)}
   -webkit-overflow-scrolling: touch;
   background: #F8F6F0;
 }
+   #custom-question-modal {
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:rgba(41,37,42,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.custom-question-box {
+  width:100%;
+  max-width:460px;
+  background:#FFFEF8;
+  border:1px solid var(--gold);
+  border-radius:16px;
+  padding:30px 24px;
+  text-align:center;
+  box-shadow:0 15px 50px rgba(0,0,0,.18);
+}
+
+.custom-question-box h2 {
+  color:var(--text);
+  font-family:inherit;
+  font-size:23px;
+  margin:0 0 12px;
+}
+
+.custom-question-box p {
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+  margin-bottom:20px;
+}
+
+.custom-question-box textarea {
+  width:100%;
+  box-sizing:border-box;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  color:var(--text);
+  font:inherit;
+  resize:vertical;
+  margin-bottom:18px;
+}
+
+.custom-question-box button {
+  width:100%;
+  padding:14px;
+  border:1px solid var(--gold);
+  border-radius:30px;
+  background:var(--gold);
+  color:#fff;
+  font:inherit;
+  cursor:pointer;
+}
+
+.custom-question-box .custom-question-cancel {
+  margin-top:10px;
+  background:transparent;
+  color:var(--gold);
+}
 </style>
 
 <script>
@@ -850,6 +914,45 @@ function selectTopic(questionText, amount, spreadType = 'single') {
   setTimeout(() => {
     window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
   }, 300);
+}
+   function openCustomQuestionForm() {
+  const oldModal = document.getElementById('custom-question-modal');
+  if (oldModal) oldModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'custom-question-modal';
+  modal.innerHTML = `
+    <div class="custom-question-box">
+      <h2>Твой вопрос о любви и отношениях</h2>
+      <p>Опиши своими словами, что тебя волнует и на что ты хочешь получить ответ.</p>
+      <textarea id="custom-question-input" placeholder="Напиши свой вопрос..." rows="5"></textarea>
+      <button type="button" onclick="submitCustomQuestion()">Перейти к оплате — 99 ₽</button>
+      <button type="button" class="custom-question-cancel" onclick="document.getElementById('custom-question-modal').remove()">Отмена</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function submitCustomQuestion() {
+  const input = document.getElementById('custom-question-input');
+  const question = input ? input.value.trim() : '';
+
+  if (!question) {
+    alert('Пожалуйста, напиши свой вопрос.');
+    return;
+  }
+
+  document.getElementById('custom-question-modal').remove();
+
+  const mainInput = document.getElementById('question');
+  if (mainInput) mainInput.value = question;
+
+  localStorage.setItem('pendingDeeperQuestion', question);
+  localStorage.setItem('pendingSpreadType', 'custom_question');
+  localStorage.removeItem('pendingPackQuestions');
+
+  window.openPaymentForm('Свой вопрос — 99 ₽', 99, 'custom_question');
 }
 function selectPack(packageName, questions, spreadType) {
   localStorage.setItem('pendingPackQuestions', JSON.stringify(questions));
