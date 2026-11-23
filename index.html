@@ -932,7 +932,11 @@ function selectTopic(questionText, amount, spreadType = 'single') {
 
   document.body.appendChild(modal);
 }
-
+modal.addEventListener('click', function(event) {
+  if (event.target === modal) {
+    modal.remove();
+  }
+});
 function submitCustomQuestion() {
   const input = document.getElementById('custom-question-input');
   const question = input ? input.value.trim() : '';
@@ -1517,6 +1521,13 @@ window.openPaymentForm = function (packageName, amount, spreadType) {
   if (typeof window.closeTopicsMenu === 'function') window.closeTopicsMenu();
 
   const modal = document.getElementById('payment-modal');
+   if (modal) {
+  modal.onclick = function(event) {
+    if (event.target === modal) {
+      window.closePaymentForm();
+    }
+  };
+}
   const nameEl = document.getElementById('selected-package-name');
   if (nameEl) nameEl.textContent = packageName;
 
