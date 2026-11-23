@@ -974,6 +974,7 @@ function selectPack(packageName, questions, spreadType) {
   window.openPaymentForm(packageName + ' — 399 ₽', 399, spreadType);
 }
 window.openCompatibilityForm = function() {
+   alert('Функция совместимости запустилась');
   const oldModal = document.getElementById('compatibility-modal');
   if (oldModal) oldModal.remove();
 
