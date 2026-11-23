@@ -157,7 +157,24 @@ color:var(--gold);
 }
 
 .topic{border:1px solid var(--line);background:linear-gradient(145deg,#FFF,#F7F3EB);padding:28px 23px;border-radius:var(--radius)}
-.topics{
+/* Особое оформление прогноза на 2027 год */
+.year-topic{
+  border:1.5px solid var(--gold);
+  background:linear-gradient(145deg,#FFFDF7,#F2EBDD);
+  box-shadow:0 5px 18px rgba(185,154,91,.13);
+  padding:32px 25px;
+}
+
+.year-topic .number{
+  font-size:38px;
+}
+
+.year-topic h3{
+  font-size:25px;
+  color:#9C7B42;
+  margin:15px 0 12px;
+}
+   .topics{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:18px;
@@ -600,8 +617,7 @@ footer a:hover{color:var(--gold)}
   </div>
 
 </div>
-<article class="topic" onclick="toggleTopic('year-options')">
-  <div class="number">04</div>
+<article class="topic year-topic" onclick="toggleTopic('year-options')">  <div class="number">04</div>
   <h3>Каким будет 2027?</h3>
   <p>Глобальный прогноз: любовь, карьера, финансы. Что готовит год?</p>
   <div class="topic-hint">
