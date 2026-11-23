@@ -326,14 +326,12 @@ footer a:hover{color:var(--gold)}
     </div>
     <div class="ai-card card">
       <form id="ai-form" novalidate>
-         <p style="color:#B99A5B;font-weight:600;margin:0 0 6px;font-size:16px;">✧ Первый вопрос — бесплатно</p>
+<p class="eyebrow" style="display:block;font-size:1.5em;margin:0 0 8px;">✧ Первый вопрос — бесплатно</p>
 <p style="color:#77717A;font-size:13px;margin:0 0 18px;">Задай свой вопрос и получи первый ответ без оплаты.</p>
         <label for="question" class="eyebrow" style="display:block;margin-bottom:8px">Твой вопрос</label>
         <textarea id="question" name="question" maxlength="1000" required placeholder="Что произошло? Что тебя тревожит?"></textarea>
         <div class="ai-actions">
-          <button type="button" class="btn btn-outline" id="voice-btn" title="Говорить вопрос голосом">🎤 Голосом</button>
-          <button type="submit" class="btn" id="ai-submit">Получить расклад ✧</button>
-        </div>
+<button type="button" class="btn btn-outline" id="voice-btn" title="Говорить вопрос голосом" style="width:auto;min-width:0;padding:8px 14px;font-size:13px;">🎤 Голосом</button>        </div>
         <p class="hint"><strong>Не знаешь, как задать вопрос?</strong> Просто расскажи, что происходит — мы поможем сформулировать.</p>
         <p id="ai-message" class="disclaimer" aria-live="polite"></p>
         <div id="ai-answer"></div>
@@ -1051,19 +1049,44 @@ async function requestTarot(question, isPaidContinuation = false) {
     if (aiAnswer) {
       let buttonsHtml = '';
       const hasFreeLeft = getFreeQuestionsCount() < 1;
-      if (hasFreeLeft) {
-        buttonsHtml = `
-          <div style="margin-top: 12px; padding: 10px; background: #F8F6F0; border-radius: 10px; border: 1px solid var(--gold); text-align: center;">
-            <p style="font-size: 13px; margin-bottom: 10px; color: var(--text); line-height: 1.4;">
-              <strong>Карты видят гораздо больше.</strong><br>Хотите узнать, что именно скрывается за этой ситуацией?
-            </p>
-            <button type="button" class="btn" data-question="${escapeHtml(question)}" onclick="openDeeperPayment(this.dataset.question)" style="width: 100%; font-size: 13px; padding: 8px; background: var(--gold); color: #18120b; border-radius: 6px;">
-              Узнать продолжение — 99 ₽
-            </button>
-          </div>
-        `;
-      }
-      showMessage(aiMessage, '');
+
+if (hasFreeLeft) {
+  buttonsHtml = `
+    <div style="margin-top:20px;padding:18px;background:#F8F6F0;border:1px solid var(--gold);border-radius:12px;text-align:left;">
+      <p style="font-size:18px;font-weight:600;color:var(--text);margin:0 0 8px;text-align:center;">
+        ✧ Хочешь разобраться глубже?
+      </p>
+      <p style="font-size:14px;color:var(--muted);margin:0 0 16px;text-align:center;line-height:1.5;">
+        Выбери глубину расклада — от краткого ответа до подробного авторского анализа твоей ситуации.
+      </p>
+
+      <button type="button" class="btn"
+        data-question="${escapeHtml(question)}"
+        onclick="localStorage.setItem('pendingDeeperQuestion',this.dataset.question);window.openPaymentForm('Расклад на 3 карты — 99 ₽',99,'ai_3')"
+        style="width:100%;margin-bottom:10px;">
+        **3 карты — 99 ₽**
+        <span style="display:block;font-size:12px;font-weight:normal;">Краткий разбор ситуации и совет карт</span>
+      </button>
+
+      <button type="button" class="btn"
+        data-question="${escapeHtml(question)}"
+        onclick="localStorage.setItem('pendingDeeperQuestion',this.dataset.question);window.openPaymentForm('Глубокий расклад на 5 карт — 299 ₽',299,'ai_5')"
+        style="width:100%;margin-bottom:10px;">
+        **5 карт — 299 ₽**
+        <span style="display:block;font-size:12px;font-weight:normal;">Глубокий анализ причин и развития ситуации</span>
+      </button>
+
+      <button type="button" class="btn"
+        data-question="${escapeHtml(question)}"
+        onclick="localStorage.setItem('pendingDeeperQuestion',this.dataset.question);window.openPaymentForm('Расширенный расклад на 7 карт — 499 ₽',499,'ai_7')"
+        style="width:100%;">
+        **7 карт — 499 ₽**
+        <span style="display:block;font-size:12px;font-weight:normal;">Расширенный авторский разбор, сочетания карт и общий вывод</span>
+      </button>
+    </div>
+  `;
+}
+
       aiAnswer.innerHTML = `
         <div class="tarot-block">
           <p class="answer-text">${formatTarotText(answer)}</p>
