@@ -170,6 +170,73 @@ color:var(--gold);
   margin-top:-8px;
   margin-bottom:12px;
 }
+   .topic-hint{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:8px;
+  margin-top:18px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+  color:var(--gold);
+  font-size:12px;
+  letter-spacing:.4px;
+}
+
+.topic-arrow{
+  font-size:20px;
+  line-height:1;
+  transition:transform .25s;
+}
+   .options-group{
+  background:rgba(255,255,255,.65);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+
+.options-heading{
+  color:var(--gold);
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin:0 0 10px 4px;
+}
+
+.options-group .topic-card{
+  padding:12px 42px 12px 14px;
+  margin-bottom:7px;
+  border-radius:10px;
+  background:#FFF;
+}
+
+.options-group .topic-card:last-child{
+  margin-bottom:0;
+}
+
+.options-group .topic-card h4{
+  font-family:inherit;
+  font-size:14px;
+  font-weight:500;
+  margin:0;
+}
+
+.options-group .price-tag{
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.featured-option{
+  border-color:var(--gold)!important;
+  background:linear-gradient(145deg,#FFFDF8,#F7F3EB)!important;
+}
+
+.featured-option p{
+  font-size:12px;
+  color:var(--muted);
+  margin:5px 0 0;
+}
    .topic .number{color:var(--gold);font-family:Georgia,serif;font-size:30px}
 .topic h3{margin:15px 0 10px}.topic p{color:var(--muted);font-size:14px;margin:0}
 .packages{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
@@ -391,52 +458,78 @@ footer a:hover{color:var(--gold)}
     </div>
   </div>
 
-  <article class="topic" onclick="toggleTopic('path-options')">
-    <div class="number">02</div>
-    <h3>Мой путь</h3>
-    <p>Обрати внимание на свои возможности и внутренние ресурсы.</p>
-  </article>
+ 
+<article class="topic" onclick="toggleTopic('path-options')">
+  <div class="number">02</div>
+  <h3>Мой путь</h3>
+  <p>Обрати внимание на свои возможности и внутренние ресурсы.</p>
+  <div class="topic-hint">
+    Выбрать расклад <span class="topic-arrow">⌄</span>
+  </div>
+</article>
 
-  <div id="path-options" class="topic-options" style="display:none;">
+ 
+<div id="path-options" class="topic-options" style="display:none;">
+
+  <div class="options-group">
+    <div class="options-heading">Выбери один вопрос · 99 ₽</div>
+
     <div class="topic-card" onclick="selectTopic('Что меня ждёт в ближайшем будущем (1 месяц)?',99)">
       <h4>Что меня ждёт в ближайшем будущем (1 месяц)?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('В чём мои сильные стороны и способности?',99)">
       <h4>В чём мои сильные стороны и способности?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Какие возможности открываются передо мной?',99)">
       <h4>Какие возможности открываются передо мной?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Что мешает мне двигаться вперёд?',99)">
       <h4>Что мешает мне двигаться вперёд?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('В правильном ли направлении я иду?',99)">
       <h4>В правильном ли направлении я иду?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
-    <div class="topic-card" onclick="selectPack('Все 5 вопросов — Мой путь',[
+  </div>
+
+  <div class="options-group pack-group">
+    <div class="topic-card featured-option" onclick="selectPack('Все 5 вопросов — Мой путь',[
       'Что меня ждёт в ближайшем будущем (1 месяц)?',
       'В чём мои сильные стороны и способности?',
       'Какие возможности открываются передо мной?',
       'Что мешает мне двигаться вперёд?',
       'В правильном ли направлении я иду?'
     ],'my_path_pack')">
-      <h4>Все 5 вопросов — Мой путь</h4>
+      <h4>Весь раздел «Мой путь»</h4>
+      <p>Все 5 вопросов · Полный разбор</p>
       <span class="price-tag">399 ₽</span>
     </div>
+  </div>
+
+  <div class="options-group birth-options">
+    <div class="options-heading">Расклады по дате рождения</div>
+
     <div class="topic-card" onclick="openBirthDateForm('life_navigator')">
       <h4>Твой навигатор по жизни</h4>
       <span class="price-tag">599 ₽</span>
     </div>
+
     <div class="topic-card" onclick="openBirthDateForm('life_code')">
       <h4>Твой жизненный код</h4>
       <span class="price-tag">199 ₽</span>
     </div>
   </div>
+
+</div>
+
 
   <article class="topic" onclick="toggleTopic('choice-options')">
     <div class="number">03</div>
@@ -683,8 +776,10 @@ function closeTopicsMenu() {
   document.body.style.overflow = '';
 }
 
+
 function toggleTopic(topicId) {
   const options = document.querySelectorAll('.topic-options');
+  const topics = document.querySelectorAll('.topic');
 
   options.forEach(item => {
     if (item.id === topicId) {
@@ -694,7 +789,20 @@ function toggleTopic(topicId) {
       item.style.display = 'none';
     }
   });
+
+  topics.forEach(topic => {
+    const hint = topic.querySelector('.topic-arrow');
+    const isActive = topic.getAttribute('onclick')?.includes(topicId);
+
+    if (hint) {
+      hint.style.transform = isActive &&
+        document.getElementById(topicId).style.display === 'block'
+        ? 'rotate(180deg)'
+        : 'rotate(0deg)';
+    }
+  });
 }
+
 function selectTopic(questionText, amount, spreadType = 'single') {
   closeTopicsMenu();
 
