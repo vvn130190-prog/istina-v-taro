@@ -9,6 +9,9 @@ const redis = new Redis({
 
 const SPREAD_PRICES = {
   single: 99,
+    ai_3: 99,
+  ai_5: 299,
+  ai_7: 499,
   love_year: 99,
   custom_question: 99,
   deeper: 299,
