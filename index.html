@@ -433,11 +433,16 @@ footer a:hover{color:var(--gold)}
       <h2>Что тебе важно узнать сейчас?</h2>
     </div>
     <div class="topics">
-  <article class="topic" onclick="toggleTopic('love-options')">
-    <div class="number">01</div>
-    <h3>Любовь и отношения</h3>
-    <p>Разберись в чувствах, ожиданиях и собственных желаниях.</p>
-  </article>
+ 
+<article class="topic" onclick="toggleTopic('love-options')">
+  <div class="number">01</div>
+  <h3>Любовь и отношения</h3>
+  <p>Разберись в чувствах, ожиданиях и собственных желаниях.</p>
+  <div class="topic-hint">
+    Выбрать расклад <span class="topic-arrow">⌄</span>
+  </div>
+</article>
+
 
   <div id="love-options" class="topic-options" style="display:none;">
     <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?',99,'love_year')">
@@ -531,45 +536,65 @@ footer a:hover{color:var(--gold)}
 </div>
 
 
-  <article class="topic" onclick="toggleTopic('choice-options')">
-    <div class="number">03</div>
-    <h3>Выбор и перемены</h3>
-    <p>Упорядочь мысли и рассмотри разные варианты.</p>
-  </article>
+  
+<article class="topic" onclick="toggleTopic('choice-options')">
+  <div class="number">03</div>
+  <h3>Выбор и перемены</h3>
+  <p>Упорядочь мысли и рассмотри разные варианты.</p>
+  <div class="topic-hint">
+    Выбрать расклад <span class="topic-arrow">⌄</span>
+  </div>
+</article>
 
-  <div id="choice-options" class="topic-options" style="display:none;">
+
+  
+<div id="choice-options" class="topic-options" style="display:none;">
+
+  <div class="options-group">
+    <div class="options-heading">Выбери один вопрос · 99 ₽</div>
+
     <div class="topic-card" onclick="selectTopic('Какой выбор будет для меня правильным?',99)">
       <h4>Какой выбор будет для меня правильным?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Стоит ли менять работу или начинать новое дело?',99)">
       <h4>Стоит ли менять работу или начинать новое дело?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Что принесут мне предстоящие перемены?',99)">
       <h4>Что принесут мне предстоящие перемены?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Что произойдёт, если я оставлю всё как есть?',99)">
       <h4>Что произойдёт, если я оставлю всё как есть?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
+
     <div class="topic-card" onclick="selectTopic('Как лучше поступить в моей ситуации?',99)">
       <h4>Как лучше поступить в моей ситуации?</h4>
       <span class="price-tag">99 ₽</span>
     </div>
-    <div class="topic-card" onclick="selectPack('Все 5 вопросов — Выбор и перемены',[
+  </div>
+
+  <div class="options-group pack-group">
+    <div class="topic-card featured-option" onclick="selectPack('Все 5 вопросов — Выбор и перемены',[
       'Какой выбор будет для меня правильным?',
       'Стоит ли менять работу или начинать новое дело?',
       'Что принесут мне предстоящие перемены?',
       'Что произойдёт, если я оставлю всё как есть?',
       'Как лучше поступить в моей ситуации?'
     ],'choices_pack')">
-      <h4>Все 5 вопросов — Выбор и перемены</h4>
+      <h4>Весь раздел «Выбор и перемены»</h4>
+      <p>Все 5 вопросов · Полный разбор</p>
       <span class="price-tag">399 ₽</span>
     </div>
   </div>
+
 </div>
+
 </section>
 <section class="section" id="packages">
   <div class="container">
