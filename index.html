@@ -913,48 +913,77 @@ function incrementFreeQuestionsCount() {
   setFreeQuestionsCount(getFreeQuestionsCount() + 1);
 }
 
+
 function updateFormState() {
   const count = getFreeQuestionsCount();
-  const qInput = document.getElementById('question'); 
+  const qInput = document.getElementById('question');
   const payBtn = document.getElementById('ai-pay-btn');
 
   if (count >= 1) {
     if (aiSubmit) aiSubmit.style.display = 'none';
+
     if (!payBtn) {
-      const newBtn = document.createElement('button');
-      newBtn.type = 'button';
-      newBtn.id = 'ai-pay-btn';
-      newBtn.className = 'btn';
-      newBtn.textContent = 'Оплатить 2-й вопрос — 99 ₽';
-      newBtn.style.width = '100%';
-      newBtn.style.opacity = '0.5';
-      newBtn.onclick = () => {
-        const question = qInput ? qInput.value.trim() : '';
-        if (!question) {
-          showMessage(aiMessage, 'Пожалуйста, сначала напишите ваш вопрос в поле выше!', true);
-          if (qInput) qInput.focus();
-          return;
-        }
-        localStorage.setItem('pendingDeeperQuestion', question);
-        window.openPaymentForm('Дополнительный вопрос — 99 ₽', 99);
-      };
-      aiSubmit.parentNode.appendChild(newBtn);
-    }
-    if (payBtn && qInput) {
-        const checkQuestion = () => {
-            if (qInput.value.trim().length > 0) { payBtn.style.opacity = '1'; payBtn.disabled = false; }
-            else { payBtn.style.opacity = '0.5'; payBtn.disabled = true; }
+      const container = document.createElement('div');
+      container.id = 'ai-pay-btn';
+      container.style.display = 'grid';
+      container.style.gap = '10px';
+      container.style.marginTop = '15px';
+
+      const tariffs = [
+        { name: 'Расклад на 3 карты — 99 ₽', amount: 99, type: 'ai_3' },
+        { name: 'Глубокий расклад на 5 карт — 299 ₽', amount: 299, type: 'ai_5' },
+        { name: 'Расширенный расклад на 7 карт — 499 ₽', amount: 499, type: 'ai_7' }
+      ];
+
+      tariffs.forEach(tariff => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn';
+        btn.textContent = tariff.name;
+        btn.style.width = '100%';
+
+        btn.onclick = () => {
+          const question = qInput ? qInput.value.trim() : '';
+
+          if (!question) {
+            showMessage(aiMessage, 'Пожалуйста, напишите ваш вопрос выше.', true);
+            if (qInput) qInput.focus();
+            return;
+          }
+
+          localStorage.setItem('pendingDeeperQuestion', question);
+
+          window.openPaymentForm(
+            tariff.name,
+            tariff.amount,
+            tariff.type
+          );
         };
-        qInput.addEventListener('input', checkQuestion);
-        checkQuestion(); 
+
+        container.appendChild(btn);
+      });
+
+      if (aiSubmit && aiSubmit.parentNode) {
+        aiSubmit.parentNode.appendChild(container);
+      }
     }
-    if (aiMessage) showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Напишите новый вопрос выше и оплатите его.', false);
+
+    if (aiMessage) {
+      showMessage(aiMessage, 'Ваш бесплатный вопрос использован. Вы можете выбрать более подробный расклад.', false);
+    }
+
   } else {
-    if (aiSubmit) { aiSubmit.style.display = 'inline-block'; aiSubmit.disabled = false; }
+    if (aiSubmit) {
+      aiSubmit.style.display = 'inline-block';
+      aiSubmit.disabled = false;
+    }
+
     if (payBtn) payBtn.remove();
+
     if (aiMessage) showMessage(aiMessage, '');
   }
 }
+
 
 function loadReadings() {
   if (!readingsList) return;
@@ -1094,19 +1123,32 @@ if (voiceBtn) {
 /* ============================================================
    6. ОПЛАТА (Воронка)
    ============================================================ */
-window.openPaymentForm = function (packageName, amount) {
-     if (typeof window.closeTopicsMenu === 'function') window.closeTopicsMenu();
-   
+window.openPaymentForm = function (packageName, amount, spreadType) {
+  if (typeof window.closeTopicsMenu === 'function') window.closeTopicsMenu();
+
   const modal = document.getElementById('payment-modal');
   const nameEl = document.getElementById('selected-package-name');
   if (nameEl) nameEl.textContent = packageName;
+
   window.currentPackageName = packageName;
   window.currentAmount = Number(amount) || 99;
+
+  if (spreadType) {
+    localStorage.setItem('pendingSpreadType', spreadType);
+  }
+
   const amountInput = document.getElementById('pay-amount');
   if (amountInput) amountInput.value = String(window.currentAmount);
+
   document.getElementById('payment-widget-container').innerHTML = '';
+
   const btn = document.getElementById('pay-submit-btn');
-  if (btn) { btn.style.display = 'block'; btn.disabled = false; btn.textContent = 'Перейти к оплате'; }
+  if (btn) {
+    btn.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Перейти к оплате';
+  }
+
   if (modal) modal.style.display = 'flex';
 };
 
