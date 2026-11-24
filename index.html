@@ -1142,8 +1142,9 @@ window.toggleLoveDescription = function(card) {
 
   description.style.display = 'block';
   card.dataset.descriptionShown = 'true';
-}; selectTopic(questionText, amount, spreadType = 'single') {
-  closeTopicsMenu();
+};
+
+function selectTopic(questionText, amount, spreadType = 'single') {  closeTopicsMenu();
 
   const input = document.getElementById('question');
   if (input) input.value = questionText;
