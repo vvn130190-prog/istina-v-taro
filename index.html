@@ -1166,11 +1166,7 @@ function selectTopic(questionText, amount, spreadType = 'single') {
     }
   });
 }
-modal.addEventListener('click', function(event) {
-  if (event.target === modal) {
-    modal.remove();
-  }
-});
+
 function submitCustomQuestion() {
   const input = document.getElementById('custom-question-input');
   const question = input ? input.value.trim() : '';
