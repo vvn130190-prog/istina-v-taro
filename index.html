@@ -472,7 +472,6 @@ color:var(--gold);
 </style>
    
    .review .who{font-size:13px;color:var(--gold);margin-top:10px}
-@media(max-width:780px){.reviews{grid-template-columns:1fr}}
 .faq{max-width:720px;margin:0 auto}
 .faq details{border-bottom:1px solid var(--line);padding:16px 0}
 .faq summary{cursor:pointer;font-family:Georgia,serif;font-size:18px;list-style:none}
@@ -2121,6 +2120,7 @@ if (blocks.length === 0 && cards.length === 0) {
   });
 
   setupReviewToggles();
+     updateReviews();
 };
 
 function setupReviewToggles() {
@@ -2174,11 +2174,6 @@ document.querySelector('#reviews .reviews-prev')?.addEventListener('click', () =
   updateReviews();
 });
 
-
-document.querySelector('#reviews .reviews-prev')?.addEventListener('click', () => {
-  currentReview = (currentReview - 1 + reviewCards.length) % reviewCards.length;
-  updateReviews();
-});
 
    function showReviewForm() {
   if (document.getElementById('paid-review-form')) return;
