@@ -334,7 +334,29 @@ color:var(--gold);
 .reading-item .a{color:var(--muted)}
 .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .review{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
-.review .who{font-size:13px;color:var(--gold);margin-top:10px}
+.review p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.review.expanded p {
+  display: block;
+  overflow: visible;
+}
+
+.review-toggle {
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--gold);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+   .review .who{font-size:13px;color:var(--gold);margin-top:10px}
 @media(max-width:780px){.reviews{grid-template-columns:1fr}}
 .faq{max-width:720px;margin:0 auto}
 .faq details{border-bottom:1px solid var(--line);padding:16px 0}
@@ -675,6 +697,7 @@ footer a:hover{color:var(--gold)}
   <div class="container">
     <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
     <div class="review">
+       <div class="reviews">
   <p>«Вика, после твоей консультации прошло два месяца, и сейчас я просто в восторге от того, насколько чётко ты всё описываешь.
 
   В моменте, на эмоциях, я думаю: „Да не работают эти ваши карты!“ А потом, со временем, всё проигрывается настолько подробно и точно, именно так, как ты сказала. У меня аж мурашки! И восторг!
@@ -1962,13 +1985,36 @@ if (blocks.length === 0 && cards.length === 0) {
 
     card.appendChild(text);
     card.appendChild(author);
-    container.appendChild(card);
+       container.appendChild(card);
   });
+
+  setupReviewToggles();
 };
 
-const reviewsScript = document.createElement('script');
+function setupReviewToggles() {
+  document.querySelectorAll('#reviews .review').forEach(card => {
+    const paragraph = card.querySelector('p');
+
+    if (!paragraph || card.querySelector('.review-toggle')) return;
+    if (paragraph.scrollHeight <= paragraph.clientHeight + 2) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'review-toggle';
+    button.textContent = 'Читать полностью';
+
+    button.addEventListener('click', () => {
+      const expanded = card.classList.toggle('expanded');
+      button.textContent = expanded ? 'Свернуть' : 'Читать полностью';
+    });
+
+    card.appendChild(button);
+  });
+}
+   const reviewsScript = document.createElement('script');
 reviewsScript.src = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec?action=approvedReviews&callback=receiveApprovedReviews';
 document.body.appendChild(reviewsScript);
+   setupReviewToggles();
    function showReviewForm() {
   if (document.getElementById('paid-review-form')) return;
 
