@@ -674,11 +674,41 @@ footer a:hover{color:var(--gold)}
 <section class="section" id="reviews">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
-    <div class="reviews">
-      <div class="review"><p>«Помогло увидеть ситуацию со стороны. Вопросы после расклада оказались важнее самих карт».</p><div class="who">— Анна</div></div>
-      <div class="review"><p>«Спокойный тон и никакой мистики. Просто разговор с собой».</p><div class="who">— Мария</div></div>
-      <div class="review"><p>«Понятно и бережно. Вернулась через неделю — увидела новое».</p><div class="who">— Екатерина</div></div>
-    </div>
+    <div class="review">
+  <p>«Вика, после твоей консультации прошло два месяца, и сейчас я просто в восторге от того, насколько чётко ты всё описываешь.
+
+  В моменте, на эмоциях, я думаю: „Да не работают эти ваши карты!“ А потом, со временем, всё проигрывается настолько подробно и точно, именно так, как ты сказала. У меня аж мурашки! И восторг!
+
+  Спасибо тебе! Ты настолько глубоко считываешь информацию. Буду обращаться ещё и ещё к тебе».</p>
+  <div class="who">— Клиентка</div>
+</div>
+
+<div class="review">
+  <p>«Виктория, здравствуйте!
+
+  Огромное спасибо за консультацию! Получила не только ответ на свой вопрос, но и информацию, которая даёт более полное понимание ситуации.
+
+  Мне очень понравилось, как чётко и ясно вы всё объяснили. А самое главное — именно так всё и есть, как вы сказали.
+
+  Вы помогаете людям и даёте надежду и уверенность в выборе, каким бы сложным он ни был. Процветания Вам и успеха!».</p>
+  <div class="who">— Клиентка</div>
+</div>
+
+<div class="review">
+  <p>«Вика, вы такой профессионал своего дела!
+
+  Благодарю вас! Вы прочитали меня за пару консультаций и дали очень много ценных советов и векторов, как и куда двигаться!
+
+  Благодарю тысячу раз!».</p>
+  <div class="who">— Клиентка</div>
+</div>
+
+<div class="review">
+  <p>«Вика, ты супер психолог!
+
+  Иногда одного специалиста не слышишь, а слова другого человека доходят прямо до самого сердца».</p>
+  <div class="who">— Клиентка</div>
+</div>
   </div>
 </section>
 <section class="section" id="faq">
@@ -1890,6 +1920,7 @@ if (blocks.length === 0 && cards.length === 0) {
         const oldBtn = document.getElementById('check-again-btn');
         if (oldBtn) oldBtn.remove();
         showMessage(aiMessage, 'Твой расклад готов ✧');
+         showReviewForm();
         return;
       }
 
@@ -1911,6 +1942,120 @@ if (blocks.length === 0 && cards.length === 0) {
     btn.onclick = () => { btn.remove(); checkPaidReading(paymentId); };
     aiMessage.parentNode.appendChild(btn);
   }
+}
+
+  window.receiveApprovedReviews = function(reviews) {
+  const container = document.querySelector('#reviews .reviews');
+  if (!container || !Array.isArray(reviews)) return;
+
+  reviews.forEach(review => {
+    const card = document.createElement('div');
+    card.className = 'review';
+
+    const text = document.createElement('p');
+    text.textContent = '«' + review.text + '»';
+
+    const author = document.createElement('div');
+    author.className = 'who';
+    author.textContent = '— ' + (review.name || 'Гость') +
+      ' · ' + '★'.repeat(Number(review.rating) || 0);
+
+    card.appendChild(text);
+    card.appendChild(author);
+    container.appendChild(card);
+  });
+};
+
+const reviewsScript = document.createElement('script');
+reviewsScript.src = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec?action=approvedReviews&callback=receiveApprovedReviews';
+document.body.appendChild(reviewsScript);
+   function showReviewForm() {
+  if (document.getElementById('paid-review-form')) return;
+
+  const form = document.createElement('div');
+  form.id = 'paid-review-form';
+  form.style.cssText = `
+    margin:30px 0;
+    padding:25px;
+    background:#FFFDF8;
+    border:1px solid var(--gold);
+    border-radius:12px;
+  `;
+
+  form.innerHTML = `
+    <h3 style="color:var(--gold);font-family:Georgia,serif;">
+      Поделись впечатлением ✧
+    </h3>
+    <p>Буду благодарна, если ты расскажешь о своём раскладе.</p>
+
+    <form id="review-submit-form">
+      <label>Твоё имя (необязательно)</label>
+      <input name="reviewName" type="text" maxlength="60"
+        placeholder="Как к тебе обращаться?"
+        style="display:block;width:100%;padding:12px;margin:8px 0 16px;">
+
+      <label>Оцени расклад</label>
+      <select name="rating" required
+        style="display:block;width:100%;padding:12px;margin:8px 0 16px;">
+        <option value="">Выбери оценку</option>
+        <option value="5">★★★★★ — Отлично</option>
+        <option value="4">★★★★ — Хорошо</option>
+        <option value="3">★★★ — Нормально</option>
+        <option value="2">★★ — Не очень</option>
+        <option value="1">★ — Плохо</option>
+      </select>
+
+      <label>Твой отзыв</label>
+      <textarea name="reviewText" required maxlength="1500"
+        placeholder="Расскажи о своих впечатлениях..."
+        style="display:block;width:100%;min-height:110px;padding:12px;margin:8px 0 16px;"></textarea>
+
+      <label style="display:flex;gap:10px;align-items:flex-start;">
+        <input type="checkbox" name="consent" value="yes" required>
+        <span>Я согласна на публикацию моего отзыва на сайте.</span>
+      </label>
+
+      <button type="submit" class="btn" style="margin-top:18px;">
+        Отправить отзыв ✧
+      </button>
+      <p id="review-status" aria-live="polite"></p>
+    </form>
+  `;
+
+  aiAnswer.appendChild(form);
+
+  document.getElementById('review-submit-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitForm = e.currentTarget;
+    const status = document.getElementById('review-status');
+    const button = submitForm.querySelector('button[type="submit"]');
+    const values = new FormData(submitForm);
+
+    button.disabled = true;
+    status.textContent = 'Отправляем отзыв...';
+
+    const params = new URLSearchParams();
+    params.set('action', 'review');
+    params.set('reviewName', values.get('reviewName') || '');
+    params.set('rating', values.get('rating'));
+    params.set('reviewText', values.get('reviewText'));
+    params.set('consent', values.get('consent') || '');
+
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: params
+      });
+
+      status.textContent = 'Спасибо! Отзыв отправлен на проверку ✧';
+      submitForm.reset();
+    } catch (error) {
+      status.textContent = 'Не удалось отправить отзыв. Попробуй ещё раз.';
+      button.disabled = false;
+    }
+  });
 }
 
 /* ============================================================
