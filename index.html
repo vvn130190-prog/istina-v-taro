@@ -607,10 +607,13 @@ footer a:hover{color:var(--gold)}
 
 
   <div id="love-options" class="topic-options" style="display:none;">
-    <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?',99,'love_year')">
-      <h4>Встречу ли я в этом году свою любовь?</h4>
-      <span class="price-tag">99 ₽</span>
-    </div>
+   <div class="topic-card" onclick="toggleLoveDescription(this)">
+  <h4>Встречу ли я в этом году свою любовь?</h4>
+  <span class="price-tag">99 ₽</span>
+  <p class="love-description" style="display:none;color:var(--muted);font-size:14px;line-height:1.6;margin-top:12px;">
+    Карты помогут увидеть, какие возможности для новых отношений открываются перед тобой в этом году, что может способствовать встрече и на что стоит обратить внимание.
+  </p>
+</div>
     <div class="topic-card" onclick="selectTopic('Мысли, чувства и действия',499,'relationship_8')">
       <h4>Мысли, чувства и действия</h4>
       <span class="price-tag">499 ₽</span>
@@ -1129,7 +1132,17 @@ function toggleTopic(topicId) {
   });
 }
 
-function selectTopic(questionText, amount, spreadType = 'single') {
+window.toggleLoveDescription = function(card) {
+  const description = card.querySelector('.love-description');
+
+  if (card.dataset.descriptionShown === 'true') {
+    selectTopic('Встречу ли я в этом году свою любовь?', 99, 'love_year');
+    return;
+  }
+
+  description.style.display = 'block';
+  card.dataset.descriptionShown = 'true';
+}; selectTopic(questionText, amount, spreadType = 'single') {
   closeTopicsMenu();
 
   const input = document.getElementById('question');
