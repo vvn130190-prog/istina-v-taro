@@ -332,9 +332,119 @@ color:var(--gold);
 .reading-item .date{color:var(--gold);font-size:12px;margin-bottom:4px}
 .reading-item .q{font-weight:600;margin-bottom:6px}
 .reading-item .a{color:var(--muted)}
-.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Отзывы</div>
+      <h2>Как это отзывается другим</h2>
+    </div>
+
+    <div class="reviews-carousel">
+      <button class="reviews-arrow reviews-prev" type="button" aria-label="Предыдущий отзыв">‹</button>
+
+      <div class="reviews-viewport">
+        <div class="reviews">
+
+          <div class="review">
+            <p>«Вика, после твоей консультации прошло два месяца, и сейчас я просто в восторге от того, насколько чётко ты всё описываешь.
+
+            В моменте, на эмоциях, я думаю: „Да не работают эти ваши карты!“ А потом, со временем, всё проигрывается настолько подробно и точно, именно так, как ты сказала. У меня аж мурашки! И восторг!
+
+            Спасибо тебе! Ты настолько глубоко считываешь информацию. Буду обращаться ещё и ещё к тебе».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+          <div class="review">
+            <p>«Виктория, здравствуйте!
+
+            Огромное спасибо за консультацию! Получила не только ответ на свой вопрос, но и информацию, которая даёт более полное понимание ситуации.
+
+            Мне очень понравилось, как чётко и ясно вы всё объяснили. А самое главное — именно так всё и есть, как вы сказали.
+
+            Вы помогаете людям и даёте надежду и уверенность в выборе, каким бы сложным он ни был. Процветания Вам и успеха!».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+          <div class="review">
+            <p>«Вика, вы такой профессионал своего дела!
+
+            Благодарю вас! Вы прочитали меня за пару консультаций и дали очень много ценных советов и векторов, как и куда двигаться!
+
+            Благодарю тысячу раз!».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+          <div class="review">
+            <p>«Вика, ты супер психолог!
+
+            Иногда одного специалиста не слышишь, а слова другого человека доходят прямо до самого сердца».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="reviews-arrow reviews-next" type="button" aria-label="Следующий отзыв">›</button>
+    </div>
+  </div>
+</section>
+<style>
 .review{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
-.review p {
+
+.reviews-carousel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.reviews-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reviews {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+.reviews .review {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+}
+
+.reviews-arrow {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gold);
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reviews-arrow:hover {
+  background: var(--gold);
+  color: white;
+}
+
+@media(max-width:780px) {
+  .reviews-carousel {
+    gap: 6px;
+  }
+
+  .reviews-arrow {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+   .review p {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -347,15 +457,20 @@ color:var(--gold);
 }
 
 .review-toggle {
-  margin-top: 12px;
+  display: block;
+  width: fit-content;
+  margin: 8px 0 0 auto;
   padding: 0;
   border: none;
   background: none;
   color: var(--gold);
+  font-size: 12px;
   cursor: pointer;
-  font: inherit;
-  text-decoration: underline;
+  font-family: inherit;
+  text-decoration: none;
 }
+</style>
+   
    .review .who{font-size:13px;color:var(--gold);margin-top:10px}
 @media(max-width:780px){.reviews{grid-template-columns:1fr}}
 .faq{max-width:720px;margin:0 auto}
@@ -693,47 +808,64 @@ footer a:hover{color:var(--gold)}
   </div>
 </div>
 
+
 <section class="section" id="reviews">
   <div class="container">
-    <div class="section-head"><div class="eyebrow">Отзывы</div><h2>Как это отзывается другим</h2></div>
-    <div class="review">
-       <div class="reviews">
-  <p>«Вика, после твоей консультации прошло два месяца, и сейчас я просто в восторге от того, насколько чётко ты всё описываешь.
+    <div class="section-head">
+      <div class="eyebrow">Отзывы</div>
+      <h2>Как это отзывается другим</h2>
+    </div>
 
-  В моменте, на эмоциях, я думаю: „Да не работают эти ваши карты!“ А потом, со временем, всё проигрывается настолько подробно и точно, именно так, как ты сказала. У меня аж мурашки! И восторг!
+    <div class="reviews-carousel">
+      <button class="reviews-arrow reviews-prev" type="button" aria-label="Предыдущий отзыв">‹</button>
 
-  Спасибо тебе! Ты настолько глубоко считываешь информацию. Буду обращаться ещё и ещё к тебе».</p>
-  <div class="who">— Клиентка</div>
-</div>
+      <div class="reviews-viewport">
+        <div class="reviews">
 
-<div class="review">
-  <p>«Виктория, здравствуйте!
+          <div class="review">
+            <p>«Вика, после твоей консультации прошло два месяца, и сейчас я просто в восторге от того, насколько чётко ты всё описываешь.
 
-  Огромное спасибо за консультацию! Получила не только ответ на свой вопрос, но и информацию, которая даёт более полное понимание ситуации.
+            В моменте, на эмоциях, я думаю: „Да не работают эти ваши карты!“ А потом, со временем, всё проигрывается настолько подробно и точно, именно так, как ты сказала. У меня аж мурашки! И восторг!
 
-  Мне очень понравилось, как чётко и ясно вы всё объяснили. А самое главное — именно так всё и есть, как вы сказали.
+            Спасибо тебе! Ты настолько глубоко считываешь информацию. Буду обращаться ещё и ещё к тебе».</p>
+            <div class="who">— Клиентка</div>
+          </div>
 
-  Вы помогаете людям и даёте надежду и уверенность в выборе, каким бы сложным он ни был. Процветания Вам и успеха!».</p>
-  <div class="who">— Клиентка</div>
-</div>
+          <div class="review">
+            <p>«Виктория, здравствуйте!
 
-<div class="review">
-  <p>«Вика, вы такой профессионал своего дела!
+            Огромное спасибо за консультацию! Получила не только ответ на свой вопрос, но и информацию, которая даёт более полное понимание ситуации.
 
-  Благодарю вас! Вы прочитали меня за пару консультаций и дали очень много ценных советов и векторов, как и куда двигаться!
+            Мне очень понравилось, как чётко и ясно вы всё объяснили. А самое главное — именно так всё и есть, как вы сказали.
 
-  Благодарю тысячу раз!».</p>
-  <div class="who">— Клиентка</div>
-</div>
+            Вы помогаете людям и даёте надежду и уверенность в выборе, каким бы сложным он ни был. Процветания Вам и успеха!».</p>
+            <div class="who">— Клиентка</div>
+          </div>
 
-<div class="review">
-  <p>«Вика, ты супер психолог!
+          <div class="review">
+            <p>«Вика, вы такой профессионал своего дела!
 
-  Иногда одного специалиста не слышишь, а слова другого человека доходят прямо до самого сердца».</p>
-  <div class="who">— Клиентка</div>
-</div>
+            Благодарю вас! Вы прочитали меня за пару консультаций и дали очень много ценных советов и векторов, как и куда двигаться!
+
+            Благодарю тысячу раз!».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+          <div class="review">
+            <p>«Вика, ты супер психолог!
+
+            Иногда одного специалиста не слышишь, а слова другого человека доходят прямо до самого сердца».</p>
+            <div class="who">— Клиентка</div>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="reviews-arrow reviews-next" type="button" aria-label="Следующий отзыв">›</button>
+    </div>
   </div>
 </section>
+
 <section class="section" id="faq">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Частые вопросы</div><h2>Что важно знать</h2></div>
@@ -2015,6 +2147,39 @@ function setupReviewToggles() {
 reviewsScript.src = 'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec?action=approvedReviews&callback=receiveApprovedReviews';
 document.body.appendChild(reviewsScript);
    setupReviewToggles();
+   
+
+const reviewsTrack = document.querySelector('#reviews .reviews');
+let currentReview = 0;
+
+function updateReviews() {
+  const reviewCards = document.querySelectorAll('#reviews .review');
+  if (!reviewsTrack || !reviewCards.length) return;
+
+  currentReview = Math.min(currentReview, reviewCards.length - 1);
+  reviewsTrack.style.transform = `translateX(-${currentReview * 100}%)`;
+}
+
+document.querySelector('#reviews .reviews-next')?.addEventListener('click', () => {
+  const count = document.querySelectorAll('#reviews .review').length;
+  if (!count) return;
+  currentReview = (currentReview + 1) % count;
+  updateReviews();
+});
+
+document.querySelector('#reviews .reviews-prev')?.addEventListener('click', () => {
+  const count = document.querySelectorAll('#reviews .review').length;
+  if (!count) return;
+  currentReview = (currentReview - 1 + count) % count;
+  updateReviews();
+});
+
+
+document.querySelector('#reviews .reviews-prev')?.addEventListener('click', () => {
+  currentReview = (currentReview - 1 + reviewCards.length) % reviewCards.length;
+  updateReviews();
+});
+
    function showReviewForm() {
   if (document.getElementById('paid-review-form')) return;
 
