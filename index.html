@@ -88,16 +88,26 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   position:relative;
   isolation:isolate;
 }
-.photo-sticky-bg{
-  display:none;
-}
-
 .photo-scroll-zone{
   position:relative;
   isolation:isolate;
+}
+
+.photo-sticky-bg{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:-1;
   background:
     linear-gradient(rgba(255,254,248,.88),rgba(255,254,248,.92)),
-    url('hero-tarot.webp') center center / cover fixed no-repeat;
+    url('hero-tarot.webp') center center / cover no-repeat;
+  pointer-events:none;
+}
+
+.photo-scroll-zone > section{
+  position:relative;
 }
 .photo-scroll-zone > section{
   position:relative;
