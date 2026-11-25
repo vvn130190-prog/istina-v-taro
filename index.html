@@ -432,6 +432,8 @@ color:var(--gold);
   display: flex;
   align-items: center;
   gap: 14px;
+  position: relative;
+  z-index: 2;
 }
 
 .reviews-viewport {
@@ -465,6 +467,8 @@ color:var(--gold);
   font-size: 25px;
   line-height: 1;
   cursor: pointer;
+   position: relative;
+z-index: 3;
 }
 
 .reviews-arrow:hover {
@@ -641,20 +645,27 @@ footer a:hover{color:var(--gold)}
 
 
   <div id="love-options" class="topic-options" style="display:none;">
-   <div class="topic-card" onclick="toggleLoveDescription(this)">
+   <div class="topic-card" onclick="selectTopic('Встречу ли я в этом году свою любовь?',99,'love_year')">
   <h4>Встречу ли я в этом году свою любовь?</h4>
-  <span class="price-tag">99 ₽</span>
-  <p class="love-description" style="display:none;color:var(--muted);font-size:14px;line-height:1.6;margin-top:12px;">
-    Карты помогут увидеть, какие возможности для новых отношений открываются перед тобой в этом году, что может способствовать встрече и на что стоит обратить внимание.
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Что говорят карты о возможности новых отношений.
   </p>
+  <span class="price-tag">99 ₽</span>
 </div>
-    <div class="topic-card" onclick="selectTopic('Мысли, чувства и действия',499,'relationship_8')">
-      <h4>Мысли, чувства и действия</h4>
-      <span class="price-tag">499 ₽</span>
-    </div>
-<div class="topic-card" onclick="window.openCompatibilityForm()">      <h4>Совместимость по датам рождения</h4>
-      <span class="price-tag">499 ₽</span>
-    </div>
+<div class="topic-card" onclick="selectTopic('Мысли, чувства и действия',499,'relationship_8')">
+  <h4>Мысли, чувства и действия</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Мысли, чувства и действия обоих партнёров и перспектива отношений.
+  </p>
+  <span class="price-tag">499 ₽</span>
+</div>
+<div class="topic-card" onclick="window.openCompatibilityForm()">
+  <h4>Совместимость по датам рождения</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Авторский анализ особенностей и взаимодействия двух людей.
+  </p>
+  <span class="price-tag">499 ₽</span>
+</div>
 <div class="topic-card" onclick="openCustomQuestionForm()"><h4>Свой вопрос</h4>
       <span class="price-tag">99 ₽</span>
     </div>
@@ -724,15 +735,20 @@ footer a:hover{color:var(--gold)}
     <div class="options-heading">Расклады по дате рождения</div>
 
     <div class="topic-card" onclick="openBirthDateForm('life_navigator')">
-      <h4>Твой навигатор по жизни</h4>
-      <span class="price-tag">599 ₽</span>
-    </div>
+  <h4>Твой навигатор по жизни</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Авторский разбор трёх периодов жизни: до 18 лет, от 18 до 36 лет и с 36 лет и далее. Три ведущих Аркана, которые раскрывают твой жизненный путь.
+  </p>
+  <span class="price-tag">599 ₽</span>
+</div>
 
     <div class="topic-card" onclick="openBirthDateForm('life_code')">
-      <h4>Твой жизненный код</h4>
-      <span class="price-tag">199 ₽</span>
-    </div>
-  </div>
+  <h4>Твой жизненный код</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Один главный Аркан по полной дате рождения. Твои сильные стороны, ловушки и подсказки для жизни.
+  </p>
+  <span class="price-tag">199 ₽</span>
+</div>
 
 </div>
 
@@ -754,31 +770,44 @@ footer a:hover{color:var(--gold)}
   <div class="options-group">
     <div class="options-heading">Выбери один вопрос · 99 ₽</div>
 
-    <div class="topic-card" onclick="selectTopic('Какой выбор будет для меня правильным?',99)">
-      <h4>Какой выбор будет для меня правильным?</h4>
-      <span class="price-tag">99 ₽</span>
-    </div>
-
-    <div class="topic-card" onclick="selectTopic('Стоит ли менять работу или начинать новое дело?',99)">
-      <h4>Стоит ли менять работу или начинать новое дело?</h4>
-      <span class="price-tag">99 ₽</span>
-    </div>
-
-    <div class="topic-card" onclick="selectTopic('Что принесут мне предстоящие перемены?',99)">
-      <h4>Что принесут мне предстоящие перемены?</h4>
-      <span class="price-tag">99 ₽</span>
-    </div>
-
-    <div class="topic-card" onclick="selectTopic('Что произойдёт, если я оставлю всё как есть?',99)">
-      <h4>Что произойдёт, если я оставлю всё как есть?</h4>
-      <span class="price-tag">99 ₽</span>
-    </div>
-
-<div class="topic-card" onclick="selectTopic('Как лучше поступить в моей ситуации?',99)">
-  <h4>Как лучше поступить в моей ситуации?</h4>
+   <div class="topic-card" onclick="selectTopic('Какой выбор будет для меня правильным?',99)">
+  <h4>Какой выбор будет для меня правильным?</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Посмотри на возможные пути, скрытые обстоятельства и последствия каждого решения. Карты помогут понять, какой вариант ближе твоим истинным желаниям.
+  </p>
   <span class="price-tag">99 ₽</span>
 </div>
 
+    <div class="topic-card" onclick="selectTopic('Стоит ли менять работу или начинать новое дело?',99)">
+  <h4>Стоит ли менять работу или начинать новое дело?</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Узнай, какие перспективы открываются перед тобой, что может удерживать на прежнем месте и к чему приведёт новый профессиональный путь.
+  </p>
+  <span class="price-tag">99 ₽</span>
+</div>
+
+    <div class="topic-card" onclick="selectTopic('Что принесут мне предстоящие перемены?',99)">
+  <h4>Что принесут мне предстоящие перемены?</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Посмотри, какие новые возможности могут появиться, что останется в прошлом и как лучше подготовиться к предстоящему этапу жизни.
+  </p>
+  <span class="price-tag">99 ₽</span>
+</div>
+
+    <div class="topic-card" onclick="selectTopic('Что произойдёт, если я оставлю всё как есть?',99)">
+  <h4>Что произойдёт, если я оставлю всё как есть?</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Разберись, к чему может привести нынешний ход событий, что изменится само собой и какие возможности могут остаться незамеченными.
+  </p>
+  <span class="price-tag">99 ₽</span>
+</div>
+<div class="topic-card" onclick="selectTopic('Как лучше поступить в моей ситуации?',99)">
+  <h4>Как лучше поступить в моей ситуации?</h4>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Посмотри на ситуацию с другой стороны, разберись в её скрытых причинах и получи подсказку, которая поможет принять взвешенное решение.
+  </p>
+  <span class="price-tag">99 ₽</span>
+</div>
 <div class="topic-card" onclick="openCustomQuestionForm()">  <h4>Свой вопрос</h4>
   <p>Опиши ситуацию и задай свой вопрос</p>
   <span class="price-tag">99 ₽</span>
@@ -793,8 +822,10 @@ footer a:hover{color:var(--gold)}
       'Как лучше поступить в моей ситуации?'
     ],'choices_pack')">
       <h4>Весь раздел «Выбор и перемены»</h4>
-      <p>Все 5 вопросов · Полный разбор</p>
-      <span class="price-tag">399 ₽</span>
+<p style="color:var(--muted);font-size:14px;line-height:1.6;">
+  Пять раскладов, которые помогут разобраться в сложной ситуации, увидеть возможные пути, оценить перспективы и понять, в каком направлении двигаться дальше.
+</p>
+<span class="price-tag">399 ₽</span>
     </div>
   </div>
 
@@ -811,12 +842,9 @@ footer a:hover{color:var(--gold)}
   <div class="options-group">
     <div class="options-heading">Глобальный прогноз на 2027 год</div>
 
-    <p>
-      Что готовит тебе наступающий год?
-      Какие перемены могут произойти в личной жизни,
-      карьере и финансах? Какие возможности откроются
-      и на что стоит обратить особое внимание?
-    </p>
+   <p style="color:var(--muted);font-size:14px;line-height:1.6;margin:12px 0 18px;">
+  Глобальный прогноз на 2027 год: любовь, карьера и финансы. Узнай, какие главные события и перемены могут ждать тебя, какие возможности откроются и на что стоит обратить особое внимание.
+</p>
 
     <div class="topic-card featured-option"
       onclick="selectTopic('Каким будет 2027? Глобальный прогноз: любовь, карьера, финансы, главные события и возможности года.',499,'year_2027')">
