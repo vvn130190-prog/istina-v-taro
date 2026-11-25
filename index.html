@@ -172,16 +172,25 @@ color:var(--gold);
   .step{padding:13px 11px}
 }
 
-.topic{border:1px solid var(--line);background:linear-gradient(145deg,#FFF,#F7F3EB);padding:28px 23px;border-radius:var(--radius)}
+
+.topic{
+  border:1px solid var(--line);
+  background:rgba(255,253,248,0.82);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  padding:28px 23px;
+  border-radius:var(--radius);
+}
+
 /* Особое оформление прогноза на 2027 год */
 .year-topic{
   border:1.5px solid var(--gold);
-  background:linear-gradient(145deg,#FFFDF7,#F2EBDD);
+  background:rgba(255,253,248,0.82);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
   box-shadow:0 5px 18px rgba(185,154,91,.13);
   padding:32px 25px;
-}
-
-.year-topic .number{
+}.year-topic .number{
   font-size:38px;
 }
 
@@ -504,8 +513,14 @@ color:var(--gold);
 .faq summary::after{content:"+";float:right;color:var(--gold)}
 .faq details[open] summary::after{content:"–"}
 .faq p{color:var(--muted);margin:10px 0 0}
-.closing{text-align:center;padding:65px 20px;border-top:1px solid var(--line);background:#F1ECE4}
-.closing h2{color:var(--gold-light)}.closing p{color:var(--muted);max-width:530px;margin:0 auto 20px}
+.closing{
+  text-align:center;
+  padding:65px 20px;
+  border-top:1px solid var(--line);
+  background:rgba(241,236,228,0.45);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}.closing h2{color:var(--gold-light)}.closing p{color:var(--muted);max-width:530px;margin:0 auto 20px}
 footer{padding:30px 0;color:#8A8180;font-size:12px}
 footer .cols{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-start}
 footer a:hover{color:var(--gold)}
