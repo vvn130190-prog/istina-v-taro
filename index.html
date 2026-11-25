@@ -93,24 +93,27 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   isolation:isolate;
 }
 
+.photo-scroll-zone{
+  position:relative;
+  isolation:isolate;
+}
+
 .photo-sticky-bg{
   position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:-1;
-  background:
-    linear-gradient(rgba(255,254,248,.88),rgba(255,254,248,.92)),
-    url('hero-tarot.webp') center center / cover no-repeat;
+  inset:0;
+  z-index:0;
+  background-image:
+    linear-gradient(rgba(255,254,248,.45),rgba(255,254,248,.55)),
+    url('./hero-tarot.webp');
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
   pointer-events:none;
 }
 
-.photo-scroll-zone > section{
+.photo-scroll-zone > *:not(.photo-sticky-bg){
   position:relative;
-}
-.photo-scroll-zone > section{
-  position:relative;
+  z-index:1;
 }
 .hero p{max-width:570px;margin:0 auto 30px;color:#514B50}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
 .daily-card{
