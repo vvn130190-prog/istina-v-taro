@@ -2198,27 +2198,29 @@ let currentReview = 0;
 
 function updateReviews() {
   const reviewCards = document.querySelectorAll('#reviews .review');
-  if (!reviewsTrack || !reviewCards.length) return;
+  const viewport = document.querySelector('#reviews .reviews-viewport');
 
-  currentReview = Math.min(currentReview, reviewCards.length - 1);
-  reviewsTrack.style.transform = `translateX(-${currentReview * 100}%)`;
+  if (!reviewsTrack || !viewport || !reviewCards.length) return;
+
+  currentReview = (currentReview + reviewCards.length) % reviewCards.length;
+
+  const slideWidth = viewport.clientWidth;
+
+  reviewsTrack.style.transform =
+    `translate3d(-${currentReview * slideWidth}px, 0, 0)`;
 }
 
 document.querySelector('#reviews .reviews-next')?.addEventListener('click', () => {
-  const count = document.querySelectorAll('#reviews .review').length;
-  if (!count) return;
-  currentReview = (currentReview + 1) % count;
+  currentReview++;
   updateReviews();
 });
 
 document.querySelector('#reviews .reviews-prev')?.addEventListener('click', () => {
-  const count = document.querySelectorAll('#reviews .review').length;
-  if (!count) return;
-  currentReview = (currentReview - 1 + count) % count;
+  currentReview--;
   updateReviews();
 });
 
-
+window.addEventListener('resize', updateReviews);
    function showReviewForm() {
   if (document.getElementById('paid-review-form')) return;
 
