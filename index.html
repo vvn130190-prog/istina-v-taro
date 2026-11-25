@@ -89,14 +89,15 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   isolation:isolate;
 }
 .photo-sticky-bg{
-  position:sticky;
-  top:0;
-  height:100vh;
-  margin-bottom:-100vh;
-  z-index:-1;
+  display:none;
+}
+
+.photo-scroll-zone{
+  position:relative;
+  isolation:isolate;
   background:
-    linear-gradient(rgba(255,254,248,.48),rgba(255,254,248,.62)),
-    url('hero-tarot.webp') center 45% / cover no-repeat;
+    linear-gradient(rgba(255,254,248,.88),rgba(255,254,248,.92)),
+    url('hero-tarot.webp') center center / cover fixed no-repeat;
 }
 .photo-scroll-zone > section{
   position:relative;
@@ -416,9 +417,9 @@ color:var(--gold);
 
 .reviews {
   display: flex;
+  width: 100%;
   transition: transform 0.4s ease;
 }
-
 .reviews .review {
   flex: 0 0 100%;
   box-sizing: border-box;
