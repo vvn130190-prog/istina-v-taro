@@ -52,7 +52,7 @@
 }
 </script>
 <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
-<style>
+   <style>
 :root{--bg:#FFFEF8;--panel:#FFF;--gold:#B99A5B;--gold-light:#C8AC72;--text:#29252A;--muted:#77717A;--line:rgba(185,154,91,.32);--radius:14px;--shadow:0 6px 28px rgba(185,154,91,.10)}
    *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;line-height:1.65}
@@ -95,30 +95,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   isolation:isolate;
 }
 
-
-.photo-sticky-bg{
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-  pointer-events:none;
-
-  background:
-    linear-gradient(
-      rgba(255,254,248,.38),
-      rgba(255,254,248,.48)
-    ),
-    url('./hero-tarot.webp') center top / contain no-repeat;
-}
-
-
-
-.photo-scroll-zone > section{
-  position:relative;
-  z-index:1;
-}
 .hero p{max-width:570px;margin:0 auto 30px;color:#514B50}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
 .daily-card{
   max-width:560px;
@@ -540,6 +516,100 @@ footer a:hover{color:var(--gold)}
 .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;padding:12px 16px;background:rgba(248,246,240,.96);border-top:1px solid var(--line);text-align:center}
 .sticky-cta .btn{width:100%}
 @media(max-width:780px){.sticky-cta{display:block}body{padding-bottom:70px}}
+/* ФОТОГРАФИИ ДЛЯ СЕКЦИЙ САЙТА */
+
+.hero,
+#daily,
+#how,
+#ai-tarot,
+#topics,
+#reviews,
+#faq,
+#contact {
+  position: relative;
+  z-index: 1;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+}
+
+/* Первая фотография — главный экран и карта дня */
+.hero,
+#daily {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.38),
+      rgba(255,254,248,.48)
+    ),
+    url('./hero-tarot.webp');
+}
+
+/* Как это работает */
+#how {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.40),
+      rgba(255,254,248,.52)
+    ),
+    url('./tarot-02.webp');
+}
+
+/* Твой вопрос */
+#ai-tarot {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.40),
+      rgba(255,254,248,.52)
+    ),
+    url('./tarot-03.webp');
+}
+
+/* Темы раскладов */
+#topics {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.40),
+      rgba(255,254,248,.52)
+    ),
+    url('./tarot-04.webp');
+}
+
+/* Отзывы */
+#reviews {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.40),
+      rgba(255,254,248,.52)
+    ),
+    url('./tarot-05.webp');
+}
+
+/* FAQ и заключительная секция */
+#faq,
+#contact {
+  background-image:
+    linear-gradient(
+      rgba(255,254,248,.40),
+      rgba(255,254,248,.52)
+    ),
+    url('./tarot-06.webp');
+}
+
+/* Настройки для телефонов */
+@media (max-width: 780px) {
+  .hero,
+  #daily,
+  #how,
+  #ai-tarot,
+  #topics,
+  #reviews,
+  #faq,
+  #contact {
+    background-attachment: scroll;
+    background-position: center center;
+  }
+}
 </style>
 </head>
 <body>
@@ -556,8 +626,6 @@ footer a:hover{color:var(--gold)}
 </header>
 <main>
 <div class="photo-scroll-zone">
-
-  <div class="photo-sticky-bg"></div>
 
   <section class="hero">
   <div class="container">
