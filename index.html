@@ -97,31 +97,19 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
 }
 
 .photo-sticky-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      rgba(255,254,248,.38),
-      rgba(255,254,248,.48)
-    ),
-    url('./tarot-02.webp') center top / cover no-repeat;
-}
-.photo-sticky-bg {
-  position: absolute;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  height: 100vh;
+  margin-bottom: -100vh;
   z-index: 0;
   pointer-events: none;
+
   background:
     linear-gradient(
-      rgba(255,254,248,.38),
-      rgba(255,254,248,.48)
+      rgba(255,254,248,.25),
+      rgba(255,254,248,.30)
     ),
-    url('./tarot-02.webp') center top / cover no-repeat;
+    url('./tarot-02.webp') center top / contain no-repeat;
 }
       .photo-panel {
   position: relative;
