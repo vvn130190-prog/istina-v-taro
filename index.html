@@ -536,31 +536,24 @@ footer a:hover{color:var(--gold)}
 
 /* Первая фотография — главный экран и карта дня */
 /* Главный экран — вторая фотография */
+/* Первая фотография — главный экран */
 .hero {
   background-image:
     linear-gradient(
       rgba(255,254,248,.30),
       rgba(255,254,248,.40)
     ),
-    url('./tarot-02.webp');
+    url('./hero-tarot.webp');
 
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
-/* Карта дня — первая фотография */
+/* Под картой дня фотографию убираем */
 #daily {
-  background-image:
-    linear-gradient(
-      rgba(255,254,248,.38),
-      rgba(255,254,248,.48)
-    ),
-    url('./hero-tarot.webp');
-
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background-image: none !important;
+  background-color: transparent;
 }
 
 /* Как это работает */
