@@ -586,14 +586,30 @@ footer a:hover{color:var(--gold)}
 }
 
 /* FAQ и заключительная секция */
-#faq,
+/* FAQ */
+#faq {
+  background-image:
+    linear-gradient(rgba(255,254,248,.40), rgba(255,254,248,.52)),
+    url('./tarot-06.webp');
+}
+
+/* Самый низ сайта — третья фотография */
 #contact {
   background-image:
-    linear-gradient(
-      rgba(255,254,248,.40),
-      rgba(255,254,248,.52)
-    ),
-    url('./tarot-06.webp');
+    linear-gradient(rgba(255,254,248,.35), rgba(255,254,248,.45)),
+    url('./tarot-03.webp');
+
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+@media (max-width: 780px) {
+  #contact {
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
 }
 
 /* Настройки для телефонов */
@@ -657,6 +673,8 @@ footer a:hover{color:var(--gold)}
     </div>
   </div>
 </section>
+   </div>
+   <div class="photo-panel photo-panel-2">
    <section class="section" id="how">
   <div class="container">
     <div class="section-head">
@@ -670,8 +688,10 @@ footer a:hover{color:var(--gold)}
       <div class="step"><div class="num">03</div><h3>Получи расклад</h3><p>Карты по авторской методике.</p></div>
       <div class="step"><div class="num">04</div><h3>Прислушайся</h3><p>Вопросы для размышления, а не приговор.</p></div>
     </div>
-  </div>
+    </div>
 </section>
+</div>
+   <div class="photo-panel photo-panel-3">
 <section class="section" id="ai-tarot">
   <div class="container">
     <div class="section-head">
@@ -699,6 +719,7 @@ footer a:hover{color:var(--gold)}
       </div>
     </div>
   </div>
+   </div>
 </section>
      <section class="section" id="topics">
   <div class="container">
