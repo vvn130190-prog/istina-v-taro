@@ -94,6 +94,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   position:relative;
   isolation:isolate;
 }
+
+
 .photo-sticky-bg{
   position:absolute;
   top:0;
@@ -102,13 +104,16 @@ header{position:sticky;top:0;z-index:50;background:rgba(248,246,240,.92);backdro
   height:100%;
   z-index:0;
   pointer-events:none;
+
   background:
     linear-gradient(
-      rgba(255,254,248,.48),
-      rgba(255,254,248,.62)
+      rgba(255,254,248,.38),
+      rgba(255,254,248,.48)
     ),
-    url('./hero-tarot.webp') center center / cover no-repeat;
+    url('./hero-tarot.webp') center top / contain no-repeat;
 }
+
+
 
 .photo-scroll-zone > section{
   position:relative;
@@ -551,7 +556,10 @@ footer a:hover{color:var(--gold)}
 </header>
 <main>
 <div class="photo-scroll-zone">
-<section class="hero">
+
+  <div class="photo-sticky-bg"></div>
+
+  <section class="hero">
   <div class="container">
     <div class="eyebrow">Пространство для себя</div>
     <h1>Иногда ответы ближе, <em>чем кажется</em></h1>
