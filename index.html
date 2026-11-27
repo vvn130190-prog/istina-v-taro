@@ -717,6 +717,18 @@ footer a:hover{color:var(--gold)}
   color: #29252A;
   font-size: inherit;
 }
+   .btn-gold {
+  background: transparent !important;
+  color: #B99A5B !important;
+  border: 1px solid #B99A5B !important;
+  box-shadow: none;
+}
+
+.btn-gold:hover {
+  background: rgba(185,154,91,0.10) !important;
+  color: #B99A5B !important;
+  box-shadow: 0 0 12px rgba(185,154,91,0.18);
+}   
 </style>
 </head>
 <body>
@@ -731,8 +743,7 @@ footer a:hover{color:var(--gold)}
       <a href="#packages">Расклады</a>
       <a href="#faq">FAQ</a>
     </nav>
-<a class="btn" href="#" onclick="openTopicsMenu(); return false;">Выбрать расклад ↓</a>  </div>
-</header>
+<a class="btn btn-outline btn-gold" href="#" onclick="openTopicsMenu(); return false;">Выбрать расклад ↓</a></header>
 <main>
 <div class="photo-scroll-zone">
    <div class="photo-sticky-bg"></div>
