@@ -16,6 +16,7 @@ const SPREAD_PRICES = {
   custom_question: 99,
   deeper: 299,
   relationship_8: 499,
+  year_2027: 499,
   compatibility: 499,
   my_path_pack: 399,
   choices_pack: 399,
