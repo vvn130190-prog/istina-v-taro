@@ -1,5 +1,6 @@
 
 import { Redis } from '@upstash/redis';
+import { randomUUID } from 'crypto';
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
@@ -45,7 +46,7 @@ const SPREAD_POSITIONS = {
     'Совет карт'
   ],
 
-    ai_3: [
+  ai_3: [
     'Суть ситуации',
     'Что важно понять',
     'Совет и возможное направление развития'
@@ -68,6 +69,7 @@ const SPREAD_POSITIONS = {
     'Возможное развитие',
     'Главный совет карт'
   ],
+
   love_year: [
     'Что происходит в личной жизни сейчас',
     'Какие возможности для встречи любви открываются',
@@ -79,14 +81,15 @@ const SPREAD_POSITIONS = {
     'Что скрыто или пока не очевидно',
     'Совет и возможное направление развития'
   ],
-deeper: [
-  'Суть ситуации',
-  'Что происходит глубже, чем кажется',
-  'Что влияет на ситуацию',
-  'Что важно понять',
-  'Совет и возможное развитие'
-],
-  
+
+  deeper: [
+    'Суть ситуации',
+    'Что происходит глубже, чем кажется',
+    'Что влияет на ситуацию',
+    'Что важно понять',
+    'Совет и возможное развитие'
+  ],
+
   relationship_8: [
     'Мысли мужчины',
     'Чувства мужчины',
@@ -98,7 +101,7 @@ deeper: [
     'Куда могут прийти отношения'
   ],
 
- compatibility: [
+  compatibility: [
     'Аркан дня рождения пары',
     'Аркан месяца рождения пары',
     'Аркан года рождения пары'
@@ -118,6 +121,7 @@ function drawCards(positions) {
     name: deck[index]
   }));
 }
+
 // РАСЧЁТ АРКАНА ПО ДАТЕ РОЖДЕНИЯ
 function calculateArcana(number) {
   while (number > 22) {
@@ -129,8 +133,10 @@ function calculateArcana(number) {
 // АРКАН ЖИЗНЕННОГО КОДА
 function calculateLifeCode(birthDate) {
   const digits = birthDate.replace(/\D/g, '');
+
   const sum = digits.split('').reduce(
-    (total, digit) => total + Number(digit), 0
+    (total, digit) => total + Number(digit),
+    0
   );
 
   return calculateArcana(sum);
@@ -144,20 +150,24 @@ function calculateLifeNavigator(birthDate) {
   const monthArcana = calculateArcana(month);
 
   const yearSum = String(year).split('').reduce(
-    (total, digit) => total + Number(digit), 0
+    (total, digit) => total + Number(digit),
+    0
   );
 
   const yearArcana = calculateArcana(yearSum);
 
   return [dayArcana, monthArcana, yearArcana];
 }
+
 function getPositions(spreadType, questions) {
   if (SPREAD_POSITIONS[spreadType]) {
     return SPREAD_POSITIONS[spreadType];
   }
 
-  if (spreadType === 'my_path_pack' ||
-      spreadType === 'choices_pack') {
+  if (
+    spreadType === 'my_path_pack' ||
+    spreadType === 'choices_pack'
+  ) {
     return questions.flatMap((question, index) => [
       `Вопрос ${index + 1}: ${question} — первая карта`,
       `Вопрос ${index + 1}: ${question} — вторая карта`,
@@ -167,6 +177,7 @@ function getPositions(spreadType, questions) {
 
   return SPREAD_POSITIONS.single;
 }
+
 // СОЗДАНИЕ РАССЧИТАННЫХ КАРТ
 function createBirthDateCards(order) {
   let arcanaNumbers;
@@ -189,8 +200,9 @@ function createBirthDateCards(order) {
     name: DECK[number - 1]
   }));
 }
+
 function makeInstructions(order, cards) {
-    if (order.spreadType === 'life_code') {
+  if (order.spreadType === 'life_code') {
     return `Ты проводишь авторский разбор жизненного кода человека.
 
 Дата рождения: ${order.birthDate}
@@ -229,8 +241,9 @@ ${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
 
 Пиши тепло, глубоко и конкретно. Не представляй трактовку как неизбежную судьбу.`;
   }
+
   if (order.spreadType === 'deeper') {
-  return `Ты проводишь подробный авторский разбор ситуации клиента по пяти картам.
+    return `Ты проводишь подробный авторский разбор ситуации клиента по пяти картам.
 
 Вопрос клиента:
 ${order.question}
@@ -246,7 +259,8 @@ ${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
 5. Заверши единым связным выводом и обозначь возможное направление развития, не выдавая его за неизбежное будущее.
 
 Пиши тепло, глубоко и конкретно. Не перечисляй общие словарные значения и не ограничивайся изолированным описанием карт.`;
-}
+  }
+
   if (order.spreadType === 'relationship_8') {
     return `Клиентский вопрос:
 ${order.question}
@@ -279,14 +293,17 @@ ${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
 Не выдавай трактовку за неизбежный прогноз.`;
   }
 
-  if (order.spreadType === 'my_path_pack' ||
-      order.spreadType === 'choices_pack') {
+  if (
+    order.spreadType === 'my_path_pack' ||
+    order.spreadType === 'choices_pack'
+  ) {
     return `Дай пять самостоятельных, подробных ответов на вопросы клиента.
 Для каждого вопроса используй строго три соответствующие карты.
 Не смешивай карты одного вопроса с другим.
 
 ${order.questions.map((question, index) => {
   const questionCards = cards.slice(index * 3, index * 3 + 3);
+
   return `
 ВОПРОС ${index + 1}: ${question}
 
@@ -299,6 +316,7 @@ ${questionCards.map(c => `${c.position}: ${c.name}`).join('\n')}
 
 В конце добавь общее заключение по всем пяти вопросам.`;
   }
+
   if (['ai_3', 'ai_5', 'ai_7'].includes(order.spreadType)) {
     return `Ты проводишь авторский расклад Таро по методике Виктории.
 
@@ -321,6 +339,7 @@ ${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
 Не перечисляй отдельные словарные значения карт.
 Не представляй будущее как неизбежное.`;
   }
+
   return `Вопрос клиента:
 ${order.question}
 
@@ -334,16 +353,36 @@ ${cards.map((c, i) => `${i + 1}. ${c.position}: ${c.name}`).join('\n')}
 и предложи практический совет.`;
 }
 
+// БЕЗОПАСНОЕ ОСВОБОЖДЕНИЕ БЛОКИРОВКИ
+async function releaseLock(lockKey, lockToken) {
+  if (!lockKey || !lockToken) return;
+
+  await redis.eval(
+    `if redis.call("get", KEYS[1]) == ARGV[1]
+     then return redis.call("del", KEYS[1])
+     else return 0 end`,
+    [lockKey],
+    [lockToken]
+  );
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({
+      error: 'Method not allowed'
+    });
   }
+
+  let lockKey = null;
+  let lockToken = null;
 
   try {
     const event = req.body;
@@ -355,131 +394,174 @@ export default async function handler(req, res) {
     const paymentId = event.object?.id;
 
     if (!paymentId) {
-      return res.status(400).json({ error: 'Не указан ID платежа.' });
+      return res.status(400).json({
+        error: 'Не указан ID платежа.'
+      });
     }
 
+    // Проверяем, не готов ли расклад уже
     const existingResult = await redis.get(`result:${paymentId}`);
 
     if (existingResult) {
-      return res.status(200).json({ status: 'already_processed' });
+      return res.status(200).json({
+        status: 'already_processed'
+      });
     }
 
+    // Атомарная блокировка от повторной генерации
+    lockKey = `processing:${paymentId}`;
+    lockToken = randomUUID();
+
+    const lock = await redis.set(
+      lockKey,
+      lockToken,
+      { nx: true, ex: 600 }
+    );
+
+    if (!lock) {
+      // Просим ЮKassa повторить уведомление позже
+      return res.status(500).json({
+        error: 'Платёж уже обрабатывается. Повторите уведомление позже.'
+      });
+    }
+
+    // Получаем заказ
     const orderData = await redis.get(`order:${paymentId}`);
 
     if (!orderData) {
-  console.error('Заказ не найден:', paymentId);
-  return res.status(500).json({
-    error: 'Заказ пока не найден. Необходимо повторить обработку.'
-  });
-}
+      console.error('Заказ не найден:', paymentId);
 
-   
-const order = typeof orderData === 'string'
-  ? JSON.parse(orderData)
-  : orderData;
+      await releaseLock(lockKey, lockToken);
+      lockKey = null;
+      lockToken = null;
 
-// Независимо проверяем платёж через API ЮKassa
-const shopId = process.env.YOOKASSA_SHOP_ID;
-const secretKey = process.env.YOOKASSA_SECRET_KEY;
-
-if (!shopId || !secretKey) {
-  throw new Error('Не настроены ключи ЮKassa.');
-}
-
-const paymentResponse = await fetch(
-  `https://api.yookassa.ru/v3/payments/${paymentId}`,
-  {
-    method: 'GET',
-    headers: {
-      'Authorization': 'Basic ' + Buffer.from(
-        `${shopId}:${secretKey}`
-      ).toString('base64'),
-      'Content-Type': 'application/json'
+      return res.status(500).json({
+        error: 'Заказ пока не найден. Необходимо повторить обработку.'
+      });
     }
-  }
-);
 
-const paymentData = await paymentResponse.json();
+    const order = typeof orderData === 'string'
+      ? JSON.parse(orderData)
+      : orderData;
 
-if (!paymentResponse.ok) {
-  console.error('Ошибка проверки платежа ЮKassa:', paymentData);
-  throw new Error('Не удалось проверить платёж через ЮKassa.');
-}
+    // НЕЗАВИСИМАЯ ПРОВЕРКА ПЛАТЕЖА ЧЕРЕЗ ЮKASSA
+    const shopId = process.env.YOOKASSA_SHOP_ID;
+    const secretKey = process.env.YOOKASSA_SECRET_KEY;
 
-if (
-  paymentData.id !== paymentId ||
-  paymentData.status !== 'succeeded' ||
-  paymentData.paid !== true
-) {
-  throw new Error('ЮKassa не подтвердила успешную оплату.');
-}
+    if (!shopId || !secretKey) {
+      throw new Error('Не настроены ключи ЮKassa.');
+    }
 
-const amount = Number(paymentData.amount?.value || 0);
+    const paymentResponse = await fetch(
+      `https://api.yookassa.ru/v3/payments/${paymentId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(
+            `${shopId}:${secretKey}`
+          ).toString('base64'),
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-if (
-  amount !== Number(order.amount) ||
-  paymentData.amount?.currency !== 'RUB'
-) {
-  throw new Error('Сумма или валюта платежа не совпадает с заказом.');
-}
+    const paymentData = await paymentResponse.json();
 
+    if (!paymentResponse.ok) {
+      console.error('Ошибка проверки платежа ЮKassa:', paymentData);
+      throw new Error('Не удалось проверить платёж через ЮKassa.');
+    }
 
+    if (
+      paymentData.id !== paymentId ||
+      paymentData.status !== 'succeeded' ||
+      paymentData.paid !== true
+    ) {
+      throw new Error('ЮKassa не подтвердила успешную оплату.');
+    }
+
+    const amount = Number(paymentData.amount?.value || 0);
+
+    if (
+      amount !== Number(order.amount) ||
+      paymentData.amount?.currency !== 'RUB'
+    ) {
+      throw new Error('Сумма или валюта платежа не совпадает с заказом.');
+    }
+
+    // ПРОВЕРКА КЛЮЧЕЙ YANDEXGPT
     if (!YANDEX_API_KEY || !YANDEX_FOLDER_ID) {
       throw new Error('Не настроены ключи YandexGPT.');
     }
 
+    // ПРОВЕРКА ПАКЕТОВ
     const isPack =
       order.spreadType === 'my_path_pack' ||
       order.spreadType === 'choices_pack';
 
-    if (isPack &&
-        (!Array.isArray(order.questions) ||
-         order.questions.length !== 5)) {
+    if (
+      isPack &&
+      (!Array.isArray(order.questions) ||
+       order.questions.length !== 5)
+    ) {
       throw new Error('В заказе отсутствуют пять вопросов пакета.');
     }
 
-   const isBirthDateProduct =
-  order.spreadType === 'life_code' ||
-  order.spreadType === 'life_navigator';
+    // ПРОВЕРКА ДАТЫ РОЖДЕНИЯ
+    const isBirthDateProduct =
+      order.spreadType === 'life_code' ||
+      order.spreadType === 'life_navigator';
 
-const parsedBirthDate = new Date(
-  `${order.birthDate}T00:00:00.000Z`
-);
+    if (isBirthDateProduct) {
+      const parsedBirthDate = new Date(
+        `${order.birthDate}T00:00:00.000Z`
+      );
 
-const validBirthDate =
-  typeof order.birthDate === 'string' &&
-  /^\d{4}-\d{2}-\d{2}$/.test(order.birthDate) &&
-  !isNaN(parsedBirthDate.getTime()) &&
-  parsedBirthDate.toISOString().slice(0, 10) === order.birthDate &&
-  parsedBirthDate <= new Date();
+      const validBirthDate =
+        typeof order.birthDate === 'string' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(order.birthDate) &&
+        !isNaN(parsedBirthDate.getTime()) &&
+        parsedBirthDate.toISOString().slice(0, 10) === order.birthDate &&
+        parsedBirthDate <= new Date();
 
-if (isBirthDateProduct && !validBirthDate) {
-  throw new Error('Дата рождения отсутствует или указана неверно.');
-}
-const positions = getPositions(
-  order.spreadType || 'single',
-  order.questions || []
-);
+      if (!validBirthDate) {
+        throw new Error('Дата рождения отсутствует или указана неверно.');
+      }
+    }
 
-const cards = isBirthDateProduct
-  ? createBirthDateCards(order)
-  : drawCards(
-      ['ai_3', 'ai_5', 'ai_7'].includes(order.spreadType)
-        ? positions.slice(0, Number(order.spreadType.split('_')[1]))
-        : positions
+    // ПОДГОТОВКА КАРТ
+    const positions = getPositions(
+      order.spreadType || 'single',
+      order.questions || []
     );
-const instructions = makeInstructions(order, cards);
 
+    const cards = isBirthDateProduct
+      ? createBirthDateCards(order)
+      : drawCards(
+          ['ai_3', 'ai_5', 'ai_7'].includes(order.spreadType)
+            ? positions.slice(
+                0,
+                Number(order.spreadType.split('_')[1])
+              )
+            : positions
+        );
+
+    const instructions = makeInstructions(order, cards);
+
+    // ОТПРАВКА ДАННЫХ В GOOGLE-ТАБЛИЦУ
     const GOOGLE_SCRIPT_URL =
       'https://script.google.com/macros/s/AKfycbwhT8r3aoKhvn82qpsdG4UwR9281oCWuyYV7Gdbl-SeZDarqDcnIkduvEhIJ-AZQTq3OA/exec';
 
     const formData = new URLSearchParams();
+
     formData.append('name', order.name || 'Клиент');
     formData.append('contact', order.contact || 'Не указано');
+
     formData.append(
       'question',
       isPack ? order.questions.join('\n') : order.question || ''
     );
+
     formData.append('package', order.spreadType || 'single');
     formData.append('amount', String(amount));
 
@@ -490,6 +572,7 @@ const instructions = makeInstructions(order, cards);
       console.error('Ошибка отправки в таблицу:', error);
     });
 
+    // ЗАПРОС К YANDEXGPT
     const yandexResponse = await fetch(
       'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
       {
@@ -536,6 +619,7 @@ const instructions = makeInstructions(order, cards);
       aiData.result?.alternatives?.[0]?.message?.text ||
       'Не удалось получить ответ. Пожалуйста, обратитесь в поддержку.';
 
+    // СОХРАНЯЕМ ГОТОВЫЙ РАСКЛАД
     await redis.set(
       `result:${paymentId}`,
       JSON.stringify({
@@ -550,10 +634,26 @@ const instructions = makeInstructions(order, cards);
 
     console.log('Расклад готов:', paymentId, order.spreadType);
 
+    // Освобождаем только свою блокировку
+    await releaseLock(lockKey, lockToken);
+    lockKey = null;
+    lockToken = null;
+
     return res.status(200).json({ status: 'ok' });
 
   } catch (error) {
     console.error('Ошибка вебхука:', error);
+
+    if (lockKey && lockToken) {
+      try {
+        await releaseLock(lockKey, lockToken);
+      } catch (unlockError) {
+        console.error(
+          'Не удалось освободить блокировку:',
+          unlockError
+        );
+      }
+    }
 
     return res.status(500).json({
       error: 'Ошибка обработки платежа: ' + error.message
