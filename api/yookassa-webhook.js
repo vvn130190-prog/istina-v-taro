@@ -373,17 +373,56 @@ export default async function handler(req, res) {
   });
 }
 
-    const order = typeof orderData === 'string'
-      ? JSON.parse(orderData)
-      : orderData;
+   
+const order = typeof orderData === 'string'
+  ? JSON.parse(orderData)
+  : orderData;
 
-    const amount = Number(event.object.amount?.value || 0);
+// Независимо проверяем платёж через API ЮKassa
+const shopId = process.env.YOOKASSA_SHOP_ID;
+const secretKey = process.env.YOOKASSA_SECRET_KEY;
 
-    if (amount !== Number(order.amount)) {
-      return res.status(400).json({
-        error: 'Сумма платежа не совпадает с заказом.'
-      });
+if (!shopId || !secretKey) {
+  throw new Error('Не настроены ключи ЮKassa.');
+}
+
+const paymentResponse = await fetch(
+  `https://api.yookassa.ru/v3/payments/${paymentId}`,
+  {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Basic ' + Buffer.from(
+        `${shopId}:${secretKey}`
+      ).toString('base64'),
+      'Content-Type': 'application/json'
     }
+  }
+);
+
+const paymentData = await paymentResponse.json();
+
+if (!paymentResponse.ok) {
+  console.error('Ошибка проверки платежа ЮKassa:', paymentData);
+  throw new Error('Не удалось проверить платёж через ЮKassa.');
+}
+
+if (
+  paymentData.id !== paymentId ||
+  paymentData.status !== 'succeeded' ||
+  paymentData.paid !== true
+) {
+  throw new Error('ЮKassa не подтвердила успешную оплату.');
+}
+
+const amount = Number(paymentData.amount?.value || 0);
+
+if (
+  amount !== Number(order.amount) ||
+  paymentData.amount?.currency !== 'RUB'
+) {
+  throw new Error('Сумма или валюта платежа не совпадает с заказом.');
+}
+
 
     if (!YANDEX_API_KEY || !YANDEX_FOLDER_ID) {
       throw new Error('Не настроены ключи YandexGPT.');
