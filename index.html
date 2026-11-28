@@ -1451,16 +1451,22 @@ window.toggleLoveDescription = function(card) {
   card.dataset.descriptionShown = 'true';
 };
 
-function selectTopic(questionText, amount, spreadType = 'single') {  closeTopicsMenu();
+  function selectTopic(questionText, amount, spreadType = 'single') {
+  closeTopicsMenu();
 
   const input = document.getElementById('question');
   if (input) input.value = questionText;
 
   localStorage.setItem('pendingDeeperQuestion', questionText);
   localStorage.setItem('pendingSpreadType', spreadType);
+  localStorage.removeItem('pendingPackQuestions');
 
   setTimeout(() => {
-    window.openPaymentForm('Выбранный расклад — ' + amount + ' ₽', amount);
+    window.openPaymentForm(
+      'Выбранный расклад — ' + amount + ' ₽',
+      amount,
+      spreadType
+    );
   }, 300);
 }
    function openCustomQuestionForm() {
@@ -1599,9 +1605,8 @@ window.openCompatibilityForm = function() {
     localStorage.setItem('pendingSpreadType', 'compatibility');
 
     modal.remove();
-    window.openPaymentForm('Совместимость по датам рождения — 499 ₽', 499);
+window.openPaymentForm('Совместимость по датам рождения — 499 ₽', 499, 'compatibility');
   };
-};
 // ФОРМА ДАТЫ РОЖДЕНИЯ ДЛЯ НОВЫХ РАСКЛАДОВ
 window.openBirthDateForm = function(spreadType) {
   const oldModal = document.getElementById('birthdate-modal');
@@ -1693,7 +1698,7 @@ window.openBirthDateForm = function(spreadType) {
     localStorage.removeItem('pendingBirthDate2');
 
     modal.remove();
-    window.openPaymentForm(title + ' — ' + amount + ' ₽', amount);
+window.openPaymentForm(title + ' — ' + amount + ' ₽', amount, spreadType); 
   };
 };
 </script>
@@ -2083,10 +2088,7 @@ window.openPaymentForm = function (packageName, amount, spreadType) {
   window.currentPackageName = packageName;
   window.currentAmount = Number(amount) || 99;
 
-  if (spreadType) {
-    localStorage.setItem('pendingSpreadType', spreadType);
-  }
-
+  localStorage.setItem('pendingSpreadType', spreadType || 'single');
   const amountInput = document.getElementById('pay-amount');
   if (amountInput) amountInput.value = String(window.currentAmount);
 
@@ -2177,9 +2179,9 @@ birthDate: localStorage.getItem('pendingBirthDate') || ''
 };
 
 window.openDeeperPayment = function(questionText) {
-localStorage.removeItem('pendingPackQuestions');
+  localStorage.removeItem('pendingPackQuestions');
   localStorage.setItem('pendingDeeperQuestion', questionText);
-  window.openPaymentForm('Продолжение анализа — 99 ₽', 99);
+  window.openPaymentForm('Продолжение анализа — 99 ₽', 99, 'ai_3');
 };
 
 /* ============================================================
