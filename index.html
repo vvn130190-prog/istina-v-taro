@@ -1400,44 +1400,27 @@ color:#29252A;
 </style>
 
 
+
 <script>
 function openTopicsMenu() {
-  const overlay = document.getElementById('topics-overlay');
-  const drawer = document.getElementById('topics-drawer');
-
-  if (!overlay || !drawer) {
-    console.error('Не найдены topics-overlay или topics-drawer');
-    return;
-  }
-
-  overlay.style.display = 'block';
-  drawer.style.right = '0';
+  document.getElementById('topics-overlay').style.display = 'block';
+  document.getElementById('topics-drawer').style.right = '0';
   document.body.style.overflow = 'hidden';
 }
 
 function closeTopicsMenu() {
-  const overlay = document.getElementById('topics-overlay');
-  const drawer = document.getElementById('topics-drawer');
-
-  if (overlay) overlay.style.display = 'none';
-  if (drawer) drawer.style.right = '-100%';
-
+  document.getElementById('topics-overlay').style.display = 'none';
+  document.getElementById('topics-drawer').style.right = '-100%';
   document.body.style.overflow = '';
 }
 
+
 function toggleTopic(topicId) {
-  const target = document.getElementById(topicId);
-
-  if (!target) {
-    console.error('Не найден раздел раскладов:', topicId);
-    return;
-  }
-
   const options = document.querySelectorAll('.topic-options');
   const topics = document.querySelectorAll('.topic');
 
   options.forEach(item => {
-    if (item === target) {
+    if (item.id === topicId) {
       item.style.display =
         item.style.display === 'block' ? 'none' : 'block';
     } else {
@@ -1450,26 +1433,19 @@ function toggleTopic(topicId) {
     const isActive = topic.getAttribute('onclick')?.includes(topicId);
 
     if (hint) {
-      hint.style.transform =
-        isActive && target.style.display === 'block'
-          ? 'rotate(180deg)'
-          : 'rotate(0deg)';
+      hint.style.transform = isActive &&
+        document.getElementById(topicId).style.display === 'block'
+        ? 'rotate(180deg)'
+        : 'rotate(0deg)';
     }
   });
 }
 
 window.toggleLoveDescription = function(card) {
-  if (!card) return;
-
   const description = card.querySelector('.love-description');
-  if (!description) return;
 
   if (card.dataset.descriptionShown === 'true') {
-    selectTopic(
-      'Встречу ли я в этом году свою любовь?',
-      99,
-      'love_year'
-    );
+    selectTopic('Встречу ли я в этом году свою любовь?', 99, 'love_year');
     return;
   }
 
@@ -1488,11 +1464,6 @@ function selectTopic(questionText, amount, spreadType = 'single') {
   localStorage.removeItem('pendingPackQuestions');
 
   setTimeout(() => {
-    if (typeof window.openPaymentForm !== 'function') {
-      console.error('Функция openPaymentForm не найдена');
-      return;
-    }
-
     window.openPaymentForm(
       'Выбранный расклад — ' + amount + ' ₽',
       amount,
@@ -1501,6 +1472,7 @@ function selectTopic(questionText, amount, spreadType = 'single') {
   }, 300);
 }
 </script>
+
 
    function openCustomQuestionForm() {
   const oldModal = document.getElementById('custom-question-modal');
