@@ -367,9 +367,11 @@ export default async function handler(req, res) {
     const orderData = await redis.get(`order:${paymentId}`);
 
     if (!orderData) {
-      console.error('Заказ не найден:', paymentId);
-      return res.status(200).json({ status: 'order_not_found' });
-    }
+  console.error('Заказ не найден:', paymentId);
+  return res.status(500).json({
+    error: 'Заказ пока не найден. Необходимо повторить обработку.'
+  });
+}
 
     const order = typeof orderData === 'string'
       ? JSON.parse(orderData)
